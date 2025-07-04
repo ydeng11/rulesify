@@ -1,0 +1,96 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# Rust Programming Guidance
+
+## Best Practice
+1. SHOULD create tests for added code
+2. SHOULD run tests and compile the code after mofifying code
+
+## Getting Started
+1. Install the toolchain with `rustup`:
+   ```bash
+   curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+   ```
+2. Create a project:
+   ```bash
+   cargo new hello_world
+   cd hello_world
+   cargo run
+   ```
+3. Update toolchain: `rustup update`.
+
+## Core Language Concepts
+### Ownership & Borrowing
+- **Ownership**: Each value has a single owner; when the owner goes out of scope, the value is dropped.
+- **Borrowing**: Use `&T` (immutable) or `&mut T` (mutable) references to access data without transferring ownership.
+- **Rules**:
+  1. At any time you can have either one mutable reference *or* any number of immutable references.
+  2. References must always be valid.
+
+### Lifetimes
+- Annotate with `'a` when compiler cannot infer.
+- Prevent dangling references at compile-time.
+
+### Pattern Matching
+- `match`, `if let`, and `while let` enable expressive control flow.
+
+### Generics & Traits
+- Generics allow type-parameterized functions/structs.
+- Traits define shared behavior (similar to interfaces).
+- Use `impl Trait` for simpler return types.
+
+### Error Handling
+- Prefer `Result<T, E>` over panics for recoverable errors.
+- Use the `?` operator to propagate errors.
+- Define custom error enums and implement `std::error::Error` when needed.
+
+## Modules, Crates, and Packages
+- **Crate**: Compilation unit; binary or library.
+- **Package**: One or more crates managed by `Cargo.toml`.
+- Organize with `mod`, `pub`, and `use`.
+
+## Concurrency
+- Threads via `std::thread` and message passing (`std::sync::mpsc`).
+- Synchronization primitives: `Arc<T>`, `Mutex<T>`, `RwLock<T>`.
+- **Async**: `async/await` powered by executors like `tokio` or `async-std`.
+
+## Smart Pointers
+- `Box<T>` for heap allocation.
+- `Rc<T>` / `Arc<T>` for shared ownership (single vs multi-threaded).
+- `RefCell<T>` / `Mutex<T>` for interior mutability with runtime borrow checks.
+
+## Testing & Benchmarking
+- Unit tests go in the same file using `#[cfg(test)]`.
+- Integration tests in `tests/` directory.
+- Benchmarks via `criterion` crate or unstable `test` feature.
+
+## FFI & Unsafe Rust
+- `unsafe` required for raw pointers, external functions, mutable statics.
+- Keep `unsafe` blocks minimal and well-documented.
+
+## Tooling & Ecosystem
+- **Formatting**: `cargo fmt` (rustfmt).
+- **Linting**: `cargo clippy`.
+- **Documentation**: `cargo doc --open` generates HTML docs.
+- **Publishing**: `cargo publish` to crates.io.
+
+## Performance Tips
+- Prefer iterators over manual loops.
+- Minimize allocations; use `Vec::with_capacity`.
+- Profile with `perf`, `cargo-flamegraph`, or `criterion`.
+
+## Common Crates
+| Domain | Crate |
+|--------|-------|
+| Async runtime | `tokio`, `async-std` |
+| HTTP client   | `reqwest`, `hyper` |
+| Serialization | `serde`, `serde_json` |
+| CLI           | `clap`, `structopt` |
+| Logging       | `tracing`, `log` + `env_logger` |
+
+---
+Happy hacking with Rust! 🚀
+

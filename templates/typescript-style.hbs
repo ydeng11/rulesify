@@ -1,0 +1,30 @@
+# TypeScript Style Guide
+
+## Code Formatting
+- Use 2 spaces for indentation
+- Use semicolons at the end of statements
+- Use single quotes for strings
+- Prefer `const` over `let` when possible
+
+## Naming Conventions
+- Use PascalCase for types and interfaces
+- Use camelCase for variables and functions
+- Use UPPER_SNAKE_CASE for constants
+
+## Type Definitions
+- Always define return types for functions
+- Use interfaces for object shapes
+- Prefer union types over enums when appropriate
+
+## Examples
+```typescript
+interface UserProfile {
+  id: string;
+  name: string;
+  email: string;
+}
+
+const createUser = (userData: UserProfile): User => {
+  return new User(userData);
+};
+``` 
