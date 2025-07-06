@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -e
 
-REPO="ihelio/rulesify"
+REPO="ydeng11/rulesify"
 BINARY_NAME="rulesify"
 INSTALL_DIR="$HOME/.local/bin"
 
