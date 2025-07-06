@@ -1,13 +1,15 @@
 use clap::{Parser, Subcommand};
-use std::path::PathBuf;
 use log::{debug, error};
+use std::path::PathBuf;
 
 pub mod commands;
 
 #[derive(Parser)]
 #[command(name = "rulesify")]
+#[command(version = env!("CARGO_PKG_VERSION"))]
 #[command(about = "A CLI tool for managing AI assistant rules")]
-#[command(long_about = r#"Rulesify manages Universal Rule Files (URF) that can be deployed to multiple AI coding tools:
+#[command(
+    long_about = r#"Rulesify manages Universal Rule Files (URF) that can be deployed to multiple AI coding tools:
 - Cursor (.cursor/rules/*.mdc)
 - Cline (.clinerules/*.md)
 - Claude Code (CLAUDE.md)
@@ -20,7 +22,8 @@ EXAMPLES:
     rulesify deploy --all                 # Deploy all rules to all tools
     rulesify deploy --tool cursor --all   # Deploy to Cursor only
     rulesify config show                  # Show current configuration
-    rulesify sync --dry-run               # Preview sync changes"#)]
+    rulesify sync --dry-run               # Preview sync changes"#
+)]
 pub struct Cli {
     #[command(subcommand)]
     pub command: Commands,
@@ -32,8 +35,7 @@ pub struct Cli {
     pub verbose: bool,
 }
 
-#[derive(Subcommand)]
-#[derive(Debug)]
+#[derive(Subcommand, Debug)]
 pub enum Commands {
     /// Manage rules (create, edit, list, show, delete)
     Rule {
@@ -91,19 +93,36 @@ impl Cli {
                 commands::rule::run(action, self.config)
             }
             Commands::Deploy { tool, rule, all } => {
-                debug!("Executing deploy command: tool={:?}, rule={:?}, all={}", tool, rule, all);
+                debug!(
+                    "Executing deploy command: tool={:?}, rule={:?}, all={}",
+                    tool, rule, all
+                );
                 commands::deploy::run(tool, rule, all, self.config)
             }
-            Commands::Import { tool, file, rule_id } => {
-                debug!("Executing import command: tool={}, file={:?}, rule_id={:?}", tool, file, rule_id);
+            Commands::Import {
+                tool,
+                file,
+                rule_id,
+            } => {
+                debug!(
+                    "Executing import command: tool={}, file={:?}, rule_id={:?}",
+                    tool, file, rule_id
+                );
                 commands::import::run(tool, file, rule_id, self.config)
             }
             Commands::Validate { rule, all } => {
                 debug!("Executing validate command: rule={:?}, all={}", rule, all);
                 commands::validate::run(rule, all, self.config)
             }
-            Commands::Sync { dry_run, rule, tool } => {
-                debug!("Executing sync command: dry_run={}, rule={:?}, tool={:?}", dry_run, rule, tool);
+            Commands::Sync {
+                dry_run,
+                rule,
+                tool,
+            } => {
+                debug!(
+                    "Executing sync command: dry_run={}, rule={:?}, tool={:?}",
+                    dry_run, rule, tool
+                );
                 commands::sync::run(dry_run, rule, tool, self.config)
             }
             Commands::Config { action } => {

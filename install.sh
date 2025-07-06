@@ -4,6 +4,7 @@ set -e
 REPO="ydeng11/rulesify"
 BINARY_NAME="rulesify"
 INSTALL_DIR="$HOME/.local/bin"
+BINARY_PATH="$INSTALL_DIR/$BINARY_NAME"
 
 # Detect OS
 OS="$(uname -s | tr '[:upper:]' '[:lower:]')"
@@ -28,6 +29,30 @@ if [ -z "$LATEST_TAG" ]; then
     echo "Could not fetch latest release tag."; exit 1
 fi
 
+echo "Latest available version: $LATEST_TAG"
+
+# Check if binary already exists and get current version
+CURRENT_VERSION=""
+if [ -x "$BINARY_PATH" ]; then
+    # Try to get version from existing binary
+    CURRENT_VERSION=$("$BINARY_PATH" --version 2>/dev/null | head -n1 | grep -o 'v[0-9]\+\.[0-9]\+\.[0-9]\+' || echo "")
+    if [ -n "$CURRENT_VERSION" ]; then
+        echo "Current installed version: $CURRENT_VERSION"
+
+        # Compare versions
+        if [ "$CURRENT_VERSION" = "$LATEST_TAG" ]; then
+            echo "✅ You already have the latest version ($LATEST_TAG) installed!"
+            echo "Re-installing anyway..."
+        else
+            echo "🔄 Updating from $CURRENT_VERSION to $LATEST_TAG"
+        fi
+    else
+        echo "🔄 Updating existing installation to $LATEST_TAG"
+    fi
+else
+    echo "📦 Installing $BINARY_NAME $LATEST_TAG"
+fi
+
 # Download URL
 URL="https://github.com/$REPO/releases/download/$LATEST_TAG/$ASSET"
 
@@ -49,7 +74,10 @@ tar xzf "$ASSET"
 mv "$BINARY_NAME" "$INSTALL_DIR/$BINARY_NAME"
 chmod +x "$INSTALL_DIR/$BINARY_NAME"
 rm -rf "$TMPDIR"
-echo "Installed $BINARY_NAME to $INSTALL_DIR/$BINARY_NAME"
+
+# Verify installation
+NEW_VERSION=$("$BINARY_PATH" --version 2>/dev/null | head -n1 | grep -o 'v[0-9]\+\.[0-9]\+\.[0-9]\+' || echo "$LATEST_TAG")
+echo "✅ Successfully installed $BINARY_NAME $NEW_VERSION to $INSTALL_DIR/$BINARY_NAME"
 
 # Add to PATH if needed
 if ! echo "$PATH" | grep -q "$INSTALL_DIR"; then

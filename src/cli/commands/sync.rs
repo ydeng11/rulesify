@@ -3,17 +3,19 @@ use std::fs;
 use std::path::{Path, PathBuf};
 
 use crate::converters::{
-    RuleConverter,
-    cursor::CursorConverter,
-    cline::ClineConverter,
-    claude_code::ClaudeCodeConverter,
-    goose::GooseConverter,
+    claude_code::ClaudeCodeConverter, cline::ClineConverter, cursor::CursorConverter,
+    goose::GooseConverter, RuleConverter,
 };
 use crate::models::rule::UniversalRule;
-use crate::store::{RuleStore, file_store::FileStore};
+use crate::store::{file_store::FileStore, RuleStore};
 use crate::utils::config::load_config_from_path;
 
-pub fn run(dry_run: bool, rule: Option<String>, tool: Option<String>, config_path: Option<PathBuf>) -> Result<()> {
+pub fn run(
+    dry_run: bool,
+    rule: Option<String>,
+    tool: Option<String>,
+    config_path: Option<PathBuf>,
+) -> Result<()> {
     let config = load_config_from_path(config_path)?;
     let store = FileStore::new(config.rules_directory.clone());
 
@@ -30,8 +32,7 @@ pub fn run(dry_run: bool, rule: Option<String>, tool: Option<String>, config_pat
 
     println!("🔄 Syncing deployed rules back to URF format");
 
-    let project_root = std::env::current_dir()
-        .context("Failed to get current directory")?;
+    let project_root = std::env::current_dir().context("Failed to get current directory")?;
 
     let mut synced_count = 0;
     let mut created_count = 0;
@@ -43,7 +44,11 @@ pub fn run(dry_run: bool, rule: Option<String>, tool: Option<String>, config_pat
         let deployment_path = converter.get_deployment_path(&project_root);
 
         if !deployment_path.exists() {
-            println!("  ⏭️  No {} rules found at {}", tool_name, deployment_path.display());
+            println!(
+                "  ⏭️  No {} rules found at {}",
+                tool_name,
+                deployment_path.display()
+            );
             continue;
         }
 
@@ -53,10 +58,12 @@ pub fn run(dry_run: bool, rule: Option<String>, tool: Option<String>, config_pat
         for file_path in deployed_files {
             if let Some(rule_name) = &rule {
                 // Only sync specific rule if requested
-                if !file_path.file_stem()
+                if !file_path
+                    .file_stem()
                     .and_then(|s| s.to_str())
                     .map(|s| s == rule_name)
-                    .unwrap_or(false) {
+                    .unwrap_or(false)
+                {
                     continue;
                 }
             }
@@ -83,7 +90,10 @@ pub fn run(dry_run: bool, rule: Option<String>, tool: Option<String>, config_pat
     if dry_run {
         println!("\n🔍 Dry run complete - no changes made");
     } else {
-        println!("\n🎉 Sync complete: {} updated, {} created", synced_count, created_count);
+        println!(
+            "\n🎉 Sync complete: {} updated, {} created",
+            synced_count, created_count
+        );
     }
 
     Ok(())
@@ -101,11 +111,17 @@ fn get_converter(tool_name: &str) -> Result<Box<dyn RuleConverter>> {
         "cline" => Ok(Box::new(ClineConverter::new())),
         "claude-code" | "claude_code" => Ok(Box::new(ClaudeCodeConverter::new())),
         "goose" => Ok(Box::new(GooseConverter::new())),
-        _ => anyhow::bail!("Unsupported tool: {}. Supported tools: cursor, cline, claude-code, goose", tool_name),
+        _ => anyhow::bail!(
+            "Unsupported tool: {}. Supported tools: cursor, cline, claude-code, goose",
+            tool_name
+        ),
     }
 }
 
-fn find_deployed_files(deployment_path: &Path, converter: &Box<dyn RuleConverter>) -> Result<Vec<std::path::PathBuf>> {
+fn find_deployed_files(
+    deployment_path: &Path,
+    converter: &Box<dyn RuleConverter>,
+) -> Result<Vec<std::path::PathBuf>> {
     let mut files = Vec::new();
 
     if deployment_path.is_file() {
@@ -152,7 +168,11 @@ fn sync_rule_from_file(
     let existing_rule = store.load_rule(&rule_id)?;
 
     // Convert from tool format to URF
-    let converted_rule = converter.convert_from_tool_format(&content)?;
+    let mut converted_rule = converter.convert_from_tool_format(&content)?;
+
+    // Override the converted rule's ID with the filename-based ID
+    // This ensures we sync back to the correct URF file
+    converted_rule.id = rule_id.clone();
 
     match existing_rule {
         Some(existing) => {
@@ -168,7 +188,8 @@ fn sync_rule_from_file(
             }
         }
         None => {
-            // Create new URF
+            // Create new URF - but warn user they should use import instead
+            println!("  ⚠️  Warning: No existing URF found for '{}'. Consider using 'rulesify import' instead.", rule_id);
             if !dry_run {
                 store.save_rule(&converted_rule)?;
             }
