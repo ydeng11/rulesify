@@ -1,8 +1,8 @@
 use crate::converters::RuleConverter;
-use crate::models::rule::{UniversalRule, RuleCondition, RuleMetadata, RuleContent, FileReference};
+use crate::models::rule::{FileReference, RuleCondition, RuleContent, RuleMetadata, UniversalRule};
 use anyhow::{anyhow, Result};
-use std::path::{Path, PathBuf};
 use serde_yaml;
+use std::path::{Path, PathBuf};
 
 pub struct CursorConverter;
 
@@ -27,7 +27,15 @@ impl RuleConverter for CursorConverter {
         output.push_str(&format!("description: {}\n", rule.metadata.name));
 
         if let Some(desc) = &rule.metadata.description {
-            output.push_str(&format!("notes: {}\n", desc));
+            // Handle multi-line descriptions properly with YAML literal block syntax
+            if desc.contains('\n') {
+                output.push_str("notes: |\n");
+                for line in desc.lines() {
+                    output.push_str(&format!("  {}\n", line));
+                }
+            } else {
+                output.push_str(&format!("notes: {}\n", desc));
+            }
         }
 
         if !rule.conditions.is_empty() {
@@ -65,16 +73,18 @@ impl RuleConverter for CursorConverter {
         let (content_sections, references) = parse_markdown_content(&markdown)?;
 
         // Extract name from frontmatter or first content section
-        let name = if let Some(description) = frontmatter.get("description").and_then(|v| v.as_str()) {
-            description.to_string()
-        } else if let Some(first_section) = content_sections.first() {
-            first_section.title.clone()
-        } else {
-            "Imported Rule".to_string()
-        };
+        let name =
+            if let Some(description) = frontmatter.get("description").and_then(|v| v.as_str()) {
+                description.to_string()
+            } else if let Some(first_section) = content_sections.first() {
+                first_section.title.clone()
+            } else {
+                "Imported Rule".to_string()
+            };
 
         // Extract description from notes field
-        let description = frontmatter.get("notes")
+        let description = frontmatter
+            .get("notes")
             .and_then(|v| v.as_str())
             .map(|s| s.to_string());
 
@@ -84,24 +94,30 @@ impl RuleConverter for CursorConverter {
             description,
             tags: Vec::new(),
             priority: 5,
-            auto_apply: frontmatter.get("alwaysApply")
+            auto_apply: frontmatter
+                .get("alwaysApply")
                 .and_then(|v| v.as_bool())
                 .unwrap_or(false),
         };
 
         // Parse conditions from globs
-        let conditions = frontmatter.get("globs")
+        let conditions = frontmatter
+            .get("globs")
             .and_then(|v| v.as_sequence())
             .map(|seq| {
                 seq.iter()
                     .filter_map(|v| v.as_str())
-                    .map(|s| RuleCondition::FilePattern { value: s.to_string() })
+                    .map(|s| RuleCondition::FilePattern {
+                        value: s.to_string(),
+                    })
                     .collect()
             })
             .unwrap_or_default();
 
         // Generate rule ID from name
-        let rule_id = metadata.name.to_lowercase()
+        let rule_id = metadata
+            .name
+            .to_lowercase()
             .replace(' ', "-")
             .replace('_', "-")
             .chars()

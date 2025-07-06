@@ -180,9 +180,9 @@ fn sync_rule_from_file(
             if rules_are_equivalent(&existing, &converted_rule) {
                 Ok(SyncResult::NoChange(rule_id))
             } else {
-                // Update existing rule
+                // Update existing rule with selective merging to preserve comments
                 if !dry_run {
-                    store.save_rule(&converted_rule)?;
+                    update_urf_file_selectively(store, &rule_id, &existing, &converted_rule)?;
                 }
                 Ok(SyncResult::Updated(rule_id))
             }
@@ -205,4 +205,180 @@ fn rules_are_equivalent(rule1: &UniversalRule, rule2: &UniversalRule) -> bool {
         && rule1.content == rule2.content
         && rule1.references == rule2.references
         && rule1.conditions == rule2.conditions
+}
+
+/// Updates a URF file selectively, preserving comments and formatting,
+/// while only updating the fields that have actually changed
+fn update_urf_file_selectively(
+    store: &FileStore,
+    rule_id: &str,
+    existing_rule: &UniversalRule,
+    updated_rule: &UniversalRule,
+) -> Result<()> {
+    let rule_path = store.get_rule_path(rule_id);
+
+    // Read the original URF file content to preserve formatting and comments
+    let original_content = fs::read_to_string(&rule_path)
+        .with_context(|| format!("Failed to read original URF file: {}", rule_path.display()))?;
+
+    let mut updated_content = original_content.clone();
+
+    // Update metadata fields if they changed
+    if existing_rule.metadata.name != updated_rule.metadata.name {
+        updated_content = update_yaml_field(
+            &updated_content,
+            "metadata.name",
+            &format!("\"{}\"", updated_rule.metadata.name),
+        )?;
+    }
+
+    if existing_rule.metadata.description != updated_rule.metadata.description {
+        let description_value = match &updated_rule.metadata.description {
+            Some(desc) => {
+                if desc.contains('\n') {
+                    format!(
+                        "|\n{}",
+                        desc.lines()
+                            .map(|line| format!("    {}", line))
+                            .collect::<Vec<_>>()
+                            .join("\n")
+                    )
+                } else {
+                    format!("\"{}\"", desc)
+                }
+            }
+            None => "null".to_string(),
+        };
+        updated_content =
+            update_yaml_field(&updated_content, "metadata.description", &description_value)?;
+    }
+
+    if existing_rule.metadata.tags != updated_rule.metadata.tags {
+        let tags_value = if updated_rule.metadata.tags.is_empty() {
+            "[]".to_string()
+        } else {
+            format!(
+                "[{}]",
+                updated_rule
+                    .metadata
+                    .tags
+                    .iter()
+                    .map(|tag| format!("\"{}\"", tag))
+                    .collect::<Vec<_>>()
+                    .join(", ")
+            )
+        };
+        updated_content = update_yaml_field(&updated_content, "metadata.tags", &tags_value)?;
+    }
+
+    if existing_rule.metadata.priority != updated_rule.metadata.priority {
+        updated_content = update_yaml_field(
+            &updated_content,
+            "metadata.priority",
+            &updated_rule.metadata.priority.to_string(),
+        )?;
+    }
+
+    if existing_rule.metadata.auto_apply != updated_rule.metadata.auto_apply {
+        updated_content = update_yaml_field(
+            &updated_content,
+            "metadata.auto_apply",
+            &updated_rule.metadata.auto_apply.to_string(),
+        )?;
+    }
+
+    // For content, references, and conditions changes, fall back to complete file replacement
+    // but preserve the original file structure by doing a smart merge
+    if existing_rule.content != updated_rule.content
+        || existing_rule.references != updated_rule.references
+        || existing_rule.conditions != updated_rule.conditions
+    {
+        // If structural changes are detected, fall back to saving the complete rule
+        // while preserving the original file's comments and structure where possible
+        return fallback_to_complete_update(store, rule_id, updated_rule, &original_content);
+    }
+
+    // Write the updated content back to the file
+    fs::write(&rule_path, updated_content)
+        .with_context(|| format!("Failed to write updated URF file: {}", rule_path.display()))?;
+
+    Ok(())
+}
+
+/// Updates a specific YAML field in the content while preserving formatting
+fn update_yaml_field(content: &str, field_path: &str, new_value: &str) -> Result<String> {
+    use regex::Regex;
+
+    let field_parts: Vec<&str> = field_path.split('.').collect();
+
+    if field_parts.len() == 2 && field_parts[0] == "metadata" {
+        let field_name = field_parts[1];
+        let pattern = format!(r"(\s*{}\s*:\s*)([^\n]+)", regex::escape(field_name));
+        let regex = Regex::new(&pattern)
+            .with_context(|| format!("Failed to create regex for field {}", field_name))?;
+
+        if regex.is_match(content) {
+            let result = regex.replace(content, format!("$1{}", new_value));
+            Ok(result.to_string())
+        } else {
+            // Field doesn't exist, we'll let the normal save handle it
+            Ok(content.to_string())
+        }
+    } else {
+        // For non-metadata fields, fall back to normal replacement
+        Ok(content.to_string())
+    }
+}
+
+/// Fallback to complete file update when structural changes are detected
+/// This preserves top-level comments but updates the entire rule structure
+fn fallback_to_complete_update(
+    store: &FileStore,
+    rule_id: &str,
+    updated_rule: &UniversalRule,
+    original_content: &str,
+) -> Result<()> {
+    // Extract top-level comments (lines starting with #) from the original file
+    let mut preserved_comments = Vec::new();
+
+    for line in original_content.lines() {
+        if line.starts_with('#') || line.trim().is_empty() {
+            preserved_comments.push(line.to_string());
+        } else if !line.trim().is_empty() {
+            // Hit the first non-comment, non-empty line - stop collecting comments
+            break;
+        }
+    }
+
+    // Save the updated rule normally
+    store.save_rule(updated_rule)?;
+
+    // If we had header comments, prepend them to the newly saved file
+    if !preserved_comments.is_empty() {
+        let rule_path = store.get_rule_path(rule_id);
+        let new_content = fs::read_to_string(&rule_path).with_context(|| {
+            format!(
+                "Failed to read newly saved URF file: {}",
+                rule_path.display()
+            )
+        })?;
+
+        let mut final_content = String::new();
+        for comment in preserved_comments {
+            final_content.push_str(&comment);
+            final_content.push('\n');
+        }
+
+        // Add a blank line between comments and content if the content doesn't start with a comment
+        if !new_content.trim_start().starts_with('#') {
+            final_content.push('\n');
+        }
+
+        final_content.push_str(&new_content);
+
+        fs::write(&rule_path, final_content)
+            .with_context(|| format!("Failed to write final URF file: {}", rule_path.display()))?;
+    }
+
+    Ok(())
 }
