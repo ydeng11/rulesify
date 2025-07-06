@@ -176,6 +176,13 @@ fn sync_rule_from_file(
 
     match existing_rule {
         Some(existing) => {
+            // Preserve original metadata that isn't available in tool format
+            // Only update fields that can be determined from the tool format
+            converted_rule.metadata.tags = existing.metadata.tags.clone();
+            converted_rule.metadata.priority = existing.metadata.priority;
+            converted_rule.version = existing.version.clone();
+            converted_rule.tool_overrides = existing.tool_overrides.clone();
+
             // Check if content has changed
             if rules_are_equivalent(&existing, &converted_rule) {
                 Ok(SyncResult::NoChange(rule_id))
@@ -331,54 +338,66 @@ fn update_yaml_field(content: &str, field_path: &str, new_value: &str) -> Result
 }
 
 /// Fallback to complete file update when structural changes are detected
-/// This preserves top-level comments but updates the entire rule structure
+/// This preserves the original file structure while updating changed content
 fn fallback_to_complete_update(
     store: &FileStore,
     rule_id: &str,
     updated_rule: &UniversalRule,
     original_content: &str,
 ) -> Result<()> {
-    // Extract top-level comments (lines starting with #) from the original file
-    let mut preserved_comments = Vec::new();
+    let rule_path = store.get_rule_path(rule_id);
 
-    for line in original_content.lines() {
-        if line.starts_with('#') || line.trim().is_empty() {
-            preserved_comments.push(line.to_string());
-        } else if !line.trim().is_empty() {
-            // Hit the first non-comment, non-empty line - stop collecting comments
-            break;
+    // Parse the original content line by line to find section boundaries
+    let original_lines: Vec<&str> = original_content.lines().collect();
+    let mut result_lines = Vec::new();
+    let mut i = 0;
+
+    // Copy lines until we find the content section
+    while i < original_lines.len() {
+        let line = original_lines[i];
+        if line.trim() == "content:" {
+            // Found the content section - add the content header
+            result_lines.push(line.to_string());
+            i += 1;
+
+            // Skip all existing content lines until we find the next top-level section
+            while i < original_lines.len() {
+                let line = original_lines[i];
+                // Check if this is the start of a new top-level section
+                if line.starts_with(char::is_alphabetic)
+                    && line.contains(':')
+                    && !line.starts_with(' ')
+                    && !line.starts_with('\t')
+                {
+                    // This is the next section, don't increment i so we process it
+                    break;
+                }
+                i += 1;
+            }
+
+            // Add the new content
+            let updated_content_yaml = serde_yaml::to_string(&updated_rule.content)
+                .with_context(|| "Failed to serialize updated content")?;
+
+            // Add each line of the new content
+            for line in updated_content_yaml.lines() {
+                result_lines.push(line.to_string());
+            }
+
+            // Continue processing from the next section
+            continue;
         }
+
+        result_lines.push(line.to_string());
+        i += 1;
     }
 
-    // Save the updated rule normally
-    store.save_rule(updated_rule)?;
+    // Join the lines back together
+    let result_content = result_lines.join("\n");
 
-    // If we had header comments, prepend them to the newly saved file
-    if !preserved_comments.is_empty() {
-        let rule_path = store.get_rule_path(rule_id);
-        let new_content = fs::read_to_string(&rule_path).with_context(|| {
-            format!(
-                "Failed to read newly saved URF file: {}",
-                rule_path.display()
-            )
-        })?;
-
-        let mut final_content = String::new();
-        for comment in preserved_comments {
-            final_content.push_str(&comment);
-            final_content.push('\n');
-        }
-
-        // Add a blank line between comments and content if the content doesn't start with a comment
-        if !new_content.trim_start().starts_with('#') {
-            final_content.push('\n');
-        }
-
-        final_content.push_str(&new_content);
-
-        fs::write(&rule_path, final_content)
-            .with_context(|| format!("Failed to write final URF file: {}", rule_path.display()))?;
-    }
+    // Write the updated content
+    fs::write(&rule_path, result_content)
+        .with_context(|| format!("Failed to write updated URF file: {}", rule_path.display()))?;
 
     Ok(())
 }
