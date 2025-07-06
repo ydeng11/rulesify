@@ -5,9 +5,15 @@ Rulesify is a command-line tool (written in Rust) that provides **unified manage
 ## Supported AI Tools
 
 - **Cursor** (`.cursor/rules/*.mdc` — Markdown with YAML frontmatter)
-- **Cline** (`.clinerules/*.md` — Simple Markdown)
-- **Claude Code** (`CLAUDE.md` — Markdown, hierarchical)
-- **Goose** (`.goosehints` — Plain text)
+- **Cline** (`.clinerules/*.md` — Simple Markdown files)
+- **Claude Code** (`<rule-name>.md` — Markdown files in project root)
+- **Goose** (`<rule-name>.goosehints` — Plain text files in project root)
+
+**File Generation Details:**
+- Generated tool files are automatically Git-ignored
+- Only edit URF files (`.urf.yaml`) - tool files are regenerated on deployment
+- Each tool has specific format requirements that are handled automatically
+- Round-trip integrity: URF → tool file → URF maintains all information
 
 ## Features
 
@@ -56,19 +62,42 @@ curl -sSL https://github.com/ihelio/rulesify/releases/latest/download/install.sh
 # Create a new rule
 rulesify rule new typescript-style
 
-# Import existing rules
+# Import existing rules from different tools
 rulesify import --tool cursor .cursor/rules/my-rule.mdc
 rulesify import --tool cline .clinerules/coding-standards.md
 
-# Validate rules
+# Validate rules for quality and compliance
 rulesify validate --all
-rulesify validate my-rule
+rulesify validate typescript-style
 
-# Deploy to all tools
+# Deploy to all configured tools
 rulesify deploy --all
 
 # Deploy to specific tool
 rulesify deploy --tool cursor --all
+rulesify deploy --tool cline --rule typescript-style
+
+# Sync deployed rules back to URF (preview first)
+rulesify sync --dry-run
+rulesify sync
+```
+
+### Synchronization Examples
+
+**Sync reads deployed tool files and updates URF files when changes are detected.**
+
+```bash
+# Synchronize all deployed rules back to URF format
+rulesify sync
+
+# Preview changes without applying them
+rulesify sync --dry-run
+
+# Sync a single rule only
+rulesify sync --rule typescript-style --dry-run
+
+# Sync from a specific tool only
+rulesify sync --tool cursor
 ```
 
 ### Import Examples
@@ -76,17 +105,20 @@ rulesify deploy --tool cursor --all
 Import rules from different AI tools:
 
 ```bash
-# Import from Cursor
+# Import from Cursor (YAML frontmatter + Markdown)
 rulesify import --tool cursor .cursor/rules/python-style.mdc
 
-# Import from Cline
+# Import from Cline (Simple Markdown)
 rulesify import --tool cline .clinerules/react-patterns.md
 
-# Import from Claude Code
-rulesify import --tool claude-code CLAUDE.md
+# Import from Claude Code (Markdown in project root)
+rulesify import --tool claude-code python-style.md
 
-# Import from Goose
-rulesify import --tool goose .goosehints
+# Import from Goose (Plain text hints)
+rulesify import --tool goose coding-standards.goosehints
+
+# Import with custom rule ID
+rulesify import --tool cursor .cursor/rules/my-rule.mdc --rule-id custom-name
 ```
 
 ### Validation
@@ -156,62 +188,141 @@ tool_overrides:
 ## Command Reference
 
 ### Rule Management
-- `rulesify rule new <name>` - Create a new rule
-- `rulesify rule edit <name>` - Edit an existing rule
-- `rulesify rule list` - List all rules
-- `rulesify rule list -r <regex>` - List rules matching regex
-- `rulesify rule show <name>` - Show rule details
-- `rulesify rule delete <name>` - Delete a rule
+- `rulesify rule new <name>` - Create a new rule from template skeleton
+- `rulesify rule edit <name>` - Edit an existing rule in your configured editor
+- `rulesify rule list` - List all rules with names and descriptions
+- `rulesify rule list -r <regex>` - List rules matching regex pattern (e.g., `-r "test.*"`)
+- `rulesify rule show <name>` - Show detailed rule information including content and metadata
+- `rulesify rule delete <name>` - Delete a rule (requires confirmation)
 
-### Import & Validation
-- `rulesify import --tool <tool> <file>` - Import rule from AI tool format
-- `rulesify validate [rule]` - Validate rule(s)
-- `rulesify validate --all` - Validate all rules
+### Validation
+- `rulesify validate [rule]` - Validate specific rule for quality and format compliance
+- `rulesify validate --all` - Validate all rules for issues, warnings, and best practices
 
 ### Deployment
-- `rulesify deploy --all` - Deploy all rules to all tools
-- `rulesify deploy --tool <tool> --all` - Deploy to specific tool
-- `rulesify deploy --tool <tool> <rule>` - Deploy specific rule to tool
-- `rulesify deploy --tool <tool> --rules <name> --dry-run` - Preview export
+- `rulesify deploy --all` - Deploy all rules to all configured default tools
+- `rulesify deploy --tool <tool> --all` - Deploy all rules to a specific tool (cursor, cline, claude-code, goose)
+- `rulesify deploy --tool <tool> --rule <rule>` - Deploy a specific rule to a specific tool
 
 ### Synchronization
-- `rulesify sync [--dry-run]` - Synchronize rules across all tools
-- `rulesify sync --rule <name>` - Sync a specific rule
-- `rulesify sync --tool <tool>` - Sync for a specific tool
+**Sync detects changes in deployed tool files and updates the corresponding URF files to maintain consistency.**
+- `rulesify sync [--dry-run]` - Synchronize all deployed rules back to URF format (use --dry-run to preview changes)
+- `rulesify sync --rule <name>` - Sync changes for a specific rule only
+- `rulesify sync --tool <tool>` - Sync changes from a specific tool only
+- **Note**: Sync reads deployed files (.mdc, .md, .goosehints) and updates URF files when differences are detected
 
 ### Configuration
-- `rulesify config show` - Show current configuration
-- `rulesify config edit` - Edit configuration file
-- `rulesify config set-storage <path>` - Change storage location
-- `rulesify config set-editor <editor>` - Set default editor
-- `rulesify config add-tool <tool>` - Add default deployment tool
-- `rulesify config remove-tool <tool>` - Remove default deployment tool
+- `rulesify config show` - Show current configuration (storage path, editor, default tools)
+- `rulesify config edit` - Edit configuration file in your default editor
+- `rulesify config set-storage <path>` - Change the directory where URF files are stored
+- `rulesify config set-editor <editor>` - Set default editor (cursor, nano, vim, etc.)
+- `rulesify config add-tool <tool>` - Add a tool to default deployment list
+- `rulesify config remove-tool <tool>` - Remove a tool from default deployment list
+
+### Import
+- `rulesify import --tool <tool> <file>` - Import existing rule from AI tool format to URF
+- `rulesify import --tool <tool> <file> --rule-id <custom-id>` - Import with custom rule ID
+
+**Global Options (available on all commands):**
+- `--config <path>` - Use custom configuration file
+- `--verbose` - Enable detailed output for debugging
 
 ## Example Usage Scenarios
 
 ### Author & Deploy a New Rule
 ```bash
+# Create a new rule and open it in your editor
 rulesify rule new react-best-practices
+
+# Validate the rule for quality and compliance
 rulesify validate react-best-practices
-rulesify deploy --tool cursor --rules react-best-practices --dry-run
-rulesify deploy --tool cursor --rules react-best-practices
-rulesify deploy --tool cline --rules react-best-practices
+
+# Deploy to a specific tool (cursor)
+rulesify deploy --tool cursor --rule react-best-practices
+
+# Deploy to multiple tools
+rulesify deploy --tool cline --rule react-best-practices
+rulesify deploy --tool claude-code --rule react-best-practices
 ```
 
-### Import an Existing Cursor Rule
+### Sync Deployed Rules Back to URF
 ```bash
+# Preview what changes sync would make (dry-run)
+rulesify sync --dry-run
+
+# Apply synchronization to update URF files from deployed tool files
+rulesify sync
+
+# Sync changes from a specific tool only
+rulesify sync --tool cursor --dry-run
+rulesify sync --tool cursor
+```
+
+### Import an Existing Tool Rule
+```bash
+# Import a Cursor rule
 author_rule=.cursor/rules/coding-standards.mdc
 rulesify import --tool cursor "$author_rule"
-rulesify deploy --tool claude-code --rules coding-standards
+
+# Deploy the imported rule to other tools
+rulesify deploy --tool claude-code --rule coding-standards
+rulesify deploy --tool cline --rule coding-standards
+
+# Import with a custom rule ID
+rulesify import --tool cline .clinerules/my-rule.md --rule-id custom-rule-name
 ```
 
 ### Share Rules Across the Team
 ```bash
-rulesify rule export --name team-standards --format urf > team-standards.yaml
-rulesify rule import --tool universal team-standards.yaml
+# Validate all rules before sharing
 rulesify validate --all
-rulesify deploy --tool goose --rules team-standards
+
+# Deploy all rules to your preferred tools
+rulesify deploy --all
+
+# Commit URF files to version control and push to the repository
+git add rules/*.urf.yaml
+git commit -m "Add/Update team coding rules"
+git push origin main
+
+# Team members can then pull, validate, and deploy
+git pull origin main
+rulesify validate --all
+rulesify deploy --all
 ```
+
+### Advanced Workflow Examples
+```bash
+# List rules matching a pattern
+rulesify rule list -r "typescript.*"
+
+# Show detailed information about a specific rule
+rulesify rule show typescript-style
+
+# Deploy all rules to just one tool
+rulesify deploy --tool cursor --all
+
+# Sync and validate workflow
+rulesify sync --dry-run    # Preview changes
+rulesify sync              # Apply changes
+rulesify validate --all    # Ensure quality
+rulesify deploy --all      # Deploy updates
+```
+
+### Interactive Features
+
+**Confirmation Prompts:**
+- `rulesify rule delete <name>` - Requires confirmation before deletion
+- Import commands ask if you want to open the rule in editor after import
+
+**Editor Integration:**
+- `rulesify rule new <name>` - Automatically opens new rule in configured editor
+- `rulesify rule edit <name>` - Opens existing rule for editing
+- `rulesify config edit` - Opens configuration file for editing
+
+**Verbose Output:**
+- Add `--verbose` to any command for detailed debugging information
+- Use `--config <path>` to specify a custom configuration file location
 
 ## Development
 
