@@ -260,3 +260,9 @@ cargo test --test validation_tests
 - **5 storage tests** (persistence layer)
 - **6 template tests** (rule generation)
 - **Unicode and round-trip integrity tested**
+
+## License
+
+This project is licensed under the [MIT License](./LICENSE).
+
+Copyright (c) 2024 Rulesify Contributors
