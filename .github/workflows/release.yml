@@ -8,6 +8,10 @@ on:
 env:
   CARGO_TERM_COLOR: always
 
+# Add permissions block at workflow level
+permissions:
+  contents: write # This gives permission to create releases and upload assets
+
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -29,6 +33,9 @@ jobs:
   create-release:
     needs: test
     runs-on: ubuntu-latest
+    # Also add permissions at job level for extra clarity
+    permissions:
+      contents: write
     outputs:
       upload_url: ${{ steps.create_release.outputs.upload_url }}
       version: ${{ steps.get_version.outputs.version }}
