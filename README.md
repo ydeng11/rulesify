@@ -11,16 +11,16 @@ Rulesify is a command-line tool (written in Rust) that provides **unified manage
 
 ## Features
 
-✅ **Rule Management**: Create, edit, list, show, and delete rules
-✅ **Multi-Tool Deployment**: Deploy rules to all supported AI tools
-✅ **Import Functionality**: Import existing rules from any AI tool format
-✅ **Validation System**: Comprehensive quality and format validation
-✅ **Template System**: Create rules from built-in templates
-✅ **Configuration Management**: Flexible storage and configuration options
-✅ **Sync**: Synchronize deployed rules back to URF format
-✅ **Round-Trip Integrity**: Import/export cycle is lossless and auto-validated
-✅ **Unicode Support**: Handles international text
-✅ **Comprehensive Testing**: 75 tests, 100% pass rate
+- **Rule Management**: Create, edit, list, show, and delete rules
+- **Multi-Tool Deployment**: Deploy rules to all supported AI tools
+- **Import Functionality**: Import existing rules from any AI tool format
+- **Validation System**: Comprehensive quality and format validation
+- **Template System**: Create rules from built-in templates
+- **Configuration Management**: Flexible storage and configuration options
+- **Sync**: Synchronize deployed rules back to URF format
+- **Round-Trip Integrity**: Import/export cycle is lossless and auto-validated
+- **Unicode Support**: Handles international text
+- **Comprehensive Testing**: 75 tests, 100% pass rate
 
 ## Installation
 
