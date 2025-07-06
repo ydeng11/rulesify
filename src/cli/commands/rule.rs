@@ -4,13 +4,14 @@ use regex::Regex;
 use std::path::PathBuf;
 use std::process::Command;
 use std::fs;
-
+use log::{debug, error, info};
 
 use crate::store::{RuleStore, file_store::FileStore};
 use crate::templates::builtin::create_skeleton_for_rule;
 use crate::utils::config::load_config_from_path;
 
 #[derive(Subcommand)]
+#[derive(Debug)]
 pub enum RuleAction {
     /// Create a new rule from skeleton
     New { name: String },
@@ -161,11 +162,16 @@ fn list_rules(regex_pattern: Option<String>, config_path: Option<PathBuf>) -> Re
 }
 
 fn show_rule(name: &str, config_path: Option<PathBuf>) -> Result<()> {
+    debug!("Showing rule: {}", name);
+
     let config = load_config_from_path(config_path)?;
     let store = FileStore::new(config.rules_directory);
 
     let rule = store.load_rule(name)?
-        .ok_or_else(|| anyhow::anyhow!("Rule '{}' not found", name))?;
+        .ok_or_else(|| {
+            error!("Rule '{}' not found", name);
+            anyhow::anyhow!("Rule '{}' not found", name)
+        })?;
 
     println!("📄 Rule: {}", rule.metadata.name);
     println!("🆔 ID: {}", rule.id);
@@ -211,6 +217,7 @@ fn show_rule(name: &str, config_path: Option<PathBuf>) -> Result<()> {
 
     println!("\n📁 File: {}", store.get_rule_path(name).display());
 
+    info!("Successfully showed rule: {}", name);
     Ok(())
 }
 

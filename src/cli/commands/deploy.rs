@@ -1,6 +1,7 @@
 use anyhow::{Context, Result};
 use std::fs;
 use std::path::{Path, PathBuf};
+use log::{debug, error, info};
 
 use crate::converters::{
     RuleConverter,
@@ -13,6 +14,8 @@ use crate::store::{RuleStore, file_store::FileStore};
 use crate::utils::config::load_config_from_path;
 
 pub fn run(tool: Option<String>, rule: Option<String>, all: bool, config_path: Option<PathBuf>) -> Result<()> {
+    debug!("Deploy command started with tool: {:?}, rule: {:?}, all: {}", tool, rule, all);
+
     let config = load_config_from_path(config_path)?;
     let store = FileStore::new(config.rules_directory);
 
@@ -22,6 +25,12 @@ pub fn run(tool: Option<String>, rule: Option<String>, all: bool, config_path: O
     } else {
         config.default_tools
     };
+
+    // Validate all tools before proceeding
+    for tool_name in &target_tools {
+        debug!("Validating tool: {}", tool_name);
+        get_converter(tool_name)?; // This will fail early if tool is invalid
+    }
 
     // Determine which rules to deploy
     let rule_names = if all {
@@ -39,24 +48,35 @@ pub fn run(tool: Option<String>, rule: Option<String>, all: bool, config_path: O
 
     println!("🚀 Deploying {} rule(s) to {} tool(s)", rule_names.len(), target_tools.len());
 
+    let mut deployment_errors = Vec::new();
+
     for tool_name in &target_tools {
         println!("\n📋 Deploying to {}", tool_name);
 
-        let converter = get_converter(tool_name)?;
+        let converter = get_converter(tool_name)?; // This should already be validated above
         let project_root = std::env::current_dir()
             .context("Failed to get current directory")?;
-                let deployment_path = converter.get_deployment_path(&project_root);
+        let deployment_path = converter.get_deployment_path(&project_root);
 
         for rule_name in &rule_names {
             match deploy_rule(&store, converter.as_ref(), rule_name, &deployment_path) {
                 Ok(output_path) => {
                     println!("  ✅ {} → {}", rule_name, output_path.display());
+                    info!("Successfully deployed rule '{}' to {}", rule_name, output_path.display());
                 }
                 Err(e) => {
                     eprintln!("  ❌ {} failed: {}", rule_name, e);
+                    error!("Failed to deploy rule '{}': {}", rule_name, e);
+                    deployment_errors.push(format!("Rule '{}': {}", rule_name, e));
                 }
             }
         }
+    }
+
+    if !deployment_errors.is_empty() {
+        anyhow::bail!("Deployment failed for {} rule(s): {}",
+                     deployment_errors.len(),
+                     deployment_errors.join("; "));
     }
 
     println!("\n🎉 Deployment complete!");
@@ -64,12 +84,16 @@ pub fn run(tool: Option<String>, rule: Option<String>, all: bool, config_path: O
 }
 
 fn get_converter(tool_name: &str) -> Result<Box<dyn RuleConverter>> {
+    debug!("Getting converter for tool: {}", tool_name);
     match tool_name.to_lowercase().as_str() {
         "cursor" => Ok(Box::new(CursorConverter::new())),
         "cline" => Ok(Box::new(ClineConverter::new())),
         "claude-code" | "claude_code" => Ok(Box::new(ClaudeCodeConverter::new())),
         "goose" => Ok(Box::new(GooseConverter::new())),
-        _ => anyhow::bail!("Unsupported tool: {}. Supported tools: cursor, cline, claude-code, goose", tool_name),
+        _ => {
+            error!("Unsupported tool: {}", tool_name);
+            anyhow::bail!("Unsupported tool: {}. Supported tools: cursor, cline, claude-code, goose", tool_name)
+        }
     }
 }
 

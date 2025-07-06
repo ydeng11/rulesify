@@ -5,6 +5,7 @@ use std::path::PathBuf;
 use crate::utils::config::{load_config_from_path, save_global_config, get_config_dir};
 
 #[derive(Subcommand)]
+#[derive(Debug)]
 pub enum ConfigAction {
     /// Show current configuration
     Show,

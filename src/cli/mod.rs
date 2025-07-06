@@ -1,5 +1,6 @@
 use clap::{Parser, Subcommand};
 use std::path::PathBuf;
+use log::{debug, error};
 
 pub mod commands;
 
@@ -32,6 +33,7 @@ pub struct Cli {
 }
 
 #[derive(Subcommand)]
+#[derive(Debug)]
 pub enum Commands {
     /// Manage rules (create, edit, list, show, delete)
     Rule {
@@ -81,25 +83,39 @@ pub enum Commands {
 
 impl Cli {
     pub fn execute(self) -> anyhow::Result<()> {
-        match self.command {
+        debug!("Executing CLI command: {:?}", self.command);
+
+        let result = match self.command {
             Commands::Rule { action } => {
+                debug!("Executing rule command: {:?}", action);
                 commands::rule::run(action, self.config)
             }
             Commands::Deploy { tool, rule, all } => {
+                debug!("Executing deploy command: tool={:?}, rule={:?}, all={}", tool, rule, all);
                 commands::deploy::run(tool, rule, all, self.config)
             }
             Commands::Import { tool, file, rule_id } => {
+                debug!("Executing import command: tool={}, file={:?}, rule_id={:?}", tool, file, rule_id);
                 commands::import::run(tool, file, rule_id, self.config)
             }
             Commands::Validate { rule, all } => {
+                debug!("Executing validate command: rule={:?}, all={}", rule, all);
                 commands::validate::run(rule, all, self.config)
             }
             Commands::Sync { dry_run, rule, tool } => {
+                debug!("Executing sync command: dry_run={}, rule={:?}, tool={:?}", dry_run, rule, tool);
                 commands::sync::run(dry_run, rule, tool, self.config)
             }
             Commands::Config { action } => {
+                debug!("Executing config command: {:?}", action);
                 commands::config::run(action, self.config)
             }
+        };
+
+        if let Err(ref e) = result {
+            error!("Command execution failed: {}", e);
         }
+
+        result
     }
 }
