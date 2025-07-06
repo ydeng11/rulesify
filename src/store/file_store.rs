@@ -2,7 +2,7 @@ use crate::models::rule::UniversalRule;
 use crate::store::RuleStore;
 use anyhow::{Context, Result};
 use std::fs;
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 
 pub struct FileStore {
     rules_directory: PathBuf,
@@ -16,7 +16,7 @@ impl FileStore {
     fn rule_path(&self, id: &str) -> PathBuf {
         self.rules_directory.join(format!("{}.urf.yaml", id))
     }
-    
+
     pub fn get_rule_path(&self, id: &str) -> PathBuf {
         self.rule_path(id)
     }
@@ -31,10 +31,10 @@ impl RuleStore for FileStore {
 
         let content = fs::read_to_string(&path)
             .with_context(|| format!("Failed to read rule file: {}", path.display()))?;
-        
+
         let rule: UniversalRule = serde_yaml::from_str(&content)
             .with_context(|| format!("Failed to parse rule file: {}", path.display()))?;
-        
+
         Ok(Some(rule))
     }
 
@@ -45,10 +45,10 @@ impl RuleStore for FileStore {
         let path = self.rule_path(&rule.id);
         let content = serde_yaml::to_string(rule)
             .with_context(|| "Failed to serialize rule to YAML")?;
-        
+
         fs::write(&path, content)
             .with_context(|| format!("Failed to write rule file: {}", path.display()))?;
-        
+
         Ok(())
     }
 
@@ -61,7 +61,7 @@ impl RuleStore for FileStore {
         for entry in fs::read_dir(&self.rules_directory)? {
             let entry = entry?;
             let path = entry.path();
-            
+
             if path.is_file() {
                 if let Some(stem) = path.file_stem() {
                     if let Some(name) = stem.to_str() {
@@ -73,7 +73,7 @@ impl RuleStore for FileStore {
                 }
             }
         }
-        
+
         rules.sort();
         Ok(rules)
     }
@@ -86,4 +86,4 @@ impl RuleStore for FileStore {
         }
         Ok(())
     }
-} 
+}

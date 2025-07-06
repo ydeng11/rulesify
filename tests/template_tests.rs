@@ -24,8 +24,8 @@ fn test_get_default_skeleton() {
     assert!(skeleton.contains("goose: {}"));
 
     // Check comments for guidance
-    assert!(skeleton.contains("# machine-safe slug"));
-    assert!(skeleton.contains("# appears in exported Markdown H1"));
+    assert!(skeleton.contains("# Unique identifier for this rule"));
+    assert!(skeleton.contains("# Human-readable name - becomes H1 heading"));
 }
 
 #[test]

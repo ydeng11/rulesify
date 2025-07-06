@@ -45,13 +45,7 @@ pub fn run(tool: Option<String>, rule: Option<String>, all: bool, config_path: O
         let converter = get_converter(tool_name)?;
         let project_root = std::env::current_dir()
             .context("Failed to get current directory")?;
-        let deployment_path = converter.get_deployment_path(&project_root);
-
-        // Ensure deployment directory exists
-        if let Some(parent) = deployment_path.parent() {
-            fs::create_dir_all(parent)
-                .with_context(|| format!("Failed to create directory: {}", parent.display()))?;
-        }
+                let deployment_path = converter.get_deployment_path(&project_root);
 
         for rule_name in &rule_names {
             match deploy_rule(&store, converter.as_ref(), rule_name, &deployment_path) {
@@ -105,6 +99,12 @@ fn deploy_rule(
             _ => deployment_path.to_path_buf(),
         }
     };
+
+    // Ensure the parent directory of the output file exists
+    if let Some(parent) = output_path.parent() {
+        fs::create_dir_all(parent)
+            .with_context(|| format!("Failed to create directory: {}", parent.display()))?;
+    }
 
     // Write the converted content
     fs::write(&output_path, tool_content)

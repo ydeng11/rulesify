@@ -47,6 +47,22 @@ pub enum Commands {
         #[arg(long, help = "Deploy all rules")]
         all: bool,
     },
+    /// Import rules from AI tool formats to URF
+    Import {
+        #[arg(long, help = "Source tool: cursor, cline, claude-code, or goose")]
+        tool: String,
+        #[arg(help = "Path to the tool-specific rule file")]
+        file: PathBuf,
+        #[arg(long, help = "Override rule ID (default: derived from filename)")]
+        rule_id: Option<String>,
+    },
+    /// Validate rules for quality and format compliance
+    Validate {
+        #[arg(help = "Rule name to validate (use --all for all rules)")]
+        rule: Option<String>,
+        #[arg(long, help = "Validate all rules")]
+        all: bool,
+    },
     /// Synchronize deployed rules back to URF format
     Sync {
         #[arg(long, help = "Preview changes without applying them")]
@@ -71,6 +87,12 @@ impl Cli {
             }
             Commands::Deploy { tool, rule, all } => {
                 commands::deploy::run(tool, rule, all, self.config)
+            }
+            Commands::Import { tool, file, rule_id } => {
+                commands::import::run(tool, file, rule_id, self.config)
+            }
+            Commands::Validate { rule, all } => {
+                commands::validate::run(rule, all, self.config)
             }
             Commands::Sync { dry_run, rule, tool } => {
                 commands::sync::run(dry_run, rule, tool, self.config)

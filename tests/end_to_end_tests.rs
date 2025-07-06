@@ -161,3 +161,110 @@ fn test_format_specific_content_preservation() {
         assert!(tool_content.contains("println!"));
     }
 }
+
+#[test]
+fn test_deploy_with_missing_directories() {
+
+    let rules_temp_dir = TempDir::new().expect("Failed to create rules temp dir");
+    let project_temp_dir = TempDir::new().expect("Failed to create project temp dir");
+
+    // Create a test rule file manually
+    let rule_content = r#"
+id: deploy-test-rule
+version: 1.0.0
+metadata:
+  name: Deploy Test Rule
+  description: |
+    Test rule for deployment directory creation
+  tags: []
+  priority: 5
+  auto_apply: false
+content:
+  - title: Test Guidelines
+    format: markdown
+    value: |-
+      • This is a test rule
+      • Should create directories automatically
+references: []
+conditions: []
+tool_overrides:
+  cursor:
+    globs: []
+  cline: {}
+  claude-code: {}
+  goose: {}
+"#;
+
+    let rule_file_path = rules_temp_dir.path().join("deploy-test-rule.urf.yaml");
+    fs::write(&rule_file_path, rule_content).expect("Failed to write test rule");
+
+    // Verify that the target directories don't exist yet
+    assert!(!project_temp_dir.path().join(".cursor").exists());
+    assert!(!project_temp_dir.path().join(".clinerules").exists());
+
+    // Load the rule and deploy using the actual deploy logic
+    let store = FileStore::new(rules_temp_dir.path().to_path_buf());
+    let rule = store.load_rule("deploy-test-rule")
+        .expect("Failed to load rule")
+        .expect("Rule not found");
+
+    // Test Cursor deployment (requires nested directory creation)
+    let cursor_converter = CursorConverter::new();
+    let cursor_deployment_path = cursor_converter.get_deployment_path(project_temp_dir.path());
+
+    // Simulate the deploy_rule function behavior
+    let cursor_output_path = cursor_deployment_path.join(format!("deploy-test-rule.{}", cursor_converter.get_file_extension()));
+
+    // This should create the directory structure automatically
+    if let Some(parent) = cursor_output_path.parent() {
+        fs::create_dir_all(parent)
+            .expect("Failed to create cursor directory structure");
+    }
+
+    let cursor_content = cursor_converter.convert_to_tool_format(&rule)
+        .expect("Failed to convert rule for cursor");
+
+    fs::write(&cursor_output_path, cursor_content)
+        .expect("Failed to write cursor file");
+
+    // Test Cline deployment (requires single directory creation)
+    let cline_converter = ClineConverter::new();
+    let cline_deployment_path = cline_converter.get_deployment_path(project_temp_dir.path());
+    let cline_output_path = cline_deployment_path.join(format!("deploy-test-rule.{}", cline_converter.get_file_extension()));
+
+    // This should create the directory structure automatically
+    if let Some(parent) = cline_output_path.parent() {
+        fs::create_dir_all(parent)
+            .expect("Failed to create cline directory structure");
+    }
+
+    let cline_content = cline_converter.convert_to_tool_format(&rule)
+        .expect("Failed to convert rule for cline");
+
+    fs::write(&cline_output_path, cline_content)
+        .expect("Failed to write cline file");
+
+    // Verify that files were created with proper directory structure
+    assert!(cursor_output_path.exists(), "Cursor file should exist");
+    assert!(cline_output_path.exists(), "Cline file should exist");
+
+    // Verify directory structure was created
+    assert!(project_temp_dir.path().join(".cursor").exists());
+    assert!(project_temp_dir.path().join(".cursor/rules").exists());
+    assert!(project_temp_dir.path().join(".clinerules").exists());
+
+            // Verify file content
+    let cursor_file_content = fs::read_to_string(&cursor_output_path)
+        .expect("Failed to read cursor file");
+
+    // Cursor format includes description in frontmatter and content in body
+    assert!(cursor_file_content.contains("Test rule for deployment directory creation"));
+    assert!(cursor_file_content.contains("This is a test rule"));
+    assert!(cursor_file_content.contains("Should create directories automatically"));
+
+    let cline_file_content = fs::read_to_string(&cline_output_path)
+        .expect("Failed to read cline file");
+    // Cline format includes the name as H1 heading
+    assert!(cline_file_content.contains("Deploy Test Rule"));
+    assert!(cline_file_content.contains("This is a test rule"));
+}

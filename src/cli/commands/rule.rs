@@ -5,7 +5,7 @@ use std::path::PathBuf;
 use std::process::Command;
 use std::fs;
 
-use crate::models::rule::UniversalRule;
+
 use crate::store::{RuleStore, file_store::FileStore};
 use crate::templates::builtin::create_skeleton_for_rule;
 use crate::utils::config::load_config_from_path;

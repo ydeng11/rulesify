@@ -1,7 +1,7 @@
 use crate::models::config::GlobalConfig;
 use anyhow::{Context, Result};
 use std::fs;
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 
 pub fn get_config_dir() -> Result<PathBuf> {
     let home_dir = dirs::home_dir()
