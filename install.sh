@@ -53,14 +53,21 @@ echo "Installed $BINARY_NAME to $INSTALL_DIR/$BINARY_NAME"
 
 # Add to PATH if needed
 if ! echo "$PATH" | grep -q "$INSTALL_DIR"; then
+    # Detect shell more reliably
+    CURRENT_SHELL=$(basename "$SHELL")
     PROFILE=""
-    if [ -n "$ZSH_VERSION" ]; then
-        PROFILE="$HOME/.zshrc"
-    elif [ -n "$BASH_VERSION" ]; then
-        PROFILE="$HOME/.bashrc"
-    else
-        PROFILE="$HOME/.profile"
-    fi
+    case "$CURRENT_SHELL" in
+        zsh)
+            PROFILE="$HOME/.zshrc"
+            ;;
+        bash)
+            PROFILE="$HOME/.bashrc"
+            ;;
+        *)
+            PROFILE="$HOME/.profile"
+            ;;
+    esac
+
     if ! grep -q "$INSTALL_DIR" "$PROFILE" 2>/dev/null; then
         echo "export PATH=\"$INSTALL_DIR:\$PATH\"" >> "$PROFILE"
         echo "Added $INSTALL_DIR to PATH in $PROFILE. Please restart your shell or run:"
