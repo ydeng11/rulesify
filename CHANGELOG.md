@@ -15,6 +15,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Always use `cargo build` to create executables in `target/debug/` for development and testing
   - Always use `cargo build --release` to build optimized executables for production release
 
+### Fixed
+- **GitHub Actions Test Failures**: Fixed race condition in sync tests that caused failures in CI/CD pipeline
+  - Added `--test-threads=1` to GitHub Actions workflow to prevent race conditions
+  - Fixed header comment extraction bug in `fallback_to_complete_update` function
+  - All 78 tests now pass reliably in both local and CI environments
+
 ### Changed
 - Updated Rust programming rule with expanded build management best practices
 - Enhanced rule template with comprehensive documentation and usage examples
