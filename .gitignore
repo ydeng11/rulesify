@@ -1,2 +1,5 @@
 /target
 .cursor
+.clinerules
+*.goosehints
+.DS_Store
