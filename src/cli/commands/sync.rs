@@ -340,12 +340,12 @@ fn fallback_to_complete_update(
 ) -> Result<()> {
     // Extract top-level comments (lines starting with #) from the original file
     let mut preserved_comments = Vec::new();
-    let in_header = true;
 
     for line in original_content.lines() {
-        if in_header && (line.starts_with('#') || line.trim().is_empty()) {
+        if line.starts_with('#') || line.trim().is_empty() {
             preserved_comments.push(line.to_string());
         } else if !line.trim().is_empty() {
+            // Hit the first non-comment, non-empty line - stop collecting comments
             break;
         }
     }
