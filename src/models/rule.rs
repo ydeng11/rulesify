@@ -29,7 +29,7 @@ pub enum RuleCategory {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum RuleScope {
     Global,     // Available across all projects
-    Workspace,  // Available within a workspace  
+    Workspace,  // Available within a workspace
     Project,    // Project-specific
 }
 
@@ -54,14 +54,14 @@ pub struct RuleMetadata {
     pub auto_apply: bool,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct RuleContent {
     pub title: String,
     pub format: ContentFormat,
     pub value: String,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub enum ContentFormat {
     #[serde(rename = "markdown")]
     Markdown,
@@ -71,15 +71,15 @@ pub enum ContentFormat {
     Code,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct FileReference {
     pub path: String,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub enum RuleCondition {
     #[serde(rename = "file_pattern")]
     FilePattern { value: String },
     #[serde(rename = "regex")]
     Regex { value: String },
-} 
+}

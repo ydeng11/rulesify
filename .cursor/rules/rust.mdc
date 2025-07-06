@@ -1,12 +1,10 @@
 ---
-description: 
-globs: 
-alwaysApply: false
+alwaysApply: true
 ---
 # Rust Programming Guidance
 
 ## Best Practice
-1. SHOULD create tests for added code
+1. SHOULD create unit tests for methods and integration tests for the app
 2. SHOULD run tests and compile the code after mofifying code
 
 ## Getting Started
@@ -93,4 +91,3 @@ alwaysApply: false
 
 ---
 Happy hacking with Rust! 🚀
-

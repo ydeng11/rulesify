@@ -1,50 +1,107 @@
 use anyhow::Result;
 
 pub fn get_default_skeleton() -> &'static str {
-    r#"# -------------------------------------------------------------
+    r#"# =====================================================================
 #  UNIVERSAL RULE FILE (URF) – SINGLE SOURCE OF TRUTH
-#  Replace <placeholders> and delete comments after editing.
-# -------------------------------------------------------------
+#
+#  This file defines a rule that can be deployed to all AI coding tools:
+#  - Cursor (.cursor/rules/*.mdc)
+#  - Cline (.clinerules/*.md)
+#  - Claude Code (CLAUDE.md)
+#  - Goose (.goosehints)
+#
+#  INSTRUCTIONS:
+#  1. Replace all <placeholders> with your content
+#  2. Delete these instruction comments when done
+#  3. Save and run: rulesify deploy --all
+# =====================================================================
 
-id: <rule_id>              # machine-safe slug, filled automatically
-version: 0.1.0             # bump when you make breaking changes
+# Unique identifier for this rule (auto-filled from filename)
+id: <rule_id>
 
+# Semantic version - increment when making breaking changes
+version: 0.1.0
+
+# Core metadata that appears in all exported formats
 metadata:
-  name: "<Human-friendly Name>"          # appears in exported Markdown H1
+  # Human-readable name - becomes H1 heading in exported files
+  name: "<Human-friendly Name>"
+
+  # Brief description - shows up in Cursor frontmatter and tool descriptions
   description: |
     <One-sentence description that shows up in Cursor front-matter>
-  tags: []                 # e.g. [react, style, hooks]
-  priority: 5              # 1 (low) → 10 (high); used for ordering
-  auto_apply: false        # if true, export uses alwaysApply in Cursor
 
+  # Tags for categorization and search (e.g. [react, typescript, testing])
+  tags: []
+
+  # Priority for rule ordering: 1 (low) → 10 (high)
+  priority: 5
+
+  # Auto-apply: if true, Cursor will always apply this rule
+  auto_apply: false
+
+# Content sections - these become H2 headings in exported files
 content:
-  - title: "Guidelines"                  # Markdown H2 in exports
-    format: markdown                      # or plaintext / code
+  # Main guidelines section
+  - title: "Guidelines"
+    format: markdown        # Options: markdown, plaintext, code
     value: |-
       • Add your first bullet here
-      • Use **block-scalar** so you keep Markdown formatting
+      • Use **block-scalar** (|-) to preserve Markdown formatting
+      • Each bullet should be a specific, actionable instruction
+      • Example: "Always use TypeScript interfaces for props"
 
-# Optional extra sections – copy / paste as needed
+# OPTIONAL: Add more content sections by copying the pattern above
 #  - title: "Examples"
 #    format: markdown
 #    value: |-
-#      ```js
-#      // code demo
+#      ```typescript
+#      // Good: Use descriptive names
+#      interface UserProps {
+#        name: string;
+#        email: string;
+#      }
+#
+#      // Bad: Vague names
+#      interface Props {
+#        a: string;
+#        b: string;
+#      }
 #      ```
 
-references: []             # optional list of @file references
-conditions: []             # optional glob patterns that trigger auto-attach
+# OPTIONAL: Reference external files (appears as @filename in Cursor)
+references: []             # Example: [@README.md, @docs/style-guide.md]
 
-# -------------------------------------------------------------------
-#  Tool-specific overrides (ignored by other exporters)
-# -------------------------------------------------------------------
+# OPTIONAL: File patterns that trigger auto-attachment
+conditions: []             # Example: [type: file_pattern, value: "src/**/*.ts"]
+
+# =====================================================================
+#  TOOL-SPECIFIC OVERRIDES
+#  These settings only apply to specific tools and are ignored by others
+# =====================================================================
 
 tool_overrides:
+  # Cursor-specific settings
   cursor:
-    globs: []              # e.g. [src/**/*.tsx, src/**/*.jsx]
+    globs: []              # File patterns: [src/**/*.tsx, src/**/*.jsx]
+
+  # Cline-specific settings
   cline: {}
+
+  # Claude Code-specific settings
   claude-code: {}
+
+  # Goose-specific settings
   goose: {}
+
+# =====================================================================
+#  USAGE EXAMPLES:
+#
+#  Deploy to all tools:     rulesify deploy --all
+#  Deploy to Cursor only:   rulesify deploy --tool cursor --rule <rule_id>
+#  Edit this rule:          rulesify rule edit <rule_id>
+#  View deployed rules:     rulesify rule list
+# =====================================================================
 "#
 }
 
@@ -52,7 +109,7 @@ pub fn create_skeleton_for_rule(rule_name: &str) -> Result<String> {
     let skeleton = get_default_skeleton();
     let filled = skeleton.replace("<rule_id>", rule_name)
         .replace("<Human-friendly Name>", &format!("{} Rule", rule_name))
-        .replace("<One-sentence description that shows up in Cursor front-matter>", 
+        .replace("<One-sentence description that shows up in Cursor front-matter>",
                  &format!("Guidelines for {}", rule_name));
     Ok(filled)
-} 
+}

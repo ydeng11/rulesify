@@ -16,6 +16,10 @@ impl FileStore {
     fn rule_path(&self, id: &str) -> PathBuf {
         self.rules_directory.join(format!("{}.urf.yaml", id))
     }
+    
+    pub fn get_rule_path(&self, id: &str) -> PathBuf {
+        self.rule_path(id)
+    }
 }
 
 impl RuleStore for FileStore {
