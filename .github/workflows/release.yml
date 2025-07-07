@@ -59,7 +59,8 @@ jobs:
           echo "### Changelog" >> RELEASE_NOTES.md
           echo "" >> RELEASE_NOTES.md
           # Extract the current version's changelog section
-          awk -v version="## [v${{ steps.get_version.outputs.version }}]" '
+          # Note: CHANGELOG.md uses [0.1.5] format (without 'v' prefix)
+          awk -v version="## [${{ steps.get_version.outputs.version }}]" '
             $0 ~ version {p=1; print; next}
             p && /^## \[/ {p=0}
             p {print}
