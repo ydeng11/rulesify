@@ -24,30 +24,71 @@ impl RuleConverter for CursorConverter {
 
         // Generate YAML frontmatter
         output.push_str("---\n");
-        output.push_str(&format!("description: {}\n", rule.metadata.name));
 
+        // For "Apply Intelligently" mode to work, Cursor needs the description field
+        // to contain the actual rule description (not just the name)
         if let Some(desc) = &rule.metadata.description {
-            // Handle multi-line descriptions properly with YAML literal block syntax
+            // Use the actual description for intelligent application
             if desc.contains('\n') {
-                output.push_str("notes: |\n");
+                output.push_str("description: |\n");
                 for line in desc.lines() {
                     output.push_str(&format!("  {}\n", line));
                 }
             } else {
-                output.push_str(&format!("notes: {}\n", desc));
+                output.push_str(&format!("description: \"{}\"\n", desc));
             }
+            // Include rule name as notes for reference
+            output.push_str(&format!("notes: \"Rule: {}\"\n", rule.metadata.name));
+        } else {
+            // Fallback to rule name if no description available
+            output.push_str(&format!("description: \"{}\"\n", rule.metadata.name));
         }
 
-        if !rule.conditions.is_empty() {
+        // Extract application mode from cursor tool overrides
+        let cursor_overrides = rule.tool_overrides.get("cursor");
+
+        // First check for new apply_mode field
+        let apply_mode = cursor_overrides
+            .and_then(|overrides| overrides.get("apply_mode"))
+            .and_then(|v| v.as_str())
+            .unwrap_or_else(|| {
+                // Fall back to legacy auto_apply field for backwards compatibility
+                let auto_apply = cursor_overrides
+                    .and_then(|overrides| overrides.get("auto_apply"))
+                    .and_then(|v| v.as_bool())
+                    .unwrap_or(false);
+
+                if auto_apply {
+                    "always"
+                } else {
+                    // If auto_apply is false, check if globs exist to determine mode
+                    let has_globs = !rule.conditions.is_empty();
+                    if has_globs {
+                        "specific_files"
+                    } else {
+                        "intelligent" // Default for backwards compatibility
+                    }
+                }
+            });
+
+        // Only include globs if apply_mode is "specific_files"
+        if apply_mode == "specific_files" && !rule.conditions.is_empty() {
             output.push_str("globs:\n");
             for condition in &rule.conditions {
                 if let RuleCondition::FilePattern { value } = condition {
-                    output.push_str(&format!("  - {}\n", value));
+                    output.push_str(&format!("  - \"{}\"\n", value));
                 }
             }
         }
 
-        output.push_str(&format!("alwaysApply: {}\n", rule.metadata.auto_apply));
+        // Map apply_mode to Cursor frontmatter
+        let always_apply = match apply_mode {
+            "always" => true,
+            "intelligent" | "specific_files" | "manual" => false,
+            _ => false, // Default to false for unknown modes
+        };
+
+        output.push_str(&format!("alwaysApply: {}\n", always_apply));
         output.push_str("---\n\n");
 
         // Add content sections
@@ -72,20 +113,37 @@ impl RuleConverter for CursorConverter {
         // Parse content sections and references from markdown
         let (content_sections, references) = parse_markdown_content(&markdown)?;
 
-        // Extract name from frontmatter or first content section
-        let name =
-            if let Some(description) = frontmatter.get("description").and_then(|v| v.as_str()) {
-                description.to_string()
-            } else if let Some(first_section) = content_sections.first() {
-                first_section.title.clone()
-            } else {
-                "Imported Rule".to_string()
-            };
-
-        // Extract description from notes field
-        let description = frontmatter
+        // Extract name from notes field (if in "Rule: XYZ" format) or fallback to description
+        let name = frontmatter
             .get("notes")
             .and_then(|v| v.as_str())
+            .and_then(|notes| {
+                if notes.starts_with("Rule: ") {
+                    Some(notes.strip_prefix("Rule: ").unwrap_or(notes).to_string())
+                } else {
+                    None
+                }
+            })
+            .or_else(|| {
+                // Fallback: use description if notes doesn't contain rule name
+                frontmatter
+                    .get("description")
+                    .and_then(|v| v.as_str())
+                    .map(|s| s.to_string())
+            })
+            .or_else(|| {
+                // Last resort: use first content section title
+                content_sections
+                    .first()
+                    .map(|section| section.title.clone())
+            })
+            .unwrap_or_else(|| "Imported Rule".to_string());
+
+        // Extract description from description field (new behavior)
+        let description = frontmatter
+            .get("description")
+            .and_then(|v| v.as_str())
+            .filter(|s| !s.is_empty() && *s != name) // Don't use description if it's the same as name
             .map(|s| s.to_string());
 
         // Extract metadata from frontmatter
@@ -94,14 +152,10 @@ impl RuleConverter for CursorConverter {
             description,
             tags: Vec::new(),
             priority: 5,
-            auto_apply: frontmatter
-                .get("alwaysApply")
-                .and_then(|v| v.as_bool())
-                .unwrap_or(false),
         };
 
         // Parse conditions from globs
-        let conditions = frontmatter
+        let conditions: Vec<RuleCondition> = frontmatter
             .get("globs")
             .and_then(|v| v.as_sequence())
             .map(|seq| {
@@ -124,6 +178,46 @@ impl RuleConverter for CursorConverter {
             .filter(|c| c.is_alphanumeric() || *c == '-')
             .collect::<String>();
 
+        // Create tool overrides with apply_mode for cursor
+        let always_apply = frontmatter
+            .get("alwaysApply")
+            .and_then(|v| v.as_bool())
+            .unwrap_or(false);
+
+        // Determine apply_mode based on Cursor frontmatter
+        let apply_mode = if always_apply {
+            "always"
+        } else {
+            // If alwaysApply is false, check if globs exist to determine mode
+            let has_globs = !conditions.is_empty();
+            if has_globs {
+                "specific_files"
+            } else {
+                "intelligent" // Default when alwaysApply is false and no globs
+            }
+        };
+
+        let mut tool_overrides: std::collections::HashMap<String, serde_json::Value> =
+            std::collections::HashMap::new();
+        let mut cursor_overrides = serde_json::Map::new();
+
+        // Add the new apply_mode field
+        cursor_overrides.insert(
+            "apply_mode".to_string(),
+            serde_json::Value::String(apply_mode.to_string()),
+        );
+
+        // Keep auto_apply for backwards compatibility (deprecated)
+        cursor_overrides.insert(
+            "auto_apply".to_string(),
+            serde_json::Value::Bool(always_apply),
+        );
+
+        tool_overrides.insert(
+            "cursor".to_string(),
+            serde_json::Value::Object(cursor_overrides),
+        );
+
         Ok(UniversalRule {
             id: rule_id,
             version: "0.1.0".to_string(),
@@ -131,7 +225,7 @@ impl RuleConverter for CursorConverter {
             content: content_sections,
             references,
             conditions,
-            tool_overrides: std::collections::HashMap::new(),
+            tool_overrides,
         })
     }
 

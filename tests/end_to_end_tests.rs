@@ -1,15 +1,12 @@
-use rulesify::store::{RuleStore, file_store::FileStore};
 use rulesify::converters::{
-    RuleConverter,
-    cursor::CursorConverter,
-    cline::ClineConverter,
-    claude_code::ClaudeCodeConverter,
-    goose::GooseConverter,
+    claude_code::ClaudeCodeConverter, cline::ClineConverter, cursor::CursorConverter,
+    goose::GooseConverter, RuleConverter,
 };
-use rulesify::templates::builtin::create_skeleton_for_rule;
 use rulesify::models::rule::UniversalRule;
-use tempfile::TempDir;
+use rulesify::store::{file_store::FileStore, RuleStore};
+use rulesify::templates::builtin::create_skeleton_for_rule;
 use std::fs;
+use tempfile::TempDir;
 
 #[test]
 fn test_complete_rule_creation_and_deployment_workflow() {
@@ -21,14 +18,15 @@ fn test_complete_rule_creation_and_deployment_workflow() {
 
     // Step 1: Create rule from skeleton
     let skeleton_content = create_skeleton_for_rule("integration-test-rule").unwrap();
-    let rule: UniversalRule = serde_yaml::from_str(&skeleton_content)
-        .expect("Failed to parse skeleton as YAML");
+    let rule: UniversalRule =
+        serde_yaml::from_str(&skeleton_content).expect("Failed to parse skeleton as YAML");
 
     // Step 2: Save rule to store
     store.save_rule(&rule).expect("Failed to save rule");
 
     // Step 3: Verify rule can be loaded
-    let loaded_rule = store.load_rule("integration-test-rule")
+    let loaded_rule = store
+        .load_rule("integration-test-rule")
         .expect("Failed to load rule")
         .expect("Rule not found");
 
@@ -45,7 +43,8 @@ fn test_complete_rule_creation_and_deployment_workflow() {
 
     for (converter, tool_name) in converters {
         // Convert rule to tool format
-        let tool_content = converter.convert_to_tool_format(&loaded_rule)
+        let tool_content = converter
+            .convert_to_tool_format(&loaded_rule)
             .expect(&format!("Failed to convert rule for {}", tool_name));
 
         // Verify content is not empty and contains expected elements
@@ -57,38 +56,56 @@ fn test_complete_rule_creation_and_deployment_workflow() {
 
         // Ensure deployment directory exists
         if let Some(parent) = deployment_path.parent() {
-            fs::create_dir_all(parent)
-                .expect(&format!("Failed to create deployment dir for {}", tool_name));
+            fs::create_dir_all(parent).expect(&format!(
+                "Failed to create deployment dir for {}",
+                tool_name
+            ));
         }
 
-                // Write tool-specific file
+        // Write tool-specific file
         let file_path = if deployment_path.is_dir() || deployment_path.extension().is_none() {
-            let path = deployment_path.join(format!("integration-test-rule.{}", converter.get_file_extension()));
+            let path = deployment_path.join(format!(
+                "integration-test-rule.{}",
+                converter.get_file_extension()
+            ));
             // Ensure the directory exists
             if let Some(parent) = path.parent() {
-                fs::create_dir_all(parent)
-                    .expect(&format!("Failed to create parent dir for {} file", tool_name));
+                fs::create_dir_all(parent).expect(&format!(
+                    "Failed to create parent dir for {} file",
+                    tool_name
+                ));
             }
             path
         } else {
             deployment_path
         };
 
-        fs::write(&file_path, tool_content)
-            .expect(&format!("Failed to write {} file", tool_name));
+        fs::write(&file_path, tool_content).expect(&format!("Failed to write {} file", tool_name));
 
         // Verify file was created and contains expected content
         assert!(file_path.exists());
-        let written_content = fs::read_to_string(&file_path)
-            .expect(&format!("Failed to read {} file", tool_name));
+        let written_content =
+            fs::read_to_string(&file_path).expect(&format!("Failed to read {} file", tool_name));
         assert!(written_content.contains("integration-test-rule"));
     }
 
     // Step 5: Verify all expected files exist
-    assert!(project_temp_dir.path().join(".cursor/rules/integration-test-rule.mdc").exists());
-    assert!(project_temp_dir.path().join(".clinerules/integration-test-rule.md").exists());
-    assert!(project_temp_dir.path().join("integration-test-rule.md").exists());
-    assert!(project_temp_dir.path().join("integration-test-rule.goosehints").exists());
+    assert!(project_temp_dir
+        .path()
+        .join(".cursor/rules/integration-test-rule.mdc")
+        .exists());
+    assert!(project_temp_dir
+        .path()
+        .join(".clinerules/integration-test-rule.md")
+        .exists());
+    assert!(project_temp_dir
+        .path()
+        .join("integration-test-rule.md")
+        .exists());
+    assert!(project_temp_dir
+        .path()
+        .join("integration-test-rule.goosehints")
+        .exists());
 }
 
 #[test]
@@ -101,8 +118,8 @@ fn test_multiple_rules_workflow() {
 
     for rule_name in &rule_names {
         let skeleton_content = create_skeleton_for_rule(rule_name).unwrap();
-        let rule: UniversalRule = serde_yaml::from_str(&skeleton_content)
-            .expect("Failed to parse skeleton as YAML");
+        let rule: UniversalRule =
+            serde_yaml::from_str(&skeleton_content).expect("Failed to parse skeleton as YAML");
 
         store.save_rule(&rule).expect("Failed to save rule");
     }
@@ -118,7 +135,8 @@ fn test_multiple_rules_workflow() {
 
     // Verify each rule can be loaded
     for rule_name in &rule_names {
-        let loaded_rule = store.load_rule(rule_name)
+        let loaded_rule = store
+            .load_rule(rule_name)
             .expect("Failed to load rule")
             .expect("Rule not found");
 
@@ -133,8 +151,8 @@ fn test_format_specific_content_preservation() {
 
     // Create a rule with special formatting
     let skeleton_content = create_skeleton_for_rule("format-test").unwrap();
-    let mut rule: UniversalRule = serde_yaml::from_str(&skeleton_content)
-        .expect("Failed to parse skeleton as YAML");
+    let mut rule: UniversalRule =
+        serde_yaml::from_str(&skeleton_content).expect("Failed to parse skeleton as YAML");
 
     // Add specific content that should be preserved
     rule.content[0].value = "• **Bold** text\n• *Italic* text\n• `Code` snippets\n\n```rust\nfn example() {\n    println!(\"Hello!\");\n}\n```".to_string();
@@ -150,7 +168,8 @@ fn test_format_specific_content_preservation() {
     ];
 
     for converter in converters {
-        let tool_content = converter.convert_to_tool_format(&rule)
+        let tool_content = converter
+            .convert_to_tool_format(&rule)
             .expect("Failed to convert rule");
 
         // Check that markdown formatting is preserved
@@ -164,7 +183,6 @@ fn test_format_specific_content_preservation() {
 
 #[test]
 fn test_deploy_with_missing_directories() {
-
     let rules_temp_dir = TempDir::new().expect("Failed to create rules temp dir");
     let project_temp_dir = TempDir::new().expect("Failed to create project temp dir");
 
@@ -178,7 +196,7 @@ metadata:
     Test rule for deployment directory creation
   tags: []
   priority: 5
-  auto_apply: false
+
 content:
   - title: Test Guidelines
     format: markdown
@@ -204,7 +222,8 @@ tool_overrides:
 
     // Load the rule and deploy using the actual deploy logic
     let store = FileStore::new(rules_temp_dir.path().to_path_buf());
-    let rule = store.load_rule("deploy-test-rule")
+    let rule = store
+        .load_rule("deploy-test-rule")
         .expect("Failed to load rule")
         .expect("Rule not found");
 
@@ -213,36 +232,40 @@ tool_overrides:
     let cursor_deployment_path = cursor_converter.get_deployment_path(project_temp_dir.path());
 
     // Simulate the deploy_rule function behavior
-    let cursor_output_path = cursor_deployment_path.join(format!("deploy-test-rule.{}", cursor_converter.get_file_extension()));
+    let cursor_output_path = cursor_deployment_path.join(format!(
+        "deploy-test-rule.{}",
+        cursor_converter.get_file_extension()
+    ));
 
     // This should create the directory structure automatically
     if let Some(parent) = cursor_output_path.parent() {
-        fs::create_dir_all(parent)
-            .expect("Failed to create cursor directory structure");
+        fs::create_dir_all(parent).expect("Failed to create cursor directory structure");
     }
 
-    let cursor_content = cursor_converter.convert_to_tool_format(&rule)
+    let cursor_content = cursor_converter
+        .convert_to_tool_format(&rule)
         .expect("Failed to convert rule for cursor");
 
-    fs::write(&cursor_output_path, cursor_content)
-        .expect("Failed to write cursor file");
+    fs::write(&cursor_output_path, cursor_content).expect("Failed to write cursor file");
 
     // Test Cline deployment (requires single directory creation)
     let cline_converter = ClineConverter::new();
     let cline_deployment_path = cline_converter.get_deployment_path(project_temp_dir.path());
-    let cline_output_path = cline_deployment_path.join(format!("deploy-test-rule.{}", cline_converter.get_file_extension()));
+    let cline_output_path = cline_deployment_path.join(format!(
+        "deploy-test-rule.{}",
+        cline_converter.get_file_extension()
+    ));
 
     // This should create the directory structure automatically
     if let Some(parent) = cline_output_path.parent() {
-        fs::create_dir_all(parent)
-            .expect("Failed to create cline directory structure");
+        fs::create_dir_all(parent).expect("Failed to create cline directory structure");
     }
 
-    let cline_content = cline_converter.convert_to_tool_format(&rule)
+    let cline_content = cline_converter
+        .convert_to_tool_format(&rule)
         .expect("Failed to convert rule for cline");
 
-    fs::write(&cline_output_path, cline_content)
-        .expect("Failed to write cline file");
+    fs::write(&cline_output_path, cline_content).expect("Failed to write cline file");
 
     // Verify that files were created with proper directory structure
     assert!(cursor_output_path.exists(), "Cursor file should exist");
@@ -253,17 +276,17 @@ tool_overrides:
     assert!(project_temp_dir.path().join(".cursor/rules").exists());
     assert!(project_temp_dir.path().join(".clinerules").exists());
 
-            // Verify file content
-    let cursor_file_content = fs::read_to_string(&cursor_output_path)
-        .expect("Failed to read cursor file");
+    // Verify file content
+    let cursor_file_content =
+        fs::read_to_string(&cursor_output_path).expect("Failed to read cursor file");
 
     // Cursor format includes description in frontmatter and content in body
     assert!(cursor_file_content.contains("Test rule for deployment directory creation"));
     assert!(cursor_file_content.contains("This is a test rule"));
     assert!(cursor_file_content.contains("Should create directories automatically"));
 
-    let cline_file_content = fs::read_to_string(&cline_output_path)
-        .expect("Failed to read cline file");
+    let cline_file_content =
+        fs::read_to_string(&cline_output_path).expect("Failed to read cline file");
     // Cline format includes the name as H1 heading
     assert!(cline_file_content.contains("Deploy Test Rule"));
     assert!(cline_file_content.contains("This is a test rule"));

@@ -28,9 +28,9 @@ pub enum RuleCategory {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum RuleScope {
-    Global,     // Available across all projects
-    Workspace,  // Available within a workspace
-    Project,    // Project-specific
+    Global,    // Available across all projects
+    Workspace, // Available within a workspace
+    Project,   // Project-specific
 }
 
 // Universal rule format for conversion
@@ -51,7 +51,6 @@ pub struct RuleMetadata {
     pub description: Option<String>,
     pub tags: Vec<String>,
     pub priority: u8,
-    pub auto_apply: bool,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]

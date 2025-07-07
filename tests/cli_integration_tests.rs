@@ -1,6 +1,6 @@
-use std::process::Command;
 use std::fs;
 use std::path::Path;
+use std::process::Command;
 use tempfile::TempDir;
 
 fn get_rulesify_binary() -> String {
@@ -15,12 +15,18 @@ fn get_rulesify_binary() -> String {
     } else if debug_path.exists() {
         debug_path.to_string_lossy().to_string()
     } else {
-        panic!("Rulesify binary not found at {} or {}. Please run 'cargo build' first.",
-               debug_path.display(), release_path.display());
+        panic!(
+            "Rulesify binary not found at {} or {}. Please run 'cargo build' first.",
+            debug_path.display(),
+            release_path.display()
+        );
     }
 }
 
-fn run_rulesify_command(args: &[&str], working_dir: &Path) -> Result<(String, String, i32), std::io::Error> {
+fn run_rulesify_command(
+    args: &[&str],
+    working_dir: &Path,
+) -> Result<(String, String, i32), std::io::Error> {
     let binary = get_rulesify_binary();
     let output = Command::new(&binary)
         .args(args)
@@ -38,8 +44,8 @@ fn run_rulesify_command(args: &[&str], working_dir: &Path) -> Result<(String, St
 fn test_cli_help_command() {
     let temp_dir = TempDir::new().expect("Failed to create temp directory");
 
-    let (stdout, _stderr, exit_code) = run_rulesify_command(&["--help"], temp_dir.path())
-        .expect("Failed to run rulesify --help");
+    let (stdout, _stderr, exit_code) =
+        run_rulesify_command(&["--help"], temp_dir.path()).expect("Failed to run rulesify --help");
 
     assert_eq!(exit_code, 0);
     assert!(stdout.contains("Rulesify manages Universal Rule Files"));
@@ -62,22 +68,32 @@ fn test_cli_rule_lifecycle() {
     let config_dir = temp_dir.path().join("config");
     fs::create_dir_all(&config_dir).expect("Failed to create config directory");
 
-    let config_content = format!(r#"
+    let config_content = format!(
+        r#"
 rules_directory: "{}"
 editor: null
 default_tools:
   - cursor
   - cline
-"#, rules_dir.display());
+"#,
+        rules_dir.display()
+    );
 
     let config_file = config_dir.join("config.yaml");
     fs::write(&config_file, config_content).expect("Failed to write config file");
 
     // Test rule creation
     let (stdout, stderr, exit_code) = run_rulesify_command(
-        &["--config", config_file.to_str().unwrap(), "rule", "new", "test-rule"],
-        temp_dir.path()
-    ).expect("Failed to run rulesify rule new");
+        &[
+            "--config",
+            config_file.to_str().unwrap(),
+            "rule",
+            "new",
+            "test-rule",
+        ],
+        temp_dir.path(),
+    )
+    .expect("Failed to run rulesify rule new");
 
     assert_eq!(exit_code, 0, "Command failed with stderr: {}", stderr);
     assert!(stdout.contains("Created new rule: test-rule"));
@@ -93,8 +109,9 @@ default_tools:
     // Test rule listing
     let (stdout, stderr, exit_code) = run_rulesify_command(
         &["--config", config_file.to_str().unwrap(), "rule", "list"],
-        temp_dir.path()
-    ).expect("Failed to run rulesify rule list");
+        temp_dir.path(),
+    )
+    .expect("Failed to run rulesify rule list");
 
     assert_eq!(exit_code, 0, "Command failed with stderr: {}", stderr);
     assert!(stdout.contains("test-rule"));
@@ -102,20 +119,34 @@ default_tools:
 
     // Test rule show
     let (stdout, stderr, exit_code) = run_rulesify_command(
-        &["--config", config_file.to_str().unwrap(), "rule", "show", "test-rule"],
-        temp_dir.path()
-    ).expect("Failed to run rulesify rule show");
+        &[
+            "--config",
+            config_file.to_str().unwrap(),
+            "rule",
+            "show",
+            "test-rule",
+        ],
+        temp_dir.path(),
+    )
+    .expect("Failed to run rulesify rule show");
 
     assert_eq!(exit_code, 0, "Command failed with stderr: {}", stderr);
     assert!(stdout.contains("Rule: test-rule Rule"));
     assert!(stdout.contains("ID: test-rule"));
     assert!(stdout.contains("Version: 0.1.0"));
 
-        // Test rule deletion
+    // Test rule deletion
     let (stdout, stderr, _exit_code) = run_rulesify_command(
-        &["--config", config_file.to_str().unwrap(), "rule", "delete", "test-rule"],
-        temp_dir.path()
-    ).expect("Failed to run rulesify rule delete");
+        &[
+            "--config",
+            config_file.to_str().unwrap(),
+            "rule",
+            "delete",
+            "test-rule",
+        ],
+        temp_dir.path(),
+    )
+    .expect("Failed to run rulesify rule delete");
 
     // The delete command requires confirmation, so we expect it to prompt
     assert!(stdout.contains("Are you sure") || stderr.contains("Are you sure"));
@@ -139,7 +170,6 @@ metadata:
     - test
     - validation
   priority: 5
-  auto_apply: false
 content:
   - title: Test Guidelines
     format: markdown
@@ -162,21 +192,30 @@ tool_overrides:
     let config_dir = temp_dir.path().join("config");
     fs::create_dir_all(&config_dir).expect("Failed to create config directory");
 
-    let config_content = format!(r#"
+    let config_content = format!(
+        r#"
 rules_directory: "{}"
 editor: null
 default_tools:
   - cursor
-"#, rules_dir.display());
+"#,
+        rules_dir.display()
+    );
 
     let config_file = config_dir.join("config.yaml");
     fs::write(&config_file, config_content).expect("Failed to write config file");
 
     // Test validation
     let (stdout, stderr, exit_code) = run_rulesify_command(
-        &["--config", config_file.to_str().unwrap(), "validate", "--all"],
-        temp_dir.path()
-    ).expect("Failed to run rulesify validate");
+        &[
+            "--config",
+            config_file.to_str().unwrap(),
+            "validate",
+            "--all",
+        ],
+        temp_dir.path(),
+    )
+    .expect("Failed to run rulesify validate");
 
     assert_eq!(exit_code, 0, "Command failed with stderr: {}", stderr);
     assert!(stdout.contains("Validating 1 rule"));
@@ -200,7 +239,6 @@ metadata:
     A test rule for deployment
   tags: []
   priority: 5
-  auto_apply: false
 content:
   - title: Test Guidelines
     format: markdown
@@ -223,21 +261,32 @@ tool_overrides:
     let config_dir = temp_dir.path().join("config");
     fs::create_dir_all(&config_dir).expect("Failed to create config directory");
 
-    let config_content = format!(r#"
+    let config_content = format!(
+        r#"
 rules_directory: "{}"
 editor: null
 default_tools:
   - cursor
-"#, rules_dir.display());
+"#,
+        rules_dir.display()
+    );
 
     let config_file = config_dir.join("config.yaml");
     fs::write(&config_file, config_content).expect("Failed to write config file");
 
     // Test deployment
     let (stdout, stderr, exit_code) = run_rulesify_command(
-        &["--config", config_file.to_str().unwrap(), "deploy", "--tool", "cursor", "--all"],
-        temp_dir.path()
-    ).expect("Failed to run rulesify deploy");
+        &[
+            "--config",
+            config_file.to_str().unwrap(),
+            "deploy",
+            "--tool",
+            "cursor",
+            "--all",
+        ],
+        temp_dir.path(),
+    )
+    .expect("Failed to run rulesify deploy");
 
     assert_eq!(exit_code, 0, "Command failed with stderr: {}", stderr);
     assert!(stdout.contains("Deploying 1 rule"));
@@ -248,7 +297,8 @@ default_tools:
     let deployed_file = temp_dir.path().join(".cursor/rules/deploy-test.mdc");
     assert!(deployed_file.exists(), "Deployed file was not created");
 
-    let deployed_content = fs::read_to_string(&deployed_file).expect("Failed to read deployed file");
+    let deployed_content =
+        fs::read_to_string(&deployed_file).expect("Failed to read deployed file");
     assert!(deployed_content.contains("---"));
     assert!(deployed_content.contains("description: Deploy Test Rule"));
     assert!(deployed_content.contains("# Test Guidelines"));
@@ -291,12 +341,15 @@ Follow these coding standards:
     let config_dir = temp_dir.path().join("config");
     fs::create_dir_all(&config_dir).expect("Failed to create config directory");
 
-    let config_content = format!(r#"
+    let config_content = format!(
+        r#"
 rules_directory: "{}"
 editor: null
 default_tools:
   - cursor
-"#, rules_dir.display());
+"#,
+        rules_dir.display()
+    );
 
     let config_file = config_dir.join("config.yaml");
     fs::write(&config_file, config_content).expect("Failed to write config file");
@@ -304,14 +357,18 @@ default_tools:
     // Test import
     let (stdout, stderr, exit_code) = run_rulesify_command(
         &[
-            "--config", config_file.to_str().unwrap(),
+            "--config",
+            config_file.to_str().unwrap(),
             "import",
-            "--tool", "cursor",
+            "--tool",
+            "cursor",
             import_file.to_str().unwrap(),
-            "--rule-id", "imported-rule"
+            "--rule-id",
+            "imported-rule",
         ],
-        temp_dir.path()
-    ).expect("Failed to run rulesify import");
+        temp_dir.path(),
+    )
+    .expect("Failed to run rulesify import");
 
     assert_eq!(exit_code, 0, "Command failed with stderr: {}", stderr);
     assert!(stdout.contains("Successfully imported rule: imported-rule"));
@@ -337,13 +394,16 @@ fn test_cli_config_command() {
     let config_dir = temp_dir.path().join("config");
     fs::create_dir_all(&config_dir).expect("Failed to create config directory");
 
-    let config_content = format!(r#"
+    let config_content = format!(
+        r#"
 rules_directory: "{}"
 editor: vim
 default_tools:
   - cursor
   - cline
-"#, rules_dir.display());
+"#,
+        rules_dir.display()
+    );
 
     let config_file = config_dir.join("config.yaml");
     fs::write(&config_file, config_content).expect("Failed to write config file");
@@ -351,8 +411,9 @@ default_tools:
     // Test config show
     let (stdout, stderr, exit_code) = run_rulesify_command(
         &["--config", config_file.to_str().unwrap(), "config", "show"],
-        temp_dir.path()
-    ).expect("Failed to run rulesify config show");
+        temp_dir.path(),
+    )
+    .expect("Failed to run rulesify config show");
 
     assert_eq!(exit_code, 0, "Command failed with stderr: {}", stderr);
     assert!(stdout.contains("Rulesify Configuration"));
@@ -366,10 +427,9 @@ fn test_cli_error_handling() {
     let temp_dir = TempDir::new().expect("Failed to create temp directory");
 
     // Test with non-existent rule
-    let (stdout, stderr, exit_code) = run_rulesify_command(
-        &["rule", "show", "non-existent-rule"],
-        temp_dir.path()
-    ).expect("Failed to run rulesify rule show");
+    let (stdout, stderr, exit_code) =
+        run_rulesify_command(&["rule", "show", "non-existent-rule"], temp_dir.path())
+            .expect("Failed to run rulesify rule show");
 
     assert_ne!(exit_code, 0);
     assert!(stdout.contains("not found") || stderr.contains("not found"));
@@ -377,8 +437,9 @@ fn test_cli_error_handling() {
     // Test with invalid tool
     let (stdout, stderr, exit_code) = run_rulesify_command(
         &["deploy", "--tool", "invalid-tool", "--all"],
-        temp_dir.path()
-    ).expect("Failed to run rulesify deploy");
+        temp_dir.path(),
+    )
+    .expect("Failed to run rulesify deploy");
 
     assert_ne!(exit_code, 0);
     assert!(stdout.contains("Unsupported tool") || stderr.contains("Unsupported tool"));
@@ -388,11 +449,10 @@ fn test_cli_error_handling() {
 fn test_cli_verbose_output() {
     let temp_dir = TempDir::new().expect("Failed to create temp directory");
 
-        // Test verbose flag
-    let (stdout, _stderr, exit_code) = run_rulesify_command(
-        &["--verbose", "--help"],
-        temp_dir.path()
-    ).expect("Failed to run rulesify --verbose --help");
+    // Test verbose flag
+    let (stdout, _stderr, exit_code) =
+        run_rulesify_command(&["--verbose", "--help"], temp_dir.path())
+            .expect("Failed to run rulesify --verbose --help");
 
     assert_eq!(exit_code, 0);
     assert!(stdout.contains("Rulesify manages Universal Rule Files"));

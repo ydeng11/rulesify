@@ -1,13 +1,9 @@
 use rulesify::converters::{
-    RuleConverter,
-    cursor::CursorConverter,
-    cline::ClineConverter,
-    claude_code::ClaudeCodeConverter,
-    goose::GooseConverter,
+    claude_code::ClaudeCodeConverter, cline::ClineConverter, cursor::CursorConverter,
+    goose::GooseConverter, RuleConverter,
 };
 use rulesify::models::rule::{
-    UniversalRule, RuleMetadata, RuleContent, ContentFormat,
-    FileReference, RuleCondition
+    ContentFormat, FileReference, RuleCondition, RuleContent, RuleMetadata, UniversalRule,
 };
 use std::collections::HashMap;
 
@@ -20,7 +16,6 @@ fn create_test_rule() -> UniversalRule {
             description: Some("A test rule for unit testing".to_string()),
             tags: vec!["test".to_string(), "example".to_string()],
             priority: 5,
-            auto_apply: false,
         },
         content: vec![
             RuleContent {
@@ -34,16 +29,12 @@ fn create_test_rule() -> UniversalRule {
                 value: "```rust\nfn test() { assert!(true); }\n```".to_string(),
             },
         ],
-        references: vec![
-            FileReference {
-                path: "README.md".to_string(),
-            },
-        ],
-        conditions: vec![
-            RuleCondition::FilePattern {
-                value: "src/**/*.rs".to_string()
-            },
-        ],
+        references: vec![FileReference {
+            path: "README.md".to_string(),
+        }],
+        conditions: vec![RuleCondition::FilePattern {
+            value: "src/**/*.rs".to_string(),
+        }],
         tool_overrides: HashMap::new(),
     }
 }
@@ -51,7 +42,18 @@ fn create_test_rule() -> UniversalRule {
 #[test]
 fn test_cursor_converter_basic_conversion() {
     let converter = CursorConverter::new();
-    let rule = create_test_rule();
+    let mut rule = create_test_rule();
+
+    // Set apply_mode to "specific_files" to test globs functionality
+    let mut cursor_overrides = serde_json::Map::new();
+    cursor_overrides.insert(
+        "apply_mode".to_string(),
+        serde_json::Value::String("specific_files".to_string()),
+    );
+    rule.tool_overrides.insert(
+        "cursor".to_string(),
+        serde_json::Value::Object(cursor_overrides),
+    );
 
     let result = converter.convert_to_tool_format(&rule);
     assert!(result.is_ok());
@@ -60,10 +62,10 @@ fn test_cursor_converter_basic_conversion() {
 
     // Check YAML frontmatter
     assert!(output.starts_with("---\n"));
-    assert!(output.contains("description: Test Rule"));
-    assert!(output.contains("notes: A test rule for unit testing"));
+    assert!(output.contains("description: \"A test rule for unit testing\""));
+    assert!(output.contains("notes: \"Rule: Test Rule\""));
     assert!(output.contains("alwaysApply: false"));
-    assert!(output.contains("globs:\n  - src/**/*.rs"));
+    assert!(output.contains("globs:\n  - \"src/**/*.rs\""));
 
     // Check content sections
     assert!(output.contains("# Guidelines"));
@@ -192,15 +194,17 @@ fn test_all_converters_deployment_paths() {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use rulesify::models::rule::{UniversalRule, RuleMetadata, RuleContent, ContentFormat, RuleCondition, FileReference};
+    use rulesify::models::rule::{
+        ContentFormat, FileReference, RuleCondition, RuleContent, RuleMetadata, UniversalRule,
+    };
     use std::collections::HashMap;
 
     #[test]
     fn test_cursor_import_basic() {
         let converter = CursorConverter::new();
         let input = r#"---
-description: Test Rule
-notes: A test rule for validation
+description: A test rule for validation
+notes: "Rule: Test Rule"
 alwaysApply: true
 globs:
   - "src/**/*.ts"
@@ -222,8 +226,18 @@ Follow these standards:
 
         let result = converter.convert_from_tool_format(input).unwrap();
         assert_eq!(result.metadata.name, "Test Rule");
-        assert_eq!(result.metadata.description, Some("A test rule for validation".to_string()));
-        assert!(result.metadata.auto_apply);
+        assert_eq!(
+            result.metadata.description,
+            Some("A test rule for validation".to_string())
+        );
+        // Check that auto_apply is stored in cursor tool overrides
+        let cursor_overrides = result.tool_overrides.get("cursor").unwrap();
+        let auto_apply = cursor_overrides
+            .get("auto_apply")
+            .unwrap()
+            .as_bool()
+            .unwrap();
+        assert!(auto_apply);
         assert_eq!(result.content.len(), 2);
         assert_eq!(result.content[0].title, "Main Section");
         assert_eq!(result.content[1].title, "Code Standards");
@@ -269,7 +283,10 @@ Always use explicit type annotations.
 
         let result = converter.convert_from_tool_format(input).unwrap();
         assert_eq!(result.metadata.name, "TypeScript Style Guide");
-        assert_eq!(result.metadata.description, Some("This guide covers TypeScript coding standards.".to_string()));
+        assert_eq!(
+            result.metadata.description,
+            Some("This guide covers TypeScript coding standards.".to_string())
+        );
         assert_eq!(result.content.len(), 2);
         assert_eq!(result.content[0].title, "Naming Conventions");
         assert_eq!(result.content[1].title, "Type Annotations");
@@ -310,7 +327,10 @@ Use hooks for state management.
 
         let result = converter.convert_from_tool_format(input).unwrap();
         assert_eq!(result.metadata.name, "React Best Practices");
-        assert_eq!(result.metadata.description, Some("These are best practices for React development.".to_string()));
+        assert_eq!(
+            result.metadata.description,
+            Some("These are best practices for React development.".to_string())
+        );
         assert_eq!(result.content.len(), 2);
         assert_eq!(result.content[0].title, "Component Structure");
         assert_eq!(result.content[1].title, "State Management");
@@ -339,7 +359,10 @@ Use pytest for testing.
 
         let result = converter.convert_from_tool_format(input).unwrap();
         assert_eq!(result.metadata.name, "Python Coding Standards");
-        assert_eq!(result.metadata.description, Some("This document outlines Python coding standards.".to_string()));
+        assert_eq!(
+            result.metadata.description,
+            Some("This document outlines Python coding standards.".to_string())
+        );
         assert_eq!(result.content.len(), 2);
         assert_eq!(result.content[0].title, "Code Style");
         assert_eq!(result.content[1].title, "Testing");
@@ -359,7 +382,10 @@ Just plain text content.
 
         let result = converter.convert_from_tool_format(input).unwrap();
         assert_eq!(result.metadata.name, "Simple Rule");
-        assert_eq!(result.metadata.description, Some("This is a simple rule with no sections.".to_string()));
+        assert_eq!(
+            result.metadata.description,
+            Some("This is a simple rule with no sections.".to_string())
+        );
         assert_eq!(result.content.len(), 1);
         assert_eq!(result.content[0].title, "Content");
     }
@@ -379,11 +405,19 @@ Just plain text content.
 
         // Verify key fields match
         assert_eq!(imported_rule.metadata.name, original_rule.metadata.name);
-        assert_eq!(imported_rule.metadata.description, original_rule.metadata.description);
-        assert_eq!(imported_rule.metadata.auto_apply, original_rule.metadata.auto_apply);
+        assert_eq!(
+            imported_rule.metadata.description,
+            original_rule.metadata.description
+        );
         assert_eq!(imported_rule.content.len(), original_rule.content.len());
-        assert_eq!(imported_rule.conditions.len(), original_rule.conditions.len());
-        assert_eq!(imported_rule.references.len(), original_rule.references.len());
+        assert_eq!(
+            imported_rule.conditions.len(),
+            original_rule.conditions.len()
+        );
+        assert_eq!(
+            imported_rule.references.len(),
+            original_rule.references.len()
+        );
     }
 
     #[test]
@@ -401,7 +435,10 @@ Just plain text content.
 
         // Verify key fields match
         assert_eq!(imported_rule.metadata.name, original_rule.metadata.name);
-        assert_eq!(imported_rule.metadata.description, original_rule.metadata.description);
+        assert_eq!(
+            imported_rule.metadata.description,
+            original_rule.metadata.description
+        );
         assert_eq!(imported_rule.content.len(), original_rule.content.len());
     }
 
@@ -420,7 +457,10 @@ Just plain text content.
 
         // Verify key fields match
         assert_eq!(imported_rule.metadata.name, original_rule.metadata.name);
-        assert_eq!(imported_rule.metadata.description, original_rule.metadata.description);
+        assert_eq!(
+            imported_rule.metadata.description,
+            original_rule.metadata.description
+        );
         assert_eq!(imported_rule.content.len(), original_rule.content.len());
     }
 
@@ -439,7 +479,10 @@ Just plain text content.
 
         // Verify key fields match
         assert_eq!(imported_rule.metadata.name, original_rule.metadata.name);
-        assert_eq!(imported_rule.metadata.description, original_rule.metadata.description);
+        assert_eq!(
+            imported_rule.metadata.description,
+            original_rule.metadata.description
+        );
         assert_eq!(imported_rule.content.len(), original_rule.content.len());
     }
 
@@ -469,40 +512,317 @@ invalid yaml: [
         assert_eq!(result.content.len(), 0);
     }
 
-    fn create_test_rule() -> UniversalRule {
-        UniversalRule {
-            id: "test-rule".to_string(),
-            version: "1.0.0".to_string(),
-            metadata: RuleMetadata {
-                name: "Test Rule".to_string(),
-                description: Some("A test rule for validation".to_string()),
-                tags: vec!["test".to_string(), "validation".to_string()],
-                priority: 5,
-                auto_apply: true,
+    #[test]
+    fn test_cursor_apply_mode_always() {
+        let mut rule = create_test_rule();
+
+        // Set apply_mode to "always"
+        let mut cursor_overrides = serde_json::Map::new();
+        cursor_overrides.insert(
+            "apply_mode".to_string(),
+            serde_json::Value::String("always".to_string()),
+        );
+        rule.tool_overrides.insert(
+            "cursor".to_string(),
+            serde_json::Value::Object(cursor_overrides),
+        );
+
+        let converter = CursorConverter::new();
+
+        // Test URF → Cursor conversion
+        let cursor_format = converter.convert_to_tool_format(&rule).unwrap();
+        assert!(cursor_format.contains("alwaysApply: true"));
+
+        // Test Cursor → URF conversion
+        let imported_rule = converter.convert_from_tool_format(&cursor_format).unwrap();
+        let apply_mode = imported_rule
+            .tool_overrides
+            .get("cursor")
+            .unwrap()
+            .get("apply_mode")
+            .unwrap()
+            .as_str()
+            .unwrap();
+        assert_eq!(apply_mode, "always");
+    }
+
+    #[test]
+    fn test_cursor_apply_mode_intelligent() {
+        let mut rule = create_test_rule();
+
+        // Set apply_mode to "intelligent"
+        let mut cursor_overrides = serde_json::Map::new();
+        cursor_overrides.insert(
+            "apply_mode".to_string(),
+            serde_json::Value::String("intelligent".to_string()),
+        );
+        rule.tool_overrides.insert(
+            "cursor".to_string(),
+            serde_json::Value::Object(cursor_overrides),
+        );
+
+        let converter = CursorConverter::new();
+
+        // Test URF → Cursor conversion
+        let cursor_format = converter.convert_to_tool_format(&rule).unwrap();
+        assert!(cursor_format.contains("alwaysApply: false"));
+        assert!(!cursor_format.contains("globs:"));
+
+        // Test Cursor → URF conversion
+        let imported_rule = converter.convert_from_tool_format(&cursor_format).unwrap();
+        let apply_mode = imported_rule
+            .tool_overrides
+            .get("cursor")
+            .unwrap()
+            .get("apply_mode")
+            .unwrap()
+            .as_str()
+            .unwrap();
+        assert_eq!(apply_mode, "intelligent");
+    }
+
+    #[test]
+    fn test_cursor_apply_mode_specific_files() {
+        let mut rule = create_test_rule();
+
+        // Set apply_mode to "specific_files" and add file patterns
+        let mut cursor_overrides = serde_json::Map::new();
+        cursor_overrides.insert(
+            "apply_mode".to_string(),
+            serde_json::Value::String("specific_files".to_string()),
+        );
+        rule.tool_overrides.insert(
+            "cursor".to_string(),
+            serde_json::Value::Object(cursor_overrides),
+        );
+
+        // Add file patterns via conditions
+        rule.conditions = vec![
+            RuleCondition::FilePattern {
+                value: "src/**/*.ts".to_string(),
             },
-            content: vec![
-                RuleContent {
-                    title: "Guidelines".to_string(),
-                    format: ContentFormat::Markdown,
-                    value: "Follow these guidelines:\n- Be consistent\n- Write tests".to_string(),
-                },
-                RuleContent {
-                    title: "Examples".to_string(),
-                    format: ContentFormat::Markdown,
-                    value: "```typescript\nconst example = 'hello';\n```".to_string(),
-                },
-            ],
-            references: vec![
-                FileReference {
-                    path: "README.md".to_string(),
-                },
-            ],
-            conditions: vec![
-                RuleCondition::FilePattern {
+            RuleCondition::FilePattern {
+                value: "src/**/*.tsx".to_string(),
+            },
+        ];
+
+        let converter = CursorConverter::new();
+
+        // Test URF → Cursor conversion
+        let cursor_format = converter.convert_to_tool_format(&rule).unwrap();
+        assert!(cursor_format.contains("alwaysApply: false"));
+        assert!(cursor_format.contains("globs:"));
+        assert!(cursor_format.contains("src/**/*.ts"));
+        assert!(cursor_format.contains("src/**/*.tsx"));
+
+        // Test Cursor → URF conversion
+        let imported_rule = converter.convert_from_tool_format(&cursor_format).unwrap();
+        let apply_mode = imported_rule
+            .tool_overrides
+            .get("cursor")
+            .unwrap()
+            .get("apply_mode")
+            .unwrap()
+            .as_str()
+            .unwrap();
+        assert_eq!(apply_mode, "specific_files");
+        assert_eq!(imported_rule.conditions.len(), 2);
+    }
+
+    #[test]
+    fn test_cursor_apply_mode_manual() {
+        let mut rule = create_test_rule();
+
+        // Set apply_mode to "manual"
+        let mut cursor_overrides = serde_json::Map::new();
+        cursor_overrides.insert(
+            "apply_mode".to_string(),
+            serde_json::Value::String("manual".to_string()),
+        );
+        rule.tool_overrides.insert(
+            "cursor".to_string(),
+            serde_json::Value::Object(cursor_overrides),
+        );
+
+        let converter = CursorConverter::new();
+
+        // Test URF → Cursor conversion
+        let cursor_format = converter.convert_to_tool_format(&rule).unwrap();
+        assert!(cursor_format.contains("alwaysApply: false"));
+        assert!(!cursor_format.contains("globs:"));
+
+        // Test Cursor → URF conversion
+        let imported_rule = converter.convert_from_tool_format(&cursor_format).unwrap();
+        let apply_mode = imported_rule
+            .tool_overrides
+            .get("cursor")
+            .unwrap()
+            .get("apply_mode")
+            .unwrap()
+            .as_str()
+            .unwrap();
+        assert_eq!(apply_mode, "intelligent"); // Should default to intelligent when no globs
+    }
+
+    #[test]
+    fn test_cursor_backwards_compatibility_auto_apply_true() {
+        let mut rule = create_test_rule();
+
+        // Use legacy auto_apply: true (should map to apply_mode: always)
+        let mut cursor_overrides = serde_json::Map::new();
+        cursor_overrides.insert("auto_apply".to_string(), serde_json::Value::Bool(true));
+        rule.tool_overrides.insert(
+            "cursor".to_string(),
+            serde_json::Value::Object(cursor_overrides),
+        );
+
+        let converter = CursorConverter::new();
+
+        // Test URF → Cursor conversion
+        let cursor_format = converter.convert_to_tool_format(&rule).unwrap();
+        assert!(cursor_format.contains("alwaysApply: true"));
+
+        // Test Cursor → URF conversion
+        let imported_rule = converter.convert_from_tool_format(&cursor_format).unwrap();
+        let apply_mode = imported_rule
+            .tool_overrides
+            .get("cursor")
+            .unwrap()
+            .get("apply_mode")
+            .unwrap()
+            .as_str()
+            .unwrap();
+        assert_eq!(apply_mode, "always");
+    }
+
+    #[test]
+    fn test_cursor_backwards_compatibility_auto_apply_false_with_globs() {
+        let mut rule = create_test_rule();
+
+        // Use legacy auto_apply: false with globs (should map to apply_mode: specific_files)
+        let mut cursor_overrides = serde_json::Map::new();
+        cursor_overrides.insert("auto_apply".to_string(), serde_json::Value::Bool(false));
+        rule.tool_overrides.insert(
+            "cursor".to_string(),
+            serde_json::Value::Object(cursor_overrides),
+        );
+
+        // Add file patterns via conditions
+        rule.conditions = vec![RuleCondition::FilePattern {
+            value: "*.js".to_string(),
+        }];
+
+        let converter = CursorConverter::new();
+
+        // Test URF → Cursor conversion
+        let cursor_format = converter.convert_to_tool_format(&rule).unwrap();
+        assert!(cursor_format.contains("alwaysApply: false"));
+        assert!(cursor_format.contains("globs:"));
+        assert!(cursor_format.contains("*.js"));
+
+        // Test Cursor → URF conversion
+        let imported_rule = converter.convert_from_tool_format(&cursor_format).unwrap();
+        let apply_mode = imported_rule
+            .tool_overrides
+            .get("cursor")
+            .unwrap()
+            .get("apply_mode")
+            .unwrap()
+            .as_str()
+            .unwrap();
+        assert_eq!(apply_mode, "specific_files");
+    }
+
+    #[test]
+    fn test_cursor_backwards_compatibility_auto_apply_false_no_globs() {
+        let mut rule = create_test_rule();
+
+        // Use legacy auto_apply: false with no globs (should map to apply_mode: intelligent)
+        let mut cursor_overrides = serde_json::Map::new();
+        cursor_overrides.insert("auto_apply".to_string(), serde_json::Value::Bool(false));
+        rule.tool_overrides.insert(
+            "cursor".to_string(),
+            serde_json::Value::Object(cursor_overrides),
+        );
+
+        // Clear conditions to test the no-globs scenario
+        rule.conditions = vec![];
+
+        let converter = CursorConverter::new();
+
+        // Test URF → Cursor conversion
+        let cursor_format = converter.convert_to_tool_format(&rule).unwrap();
+        assert!(cursor_format.contains("alwaysApply: false"));
+        assert!(!cursor_format.contains("globs:"));
+
+        // Test Cursor → URF conversion
+        let imported_rule = converter.convert_from_tool_format(&cursor_format).unwrap();
+        let apply_mode = imported_rule
+            .tool_overrides
+            .get("cursor")
+            .unwrap()
+            .get("apply_mode")
+            .unwrap()
+            .as_str()
+            .unwrap();
+        assert_eq!(apply_mode, "intelligent");
+    }
+
+    #[test]
+    fn test_cursor_apply_mode_round_trip_all_modes() {
+        let modes = vec!["always", "intelligent", "specific_files", "manual"];
+
+        for mode in modes {
+            let mut rule = create_test_rule();
+
+            // Set apply_mode
+            let mut cursor_overrides = serde_json::Map::new();
+            cursor_overrides.insert(
+                "apply_mode".to_string(),
+                serde_json::Value::String(mode.to_string()),
+            );
+            rule.tool_overrides.insert(
+                "cursor".to_string(),
+                serde_json::Value::Object(cursor_overrides),
+            );
+
+            // Add conditions for specific_files mode
+            if mode == "specific_files" {
+                rule.conditions = vec![RuleCondition::FilePattern {
                     value: "src/**/*.ts".to_string(),
-                },
-            ],
-            tool_overrides: HashMap::new(),
+                }];
+            }
+
+            let converter = CursorConverter::new();
+
+            // Test round-trip: URF → Cursor → URF
+            let cursor_format = converter.convert_to_tool_format(&rule).unwrap();
+            let imported_rule = converter.convert_from_tool_format(&cursor_format).unwrap();
+
+            let imported_apply_mode = imported_rule
+                .tool_overrides
+                .get("cursor")
+                .unwrap()
+                .get("apply_mode")
+                .unwrap()
+                .as_str()
+                .unwrap();
+
+            // Note: "manual" mode without specific indication might be imported as "intelligent"
+            if mode == "manual" {
+                assert!(imported_apply_mode == "intelligent" || imported_apply_mode == "manual");
+            } else {
+                assert_eq!(
+                    imported_apply_mode, mode,
+                    "Round-trip failed for mode: {}",
+                    mode
+                );
+            }
+
+            // Verify conditions are preserved for specific_files mode
+            if mode == "specific_files" {
+                assert_eq!(imported_rule.conditions.len(), 1);
+            }
         }
     }
 }

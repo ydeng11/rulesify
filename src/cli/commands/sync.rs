@@ -286,13 +286,7 @@ fn update_urf_file_selectively(
         )?;
     }
 
-    if existing_rule.metadata.auto_apply != updated_rule.metadata.auto_apply {
-        updated_content = update_yaml_field(
-            &updated_content,
-            "metadata.auto_apply",
-            &updated_rule.metadata.auto_apply.to_string(),
-        )?;
-    }
+    // Note: auto_apply is now handled in tool_overrides, not metadata
 
     // For content, references, and conditions changes, fall back to complete file replacement
     // but preserve the original file structure by doing a smart merge

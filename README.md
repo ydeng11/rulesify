@@ -157,7 +157,7 @@ metadata:
     Coding standards for TypeScript projects
   tags: [typescript, style, linting]
   priority: 5                     # 1 (low) → 10 (high); used for ordering
-  auto_apply: true                # if true, export uses alwaysApply in Cursor
+  # auto_apply is now in tool_overrides.cursor section
 content:
   - title: "Code Style"           # Markdown H2 in exports
     format: markdown              # or plaintext / code
@@ -172,7 +172,14 @@ conditions:                       # optional glob patterns that trigger auto-att
 # Tool-specific overrides (ignored by other exporters)
 tool_overrides:
   cursor:
-    globs: [src/**/*.ts]
+    # Application mode - how Cursor should apply this rule:
+    # • always: Apply to every chat and cmd-k session
+    # • intelligent: When Agent decides it's relevant (RECOMMENDED)
+    # • specific_files: When file matches specified patterns
+    # • manual: Only when @-mentioned by user
+    apply_mode: intelligent     # Options: always | intelligent | specific_files | manual
+
+    globs: [src/**/*.ts]        # File patterns (only used when apply_mode is "specific_files")
   cline:
     toggle_default: true
   claude-code: {}

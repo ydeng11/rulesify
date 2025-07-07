@@ -5,6 +5,31 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.5] - 2024-12-19
+
+### Added
+- **NEW**: Full support for all 4 Cursor rule application modes:
+  - `always`: Apply to every chat and cmd-k session
+  - `intelligent`: When Agent decides it's relevant (RECOMMENDED)
+  - `specific_files`: When file matches specified patterns
+  - `manual`: Only when @-mentioned by user
+- New `apply_mode` field in `tool_overrides.cursor` with full backwards compatibility
+- Comprehensive test suite for all application modes and round-trip conversion
+- Template now includes documentation for all 4 application modes
+
+### Fixed
+- **CRITICAL**: Cursor "Apply Intelligently" mode now works correctly by placing rule description in the `description` field instead of `notes`
+  - This ensures Cursor's AI can properly determine when rules are relevant
+  - Rule name is now in `notes` field for reference
+- Cursor frontmatter glob patterns are now properly quoted to prevent YAML parsing errors
+- Globs now only output when `apply_mode` is "specific_files" (cleaner generated files)
+- Improved logic for determining application mode during import/export
+
+### Changed
+- Updated all existing URF files to use new `apply_mode` structure (fully backwards compatible)
+- CLI commands now show "Auto-apply (Cursor)" with mode-specific information
+- Template defaults to `intelligent` mode (recommended best practice)
+
 ## [0.1.3] - 2024-12-19
 
 ### Added
@@ -37,7 +62,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - **Selective Field Updating**: Sync now uses intelligent field-by-field updates for metadata changes
-  - Updates only changed fields: name, description, tags, priority, auto_apply
+  - Updates only changed fields: name, description, tags, priority
   - Preserves original file structure and formatting
   - Falls back to complete update for structural changes while preserving header comments
 

@@ -43,7 +43,7 @@ fn test_create_skeleton_for_rule() {
     // Check that original structure is preserved
     assert!(filled.contains("version: 0.1.0"));
     assert!(filled.contains("priority: 5"));
-    assert!(filled.contains("auto_apply: false"));
+    assert!(filled.contains("auto_apply: false")); // Now in cursor tool overrides
 
     // Placeholders should be gone
     assert!(!filled.contains("<rule_id>"));

@@ -37,9 +37,6 @@ metadata:
   # Priority for rule ordering: 1 (low) → 10 (high)
   priority: 5
 
-  # Auto-apply: if true, Cursor will always apply this rule
-  auto_apply: false
-
 # Content sections - these become H2 headings in exported files
 content:
   # Main guidelines section
@@ -83,7 +80,18 @@ conditions: []             # Example: [type: file_pattern, value: "src/**/*.ts"]
 tool_overrides:
   # Cursor-specific settings
   cursor:
-    globs: []              # File patterns: [src/**/*.tsx, src/**/*.jsx]
+    # Application mode - how Cursor should apply this rule:
+    # • always: Apply to every chat and cmd-k session (equivalent to old auto_apply: true)
+    # • intelligent: When Agent decides it's relevant based on description (RECOMMENDED)
+    # • specific_files: When file matches specified patterns (uses globs below)
+    # • manual: Only when @-mentioned by user (equivalent to old auto_apply: false)
+    apply_mode: intelligent     # Options: always | intelligent | specific_files | manual
+
+    globs: []                   # File patterns: [src/**/*.tsx, src/**/*.jsx]
+                               # Only used when apply_mode is "specific_files"
+
+    # Legacy field for backwards compatibility (deprecated - use apply_mode instead)
+    # auto_apply: false
 
   # Cline-specific settings
   cline: {}
@@ -107,9 +115,12 @@ tool_overrides:
 
 pub fn create_skeleton_for_rule(rule_name: &str) -> Result<String> {
     let skeleton = get_default_skeleton();
-    let filled = skeleton.replace("<rule_id>", rule_name)
+    let filled = skeleton
+        .replace("<rule_id>", rule_name)
         .replace("<Human-friendly Name>", &format!("{} Rule", rule_name))
-        .replace("<One-sentence description that shows up in Cursor front-matter>",
-                 &format!("Guidelines for {}", rule_name));
+        .replace(
+            "<One-sentence description that shows up in Cursor front-matter>",
+            &format!("Guidelines for {}", rule_name),
+        );
     Ok(filled)
 }

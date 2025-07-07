@@ -1,18 +1,17 @@
 use rulesify::converters::{
-    RuleConverter,
-    cursor::CursorConverter,
-    cline::ClineConverter,
-    claude_code::ClaudeCodeConverter,
-    goose::GooseConverter,
+    claude_code::ClaudeCodeConverter, cline::ClineConverter, cursor::CursorConverter,
+    goose::GooseConverter, RuleConverter,
 };
-use rulesify::models::rule::{UniversalRule, RuleMetadata, RuleContent, ContentFormat, RuleCondition, FileReference};
+use rulesify::models::rule::{
+    ContentFormat, FileReference, RuleCondition, RuleContent, RuleMetadata, UniversalRule,
+};
 use std::collections::HashMap;
 
 #[test]
 fn test_cursor_import_with_complex_frontmatter() {
     let cursor_content = r#"---
-description: Advanced TypeScript Rules
-notes: Comprehensive guidelines for TypeScript development
+description: Comprehensive guidelines for TypeScript development
+notes: "Rule: Advanced TypeScript Rules"
 globs:
   - "src/**/*.ts"
   - "src/**/*.tsx"
@@ -53,8 +52,18 @@ Prefer Result types over throwing exceptions.
 
     let rule = result.unwrap();
     assert_eq!(rule.metadata.name, "Advanced TypeScript Rules");
-    assert_eq!(rule.metadata.description, Some("Comprehensive guidelines for TypeScript development".to_string()));
-    assert_eq!(rule.metadata.auto_apply, true);
+    assert_eq!(
+        rule.metadata.description,
+        Some("Comprehensive guidelines for TypeScript development".to_string())
+    );
+    // Check that auto_apply is stored in cursor tool overrides
+    let cursor_overrides = rule.tool_overrides.get("cursor").unwrap();
+    let auto_apply = cursor_overrides
+        .get("auto_apply")
+        .unwrap()
+        .as_bool()
+        .unwrap();
+    assert_eq!(auto_apply, true);
     assert_eq!(rule.content.len(), 3);
     assert_eq!(rule.content[0].title, "TypeScript Style Guide");
     assert_eq!(rule.content[1].title, "Type Definitions");
@@ -110,7 +119,10 @@ Write tests for all components using Jest and React Testing Library.
 
     let rule = result.unwrap();
     assert_eq!(rule.metadata.name, "React Best Practices");
-    assert_eq!(rule.metadata.description, Some("Guidelines for writing maintainable React code.".to_string()));
+    assert_eq!(
+        rule.metadata.description,
+        Some("Guidelines for writing maintainable React code.".to_string())
+    );
     assert_eq!(rule.content.len(), 3);
     assert_eq!(rule.content[0].title, "Component Structure");
     assert_eq!(rule.content[1].title, "State Management");
@@ -132,7 +144,10 @@ Use black for formatting and type hints everywhere.
 
     let rule = result.unwrap();
     assert_eq!(rule.metadata.name, "Python Code Style");
-    assert_eq!(rule.metadata.description, Some("Use black for formatting and type hints everywhere.".to_string()));
+    assert_eq!(
+        rule.metadata.description,
+        Some("Use black for formatting and type hints everywhere.".to_string())
+    );
     // The minimal content becomes a "Content" section
     assert_eq!(rule.content.len(), 1);
     if !rule.content.is_empty() {
@@ -175,7 +190,10 @@ Data Migration
 
     let rule = result.unwrap();
     assert_eq!(rule.metadata.name, "Database Design Guidelines");
-    assert_eq!(rule.metadata.description, Some("Best practices for designing robust database schemas.".to_string()));
+    assert_eq!(
+        rule.metadata.description,
+        Some("Best practices for designing robust database schemas.".to_string())
+    );
     assert_eq!(rule.content.len(), 3);
     assert_eq!(rule.content[0].title, "Schema Design");
     assert_eq!(rule.content[1].title, "Performance Optimization");
@@ -197,7 +215,10 @@ invalid_yaml: [unclosed array
     let converter = CursorConverter::new();
     let result = converter.convert_from_tool_format(malformed_cursor);
     assert!(result.is_err());
-    assert!(result.unwrap_err().to_string().contains("Failed to parse YAML frontmatter"));
+    assert!(result
+        .unwrap_err()
+        .to_string()
+        .contains("Failed to parse YAML frontmatter"));
 }
 
 #[test]
@@ -281,7 +302,7 @@ const chinese = "你好";
     let result = converter.convert_from_tool_format(content_with_special_chars);
     assert!(result.is_ok());
 
-            let rule = result.unwrap();
+    let rule = result.unwrap();
     assert!(rule.metadata.name.contains("Special Characters"));
 
     // The content should have the code section with Unicode
@@ -291,8 +312,14 @@ const chinese = "你好";
     // Check for the JavaScript code with emojis and Chinese characters
     let code_content = &rule.content[0].value;
     assert!(code_content.contains("🎉"), "Code emoji not found");
-    assert!(code_content.contains("你好"), "Chinese characters not found");
-    assert!(code_content.contains("```javascript"), "JavaScript code block not found");
+    assert!(
+        code_content.contains("你好"),
+        "Chinese characters not found"
+    );
+    assert!(
+        code_content.contains("```javascript"),
+        "JavaScript code block not found"
+    );
 }
 
 #[test]
@@ -303,7 +330,10 @@ fn test_import_rule_id_generation() {
         ("Rule_With_Underscores", "rule-with-underscores"),
         ("Rule123", "rule123"),
         ("Rule-With-Hyphens", "rule-with-hyphens"),
-        ("Rule With Special!@#$%^&*()Characters", "rule-with-specialcharacters"),
+        (
+            "Rule With Special!@#$%^&*()Characters",
+            "rule-with-specialcharacters",
+        ),
     ];
 
     for (rule_name, expected_id) in test_cases {
@@ -327,7 +357,6 @@ fn test_import_round_trip_all_tools() {
             description: Some("A test rule for validation".to_string()),
             tags: vec!["test".to_string(), "validation".to_string()],
             priority: 7,
-            auto_apply: true,
         },
         content: vec![
             RuleContent {
@@ -341,12 +370,12 @@ fn test_import_round_trip_all_tools() {
                 value: "```javascript\nconst example = true;\n```".to_string(),
             },
         ],
-        references: vec![
-            FileReference { path: "README.md".to_string() },
-        ],
-        conditions: vec![
-            RuleCondition::FilePattern { value: "src/**/*.js".to_string() },
-        ],
+        references: vec![FileReference {
+            path: "README.md".to_string(),
+        }],
+        conditions: vec![RuleCondition::FilePattern {
+            value: "src/**/*.js".to_string(),
+        }],
         tool_overrides: HashMap::new(),
     };
 

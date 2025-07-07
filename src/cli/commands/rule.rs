@@ -1,17 +1,16 @@
 use anyhow::{Context, Result};
 use clap::Subcommand;
+use log::{debug, error, info};
 use regex::Regex;
+use std::fs;
 use std::path::PathBuf;
 use std::process::Command;
-use std::fs;
-use log::{debug, error, info};
 
-use crate::store::{RuleStore, file_store::FileStore};
+use crate::store::{file_store::FileStore, RuleStore};
 use crate::templates::builtin::create_skeleton_for_rule;
 use crate::utils::config::load_config_from_path;
 
-#[derive(Subcommand)]
-#[derive(Debug)]
+#[derive(Subcommand, Debug)]
 pub enum RuleAction {
     /// Create a new rule from skeleton
     New { name: String },
@@ -47,7 +46,7 @@ fn create_new_rule(name: &str, config_path: Option<PathBuf>) -> Result<()> {
         anyhow::bail!("Rule '{}' already exists", name);
     }
 
-        // Create skeleton YAML content
+    // Create skeleton YAML content
     let skeleton_content = create_skeleton_for_rule(name)?;
 
     // Write the skeleton directly to preserve comments
@@ -120,10 +119,11 @@ fn list_rules(regex_pattern: Option<String>, config_path: Option<PathBuf>) -> Re
     }
 
     let filtered_rules = if let Some(pattern) = regex_pattern {
-        let regex = Regex::new(&pattern)
-            .with_context(|| format!("Invalid regex pattern: {}", pattern))?;
+        let regex =
+            Regex::new(&pattern).with_context(|| format!("Invalid regex pattern: {}", pattern))?;
 
-        rule_ids.into_iter()
+        rule_ids
+            .into_iter()
             .filter(|id| regex.is_match(id))
             .collect::<Vec<_>>()
     } else {
@@ -167,11 +167,10 @@ fn show_rule(name: &str, config_path: Option<PathBuf>) -> Result<()> {
     let config = load_config_from_path(config_path)?;
     let store = FileStore::new(config.rules_directory);
 
-    let rule = store.load_rule(name)?
-        .ok_or_else(|| {
-            error!("Rule '{}' not found", name);
-            anyhow::anyhow!("Rule '{}' not found", name)
-        })?;
+    let rule = store.load_rule(name)?.ok_or_else(|| {
+        error!("Rule '{}' not found", name);
+        anyhow::anyhow!("Rule '{}' not found", name)
+    })?;
 
     println!("📄 Rule: {}", rule.metadata.name);
     println!("🆔 ID: {}", rule.id);
@@ -186,7 +185,15 @@ fn show_rule(name: &str, config_path: Option<PathBuf>) -> Result<()> {
     }
 
     println!("⚡ Priority: {}", rule.metadata.priority);
-    println!("🔄 Auto-apply: {}", rule.metadata.auto_apply);
+
+    // Check for cursor-specific auto_apply setting
+    let cursor_auto_apply = rule
+        .tool_overrides
+        .get("cursor")
+        .and_then(|cursor_overrides| cursor_overrides.get("auto_apply"))
+        .and_then(|v| v.as_bool())
+        .unwrap_or(false);
+    println!("🔄 Auto-apply (Cursor): {}", cursor_auto_apply);
 
     if !rule.content.is_empty() {
         println!("\n📖 Content:");
@@ -195,7 +202,9 @@ fn show_rule(name: &str, config_path: Option<PathBuf>) -> Result<()> {
             // Show first few lines of content
             let lines: Vec<&str> = section.value.lines().take(3).collect();
             for line in lines {
-                if line.trim().is_empty() { continue; }
+                if line.trim().is_empty() {
+                    continue;
+                }
                 println!("     {}", line);
             }
             if section.value.lines().count() > 3 {
@@ -231,7 +240,10 @@ fn delete_rule(name: &str, config_path: Option<PathBuf>) -> Result<()> {
     }
 
     // Confirm deletion
-    print!("⚠️  Are you sure you want to delete rule '{}'? [y/N]: ", name);
+    print!(
+        "⚠️  Are you sure you want to delete rule '{}'? [y/N]: ",
+        name
+    );
     std::io::Write::flush(&mut std::io::stdout())?;
 
     let mut input = String::new();
@@ -243,7 +255,8 @@ fn delete_rule(name: &str, config_path: Option<PathBuf>) -> Result<()> {
     }
 
     // Delete the rule
-    store.delete_rule(name)
+    store
+        .delete_rule(name)
         .with_context(|| format!("Failed to delete rule '{}'", name))?;
 
     println!("✅ Deleted rule: {}", name);

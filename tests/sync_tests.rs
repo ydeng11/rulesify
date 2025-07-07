@@ -26,7 +26,6 @@ fn test_sync_preserves_original_rule_id() {
             description: Some("Embrace the Borrow Checker".to_string()),
             tags: vec!["rust".to_string()],
             priority: 10,
-            auto_apply: true,
         },
         content: vec![RuleContent {
             title: "Core Principles".to_string(),
@@ -218,7 +217,6 @@ fn test_sync_dry_run_mode() {
             description: Some("Original description".to_string()),
             tags: vec![],
             priority: 5,
-            auto_apply: false,
         },
         content: vec![RuleContent {
             title: "Content".to_string(),

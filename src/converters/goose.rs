@@ -1,5 +1,5 @@
 use crate::converters::RuleConverter;
-use crate::models::rule::{UniversalRule, RuleMetadata, RuleContent};
+use crate::models::rule::{RuleContent, RuleMetadata, UniversalRule};
 use anyhow::Result;
 use std::path::{Path, PathBuf};
 
@@ -45,7 +45,8 @@ impl RuleConverter for GooseConverter {
         let (name, description, content_sections) = parse_goose_format(content)?;
 
         // Generate rule ID from name
-        let rule_id = name.to_lowercase()
+        let rule_id = name
+            .to_lowercase()
             .replace(' ', "-")
             .replace('_', "-")
             .chars()
@@ -57,7 +58,6 @@ impl RuleConverter for GooseConverter {
             description,
             tags: Vec::new(),
             priority: 5,
-            auto_apply: false,
         };
 
         Ok(UniversalRule {
@@ -95,9 +95,9 @@ fn parse_goose_format(content: &str) -> Result<(String, Option<String>, Vec<Rule
             let next_line = lines[i + 1].trim();
 
             // Check if this is a title with underline (= or -)
-            if (next_line.chars().all(|c| c == '=') && next_line.len() > 0) ||
-               (next_line.chars().all(|c| c == '-') && next_line.len() > 0) {
-
+            if (next_line.chars().all(|c| c == '=') && next_line.len() > 0)
+                || (next_line.chars().all(|c| c == '-') && next_line.len() > 0)
+            {
                 if next_line.chars().all(|c| c == '=') {
                     // Main title (underlined with =)
                     name = line.to_string();
@@ -115,7 +115,8 @@ fn parse_goose_format(content: &str) -> Result<(String, Option<String>, Vec<Rule
                             // Check if the line after description is not an underline
                             let is_description = if j + 1 < lines.len() {
                                 let after_desc = lines[j + 1].trim();
-                                !(after_desc.chars().all(|c| c == '=' || c == '-') && after_desc.len() > 0)
+                                !(after_desc.chars().all(|c| c == '=' || c == '-')
+                                    && after_desc.len() > 0)
                             } else {
                                 true
                             };

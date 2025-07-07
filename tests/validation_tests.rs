@@ -1,6 +1,10 @@
+use rulesify::models::rule::{
+    ContentFormat, FileReference, RuleCondition, RuleContent, RuleMetadata, UniversalRule,
+};
+use rulesify::validation::{
+    content_validator::ContentValidator, format_validator::FormatValidator, Severity, Validator,
+};
 use std::collections::HashMap;
-use rulesify::models::rule::{UniversalRule, RuleMetadata, RuleContent, ContentFormat, RuleCondition, FileReference};
-use rulesify::validation::{Validator, Severity, content_validator::ContentValidator, format_validator::FormatValidator};
 
 #[test]
 fn test_content_validator_valid_rule() {
@@ -9,7 +13,10 @@ fn test_content_validator_valid_rule() {
 
     let errors = validator.validate(&rule).unwrap();
     // Should have some info suggestions but no errors
-    let error_count = errors.iter().filter(|e| matches!(e.severity, Severity::Error)).count();
+    let error_count = errors
+        .iter()
+        .filter(|e| matches!(e.severity, Severity::Error))
+        .count();
     assert_eq!(error_count, 0);
 }
 
@@ -20,12 +27,15 @@ fn test_content_validator_missing_name() {
     rule.metadata.name = "".to_string();
 
     let errors = validator.validate(&rule).unwrap();
-    let error_messages: Vec<_> = errors.iter()
+    let error_messages: Vec<_> = errors
+        .iter()
         .filter(|e| matches!(e.severity, Severity::Error))
         .map(|e| &e.message)
         .collect();
 
-    assert!(error_messages.iter().any(|msg| msg.contains("Rule must have a name")));
+    assert!(error_messages
+        .iter()
+        .any(|msg| msg.contains("Rule must have a name")));
 }
 
 #[test]
@@ -35,12 +45,15 @@ fn test_content_validator_empty_content() {
     rule.content = vec![];
 
     let errors = validator.validate(&rule).unwrap();
-    let error_messages: Vec<_> = errors.iter()
+    let error_messages: Vec<_> = errors
+        .iter()
         .filter(|e| matches!(e.severity, Severity::Error))
         .map(|e| &e.message)
         .collect();
 
-    assert!(error_messages.iter().any(|msg| msg.contains("Rule must have at least one content section")));
+    assert!(error_messages
+        .iter()
+        .any(|msg| msg.contains("Rule must have at least one content section")));
 }
 
 #[test]
@@ -50,12 +63,15 @@ fn test_content_validator_empty_section_title() {
     rule.content[0].title = "".to_string();
 
     let errors = validator.validate(&rule).unwrap();
-    let error_messages: Vec<_> = errors.iter()
+    let error_messages: Vec<_> = errors
+        .iter()
         .filter(|e| matches!(e.severity, Severity::Error))
         .map(|e| &e.message)
         .collect();
 
-    assert!(error_messages.iter().any(|msg| msg.contains("Content section must have a title")));
+    assert!(error_messages
+        .iter()
+        .any(|msg| msg.contains("Content section must have a title")));
 }
 
 #[test]
@@ -65,12 +81,15 @@ fn test_content_validator_empty_section_content() {
     rule.content[0].value = "".to_string();
 
     let errors = validator.validate(&rule).unwrap();
-    let error_messages: Vec<_> = errors.iter()
+    let error_messages: Vec<_> = errors
+        .iter()
         .filter(|e| matches!(e.severity, Severity::Error))
         .map(|e| &e.message)
         .collect();
 
-    assert!(error_messages.iter().any(|msg| msg.contains("Content section must have content")));
+    assert!(error_messages
+        .iter()
+        .any(|msg| msg.contains("Content section must have content")));
 }
 
 #[test]
@@ -84,12 +103,15 @@ fn test_content_validator_duplicate_section_titles() {
     });
 
     let errors = validator.validate(&rule).unwrap();
-    let warning_messages: Vec<_> = errors.iter()
+    let warning_messages: Vec<_> = errors
+        .iter()
         .filter(|e| matches!(e.severity, Severity::Warning))
         .map(|e| &e.message)
         .collect();
 
-    assert!(warning_messages.iter().any(|msg| msg.contains("Duplicate section title")));
+    assert!(warning_messages
+        .iter()
+        .any(|msg| msg.contains("Duplicate section title")));
 }
 
 #[test]
@@ -99,12 +121,15 @@ fn test_content_validator_long_name() {
     rule.metadata.name = "a".repeat(150); // Very long name
 
     let errors = validator.validate(&rule).unwrap();
-    let warning_messages: Vec<_> = errors.iter()
+    let warning_messages: Vec<_> = errors
+        .iter()
         .filter(|e| matches!(e.severity, Severity::Warning))
         .map(|e| &e.message)
         .collect();
 
-    assert!(warning_messages.iter().any(|msg| msg.contains("Rule name should be 100 characters or less")));
+    assert!(warning_messages
+        .iter()
+        .any(|msg| msg.contains("Rule name should be 100 characters or less")));
 }
 
 #[test]
@@ -114,12 +139,15 @@ fn test_content_validator_empty_tags() {
     rule.metadata.tags = vec!["".to_string(), "valid-tag".to_string()];
 
     let errors = validator.validate(&rule).unwrap();
-    let error_messages: Vec<_> = errors.iter()
+    let error_messages: Vec<_> = errors
+        .iter()
         .filter(|e| matches!(e.severity, Severity::Error))
         .map(|e| &e.message)
         .collect();
 
-    assert!(error_messages.iter().any(|msg| msg.contains("Tag cannot be empty")));
+    assert!(error_messages
+        .iter()
+        .any(|msg| msg.contains("Tag cannot be empty")));
 }
 
 #[test]
@@ -131,12 +159,15 @@ fn test_content_validator_dangerous_file_reference() {
     }];
 
     let errors = validator.validate(&rule).unwrap();
-    let warning_messages: Vec<_> = errors.iter()
+    let warning_messages: Vec<_> = errors
+        .iter()
         .filter(|e| matches!(e.severity, Severity::Warning))
         .map(|e| &e.message)
         .collect();
 
-    assert!(warning_messages.iter().any(|msg| msg.contains("contains '..' which might be unsafe")));
+    assert!(warning_messages
+        .iter()
+        .any(|msg| msg.contains("contains '..' which might be unsafe")));
 }
 
 #[test]
@@ -146,7 +177,10 @@ fn test_format_validator_valid_rule() {
 
     let errors = validator.validate(&rule).unwrap();
     // Should have some info suggestions but no errors
-    let error_count = errors.iter().filter(|e| matches!(e.severity, Severity::Error)).count();
+    let error_count = errors
+        .iter()
+        .filter(|e| matches!(e.severity, Severity::Error))
+        .count();
     assert_eq!(error_count, 0);
 }
 
@@ -157,12 +191,15 @@ fn test_format_validator_invalid_version() {
     rule.version = "invalid-version".to_string();
 
     let errors = validator.validate(&rule).unwrap();
-    let warning_messages: Vec<_> = errors.iter()
+    let warning_messages: Vec<_> = errors
+        .iter()
         .filter(|e| matches!(e.severity, Severity::Warning))
         .map(|e| &e.message)
         .collect();
 
-    assert!(warning_messages.iter().any(|msg| msg.contains("Version should follow semantic versioning")));
+    assert!(warning_messages
+        .iter()
+        .any(|msg| msg.contains("Version should follow semantic versioning")));
 }
 
 #[test]
@@ -172,12 +209,15 @@ fn test_format_validator_invalid_id() {
     rule.id = "Invalid ID With Spaces".to_string();
 
     let errors = validator.validate(&rule).unwrap();
-    let warning_messages: Vec<_> = errors.iter()
+    let warning_messages: Vec<_> = errors
+        .iter()
         .filter(|e| matches!(e.severity, Severity::Warning))
         .map(|e| &e.message)
         .collect();
 
-    assert!(warning_messages.iter().any(|msg| msg.contains("ID should be lowercase with no spaces")));
+    assert!(warning_messages
+        .iter()
+        .any(|msg| msg.contains("ID should be lowercase with no spaces")));
 }
 
 #[test]
@@ -187,12 +227,15 @@ fn test_format_validator_short_id() {
     rule.id = "a".to_string();
 
     let errors = validator.validate(&rule).unwrap();
-    let warning_messages: Vec<_> = errors.iter()
+    let warning_messages: Vec<_> = errors
+        .iter()
         .filter(|e| matches!(e.severity, Severity::Warning))
         .map(|e| &e.message)
         .collect();
 
-    assert!(warning_messages.iter().any(|msg| msg.contains("ID should be at least 2 characters long")));
+    assert!(warning_messages
+        .iter()
+        .any(|msg| msg.contains("ID should be at least 2 characters long")));
 }
 
 #[test]
@@ -202,12 +245,15 @@ fn test_format_validator_long_id() {
     rule.id = "a".repeat(60); // Very long ID
 
     let errors = validator.validate(&rule).unwrap();
-    let warning_messages: Vec<_> = errors.iter()
+    let warning_messages: Vec<_> = errors
+        .iter()
         .filter(|e| matches!(e.severity, Severity::Warning))
         .map(|e| &e.message)
         .collect();
 
-    assert!(warning_messages.iter().any(|msg| msg.contains("ID should be 50 characters or less")));
+    assert!(warning_messages
+        .iter()
+        .any(|msg| msg.contains("ID should be 50 characters or less")));
 }
 
 #[test]
@@ -217,12 +263,15 @@ fn test_format_validator_tags_with_spaces() {
     rule.metadata.tags = vec!["valid-tag".to_string(), "invalid tag".to_string()];
 
     let errors = validator.validate(&rule).unwrap();
-    let info_messages: Vec<_> = errors.iter()
+    let info_messages: Vec<_> = errors
+        .iter()
         .filter(|e| matches!(e.severity, Severity::Info))
         .map(|e| &e.message)
         .collect();
 
-    assert!(info_messages.iter().any(|msg| msg.contains("Tags should not contain spaces")));
+    assert!(info_messages
+        .iter()
+        .any(|msg| msg.contains("Tags should not contain spaces")));
 }
 
 #[test]
@@ -232,12 +281,15 @@ fn test_format_validator_uppercase_tags() {
     rule.metadata.tags = vec!["ValidTag".to_string(), "another-tag".to_string()];
 
     let errors = validator.validate(&rule).unwrap();
-    let info_messages: Vec<_> = errors.iter()
+    let info_messages: Vec<_> = errors
+        .iter()
         .filter(|e| matches!(e.severity, Severity::Info))
         .map(|e| &e.message)
         .collect();
 
-    assert!(info_messages.iter().any(|msg| msg.contains("Tags should be lowercase for consistency")));
+    assert!(info_messages
+        .iter()
+        .any(|msg| msg.contains("Tags should be lowercase for consistency")));
 }
 
 #[test]
@@ -247,12 +299,15 @@ fn test_format_validator_duplicate_tags() {
     rule.metadata.tags = vec!["tag1".to_string(), "tag2".to_string(), "tag1".to_string()];
 
     let errors = validator.validate(&rule).unwrap();
-    let warning_messages: Vec<_> = errors.iter()
+    let warning_messages: Vec<_> = errors
+        .iter()
         .filter(|e| matches!(e.severity, Severity::Warning))
         .map(|e| &e.message)
         .collect();
 
-    assert!(warning_messages.iter().any(|msg| msg.contains("Duplicate tag")));
+    assert!(warning_messages
+        .iter()
+        .any(|msg| msg.contains("Duplicate tag")));
 }
 
 #[test]
@@ -264,12 +319,15 @@ fn test_format_validator_absolute_file_reference() {
     }];
 
     let errors = validator.validate(&rule).unwrap();
-    let warning_messages: Vec<_> = errors.iter()
+    let warning_messages: Vec<_> = errors
+        .iter()
         .filter(|e| matches!(e.severity, Severity::Warning))
         .map(|e| &e.message)
         .collect();
 
-    assert!(warning_messages.iter().any(|msg| msg.contains("should use relative paths")));
+    assert!(warning_messages
+        .iter()
+        .any(|msg| msg.contains("should use relative paths")));
 }
 
 #[test]
@@ -281,12 +339,15 @@ fn test_format_validator_windows_path_separators() {
     }];
 
     let errors = validator.validate(&rule).unwrap();
-    let warning_messages: Vec<_> = errors.iter()
+    let warning_messages: Vec<_> = errors
+        .iter()
         .filter(|e| matches!(e.severity, Severity::Warning))
         .map(|e| &e.message)
         .collect();
 
-    assert!(warning_messages.iter().any(|msg| msg.contains("should use forward slashes")));
+    assert!(warning_messages
+        .iter()
+        .any(|msg| msg.contains("should use forward slashes")));
 }
 
 #[test]
@@ -298,12 +359,15 @@ fn test_format_validator_broad_file_patterns() {
     }];
 
     let errors = validator.validate(&rule).unwrap();
-    let info_messages: Vec<_> = errors.iter()
+    let info_messages: Vec<_> = errors
+        .iter()
         .filter(|e| matches!(e.severity, Severity::Info))
         .map(|e| &e.message)
         .collect();
 
-    assert!(info_messages.iter().any(|msg| msg.contains("File pattern is very broad")));
+    assert!(info_messages
+        .iter()
+        .any(|msg| msg.contains("File pattern is very broad")));
 }
 
 #[test]
@@ -313,12 +377,15 @@ fn test_format_validator_yaml_in_content() {
     rule.content[0].value = "---\nkey: value\n---\nThis looks like YAML".to_string();
 
     let errors = validator.validate(&rule).unwrap();
-    let warning_messages: Vec<_> = errors.iter()
+    let warning_messages: Vec<_> = errors
+        .iter()
         .filter(|e| matches!(e.severity, Severity::Warning))
         .map(|e| &e.message)
         .collect();
 
-    assert!(warning_messages.iter().any(|msg| msg.contains("appears to contain YAML syntax")));
+    assert!(warning_messages
+        .iter()
+        .any(|msg| msg.contains("appears to contain YAML syntax")));
 }
 
 #[test]
@@ -335,7 +402,9 @@ fn test_validation_multiple_validators() {
     let content_errors = content_validator.validate(&rule).unwrap();
     let format_errors = format_validator.validate(&rule).unwrap();
 
-    let total_errors = content_errors.iter().chain(format_errors.iter())
+    let total_errors = content_errors
+        .iter()
+        .chain(format_errors.iter())
         .filter(|e| matches!(e.severity, Severity::Error))
         .count();
 
@@ -351,25 +420,18 @@ fn create_valid_rule() -> UniversalRule {
             description: Some("A test rule for validation".to_string()),
             tags: vec!["test".to_string(), "validation".to_string()],
             priority: 5,
-            auto_apply: false,
         },
-        content: vec![
-            RuleContent {
-                title: "Guidelines".to_string(),
-                format: ContentFormat::Markdown,
-                value: "Follow these guidelines:\n- Be consistent\n- Write tests".to_string(),
-            },
-        ],
-        references: vec![
-            FileReference {
-                path: "README.md".to_string(),
-            },
-        ],
-        conditions: vec![
-            RuleCondition::FilePattern {
-                value: "src/**/*.ts".to_string(),
-            },
-        ],
+        content: vec![RuleContent {
+            title: "Guidelines".to_string(),
+            format: ContentFormat::Markdown,
+            value: "Follow these guidelines:\n- Be consistent\n- Write tests".to_string(),
+        }],
+        references: vec![FileReference {
+            path: "README.md".to_string(),
+        }],
+        conditions: vec![RuleCondition::FilePattern {
+            value: "src/**/*.ts".to_string(),
+        }],
         tool_overrides: HashMap::new(),
     }
 }

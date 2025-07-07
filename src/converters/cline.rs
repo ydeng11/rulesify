@@ -1,5 +1,5 @@
 use crate::converters::RuleConverter;
-use crate::models::rule::{UniversalRule, RuleMetadata, RuleContent};
+use crate::models::rule::{RuleContent, RuleMetadata, UniversalRule};
 use anyhow::Result;
 use std::path::{Path, PathBuf};
 
@@ -41,7 +41,8 @@ impl RuleConverter for ClineConverter {
         let (name, description, content_sections) = parse_cline_format(content)?;
 
         // Generate rule ID from name
-        let rule_id = name.to_lowercase()
+        let rule_id = name
+            .to_lowercase()
             .replace(' ', "-")
             .replace('_', "-")
             .chars()
@@ -53,7 +54,6 @@ impl RuleConverter for ClineConverter {
             description,
             tags: Vec::new(),
             priority: 5,
-            auto_apply: false,
         };
 
         Ok(UniversalRule {

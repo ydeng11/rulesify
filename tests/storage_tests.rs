@@ -1,5 +1,5 @@
-use rulesify::store::{RuleStore, file_store::FileStore, memory_store::MemoryStore};
-use rulesify::models::rule::{UniversalRule, RuleMetadata, RuleContent, ContentFormat};
+use rulesify::models::rule::{ContentFormat, RuleContent, RuleMetadata, UniversalRule};
+use rulesify::store::{file_store::FileStore, memory_store::MemoryStore, RuleStore};
 use std::collections::HashMap;
 use tempfile::TempDir;
 
@@ -12,15 +12,12 @@ fn create_test_rule(id: &str) -> UniversalRule {
             description: Some(format!("Test rule {}", id)),
             tags: vec!["test".to_string()],
             priority: 5,
-            auto_apply: false,
         },
-        content: vec![
-            RuleContent {
-                title: "Test Content".to_string(),
-                format: ContentFormat::Markdown,
-                value: "Test content value".to_string(),
-            },
-        ],
+        content: vec![RuleContent {
+            title: "Test Content".to_string(),
+            format: ContentFormat::Markdown,
+            value: "Test content value".to_string(),
+        }],
         references: vec![],
         conditions: vec![],
         tool_overrides: HashMap::new(),

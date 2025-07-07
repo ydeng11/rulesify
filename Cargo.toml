@@ -1,6 +1,6 @@
 [package]
 name = "rulesify"
-version = "0.1.4"
+version = "0.1.5"
 edition = "2021"
 description = "A CLI tool for managing AI assistant rules"
 license = "MIT"
