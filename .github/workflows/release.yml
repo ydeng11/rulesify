@@ -149,9 +149,9 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
-            gh release upload ${{ github.ref_name }} ${{ matrix.asset_name }}.zip
+            gh release upload ${{ github.ref_name }} ${{ matrix.asset_name }}.zip --clobber
           else
-            gh release upload ${{ github.ref_name }} ${{ matrix.asset_name }}.tar.gz
+            gh release upload ${{ github.ref_name }} ${{ matrix.asset_name }}.tar.gz --clobber
           fi
 
       - name: Upload Checksum
@@ -159,9 +159,9 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
-            gh release upload ${{ github.ref_name }} ${{ matrix.asset_name }}.zip.sha256
+            gh release upload ${{ github.ref_name }} ${{ matrix.asset_name }}.zip.sha256 --clobber
           else
-            gh release upload ${{ github.ref_name }} ${{ matrix.asset_name }}.tar.gz.sha256
+            gh release upload ${{ github.ref_name }} ${{ matrix.asset_name }}.tar.gz.sha256 --clobber
           fi
 
   upload-install-script:
@@ -173,4 +173,4 @@ jobs:
       - name: Upload Install Script
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh release upload ${{ github.ref_name }} install.sh
+        run: gh release upload ${{ github.ref_name }} install.sh --clobber
