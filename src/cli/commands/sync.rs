@@ -375,13 +375,36 @@ fn fallback_to_complete_update(
                 i += 1;
             }
 
-            // Add the new content
-            let updated_content_yaml = serde_yaml::to_string(&updated_rule.content)
-                .with_context(|| "Failed to serialize updated content")?;
+            // Add the new content with proper formatting
+            for section in updated_rule.content.iter() {
+                result_lines.push(format!("- title: \"{}\"", section.title));
 
-            // Add each line of the new content
-            for line in updated_content_yaml.lines() {
-                result_lines.push(line.to_string());
+                // Use correct serde format strings
+                let format_str = match section.format {
+                    crate::models::rule::ContentFormat::Markdown => "markdown",
+                    crate::models::rule::ContentFormat::PlainText => "plaintext",
+                    crate::models::rule::ContentFormat::Code => "code",
+                };
+                result_lines.push(format!("  format: {}", format_str));
+
+                // Always use block scalar for markdown content to maintain consistency
+                if matches!(section.format, crate::models::rule::ContentFormat::Markdown) {
+                    result_lines.push("  value: |-".to_string());
+                    // Add each line of content with proper indentation
+                    for line in section.value.lines() {
+                        result_lines.push(format!("    {}", line));
+                    }
+                } else {
+                    // For non-markdown content, use flow scalar if single line, block scalar if multi-line
+                    if section.value.contains('\n') {
+                        result_lines.push("  value: |-".to_string());
+                        for line in section.value.lines() {
+                            result_lines.push(format!("    {}", line));
+                        }
+                    } else {
+                        result_lines.push(format!("  value: \"{}\"", section.value));
+                    }
+                }
             }
 
             // Continue processing from the next section
