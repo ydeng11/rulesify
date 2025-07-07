@@ -300,7 +300,9 @@ default_tools:
     let deployed_content =
         fs::read_to_string(&deployed_file).expect("Failed to read deployed file");
     assert!(deployed_content.contains("---"));
-    assert!(deployed_content.contains("description: Deploy Test Rule"));
+    assert!(deployed_content.contains("description: |"));
+    assert!(deployed_content.contains("A test rule for deployment"));
+    assert!(deployed_content.contains("notes: \"Rule: Deploy Test Rule\""));
     assert!(deployed_content.contains("# Test Guidelines"));
 }
 

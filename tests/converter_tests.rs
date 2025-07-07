@@ -194,10 +194,7 @@ fn test_all_converters_deployment_paths() {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use rulesify::models::rule::{
-        ContentFormat, FileReference, RuleCondition, RuleContent, RuleMetadata, UniversalRule,
-    };
-    use std::collections::HashMap;
+    use rulesify::models::rule::{ContentFormat, RuleCondition};
 
     #[test]
     fn test_cursor_import_basic() {
