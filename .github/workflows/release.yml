@@ -55,6 +55,15 @@ jobs:
           echo '```bash' >> RELEASE_NOTES.md
           echo "curl -fsSL https://raw.githubusercontent.com/${{ github.repository }}/${{ github.ref_name }}/install.sh | sh" >> RELEASE_NOTES.md
           echo '```' >> RELEASE_NOTES.md
+          echo "" >> RELEASE_NOTES.md
+          echo "### Changelog" >> RELEASE_NOTES.md
+          echo "" >> RELEASE_NOTES.md
+          # Extract the current version's changelog section
+          awk -v version="## [v${{ steps.get_version.outputs.version }}]" '
+            $0 ~ version {p=1; print; next}
+            p && /^## \[/ {p=0}
+            p {print}
+          ' CHANGELOG.md >> RELEASE_NOTES.md
 
       - name: Create Release
         id: create_release
