@@ -3,16 +3,19 @@ use std::fs;
 use std::path::PathBuf;
 
 use crate::converters::{
-    RuleConverter,
-    cursor::CursorConverter,
-    cline::ClineConverter,
-    claude_code::ClaudeCodeConverter,
-    goose::GooseConverter,
+    claude_code::ClaudeCodeConverter, cline::ClineConverter, cursor::CursorConverter,
+    goose::GooseConverter, RuleConverter,
 };
-use crate::store::{RuleStore, file_store::FileStore};
+use crate::store::{file_store::FileStore, RuleStore};
 use crate::utils::config::load_config_from_path;
+use crate::utils::rule_id::extract_rule_id_from_filename;
 
-pub fn run(tool: String, file: PathBuf, rule_id: Option<String>, config_path: Option<PathBuf>) -> Result<()> {
+pub fn run(
+    tool: String,
+    file: PathBuf,
+    rule_id: Option<String>,
+    config_path: Option<PathBuf>,
+) -> Result<()> {
     let config = load_config_from_path(config_path)?;
     let store = FileStore::new(config.rules_directory);
 
@@ -29,13 +32,33 @@ pub fn run(tool: String, file: PathBuf, rule_id: Option<String>, config_path: Op
         .with_context(|| format!("Failed to read file: {}", file.display()))?;
 
     // Convert from tool format to URF
-    let mut rule = converter.convert_from_tool_format(&content)
+    let mut rule = converter
+        .convert_from_tool_format(&content)
         .with_context(|| format!("Failed to convert {} format to URF", tool))?;
 
-    // Override rule ID if provided
-    if let Some(custom_id) = rule_id {
-        rule.id = custom_id;
-    }
+    // Determine final rule ID: CLI override > filename > content-based fallback
+    let final_rule_id = if let Some(custom_id) = rule_id {
+        // User provided explicit override
+        custom_id
+    } else {
+        // Extract rule ID from filename (new default behavior)
+        let filename_based_id = extract_rule_id_from_filename(&file)
+            .with_context(|| format!("Cannot derive rule ID from filename: {}", file.display()))?;
+
+        // Check if filename-based ID differs from content-based ID
+        if filename_based_id != rule.id {
+            println!(
+                "ℹ️  Note: Using filename '{}' as rule ID (content suggests '{}')",
+                filename_based_id, rule.id
+            );
+            println!("   Use --rule-id to override or rename the file to match content naming");
+        }
+
+        filename_based_id
+    };
+
+    // Override the rule ID with our determined value
+    rule.id = final_rule_id;
 
     // Check if rule already exists
     if store.load_rule(&rule.id)?.is_some() {
@@ -52,7 +75,8 @@ pub fn run(tool: String, file: PathBuf, rule_id: Option<String>, config_path: Op
     }
 
     // Save the rule
-    store.save_rule(&rule)
+    store
+        .save_rule(&rule)
         .with_context(|| format!("Failed to save rule '{}'", rule.id))?;
 
     println!("✅ Successfully imported rule: {}", rule.id);
@@ -92,6 +116,9 @@ fn get_converter(tool_name: &str) -> Result<Box<dyn RuleConverter>> {
         "cline" => Ok(Box::new(ClineConverter::new())),
         "claude-code" | "claude_code" => Ok(Box::new(ClaudeCodeConverter::new())),
         "goose" => Ok(Box::new(GooseConverter::new())),
-        _ => anyhow::bail!("Unsupported tool: {}. Supported tools: cursor, cline, claude-code, goose", tool_name),
+        _ => anyhow::bail!(
+            "Unsupported tool: {}. Supported tools: cursor, cline, claude-code, goose",
+            tool_name
+        ),
     }
 }

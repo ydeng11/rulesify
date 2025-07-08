@@ -9,6 +9,7 @@ use crate::converters::{
 use crate::models::rule::UniversalRule;
 use crate::store::{file_store::FileStore, RuleStore};
 use crate::utils::config::load_config_from_path;
+use crate::utils::rule_id::extract_rule_id_from_filename;
 
 pub fn run(
     dry_run: bool,
@@ -157,12 +158,13 @@ fn sync_rule_from_file(
     let content = fs::read_to_string(file_path)
         .with_context(|| format!("Failed to read file: {}", file_path.display()))?;
 
-    // Extract rule ID from filename
-    let rule_id = file_path
-        .file_stem()
-        .and_then(|s| s.to_str())
-        .ok_or_else(|| anyhow::anyhow!("Invalid filename: {}", file_path.display()))?
-        .to_string();
+    // Extract rule ID from filename using our shared utility
+    let rule_id = extract_rule_id_from_filename(file_path).with_context(|| {
+        format!(
+            "Cannot extract rule ID from filename: {}",
+            file_path.display()
+        )
+    })?;
 
     // Check if URF already exists
     let existing_rule = store.load_rule(&rule_id)?;

@@ -113,14 +113,31 @@ tool_overrides:
 "#
 }
 
-pub fn create_skeleton_for_rule(rule_name: &str) -> Result<String> {
+/// Creates a skeleton rule with both the sanitized rule ID and human-friendly name
+pub fn create_skeleton_for_rule(rule_id: &str) -> Result<String> {
     let skeleton = get_default_skeleton();
     let filled = skeleton
-        .replace("<rule_id>", rule_name)
-        .replace("<Human-friendly Name>", &format!("{} Rule", rule_name))
+        .replace("<rule_id>", rule_id)
+        .replace("<Human-friendly Name>", &format!("{} Rule", rule_id))
         .replace(
             "<One-sentence description that shows up in Cursor front-matter>",
-            &format!("Guidelines for {}", rule_name),
+            &format!("Guidelines for {}", rule_id),
+        );
+    Ok(filled)
+}
+
+/// Creates a skeleton rule with custom human-friendly name based on original user input
+pub fn create_skeleton_for_rule_with_display_name(
+    rule_id: &str,
+    original_name: &str,
+) -> Result<String> {
+    let skeleton = get_default_skeleton();
+    let filled = skeleton
+        .replace("<rule_id>", rule_id)
+        .replace("<Human-friendly Name>", &format!("{} Rule", original_name))
+        .replace(
+            "<One-sentence description that shows up in Cursor front-matter>",
+            &format!("Guidelines for {}", original_name),
         );
     Ok(filled)
 }

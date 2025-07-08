@@ -7,8 +7,9 @@ use std::path::PathBuf;
 use std::process::Command;
 
 use crate::store::{file_store::FileStore, RuleStore};
-use crate::templates::builtin::create_skeleton_for_rule;
+use crate::templates::builtin::create_skeleton_for_rule_with_display_name;
 use crate::utils::config::load_config_from_path;
+use crate::utils::rule_id::sanitize_rule_id;
 
 #[derive(Subcommand, Debug)]
 pub enum RuleAction {
@@ -41,25 +42,41 @@ fn create_new_rule(name: &str, config_path: Option<PathBuf>) -> Result<()> {
     let config = load_config_from_path(config_path)?;
     let store = FileStore::new(config.rules_directory);
 
-    // Check if rule already exists
-    if store.load_rule(name)?.is_some() {
-        anyhow::bail!("Rule '{}' already exists", name);
+    // Sanitize the rule name to create a valid rule ID
+    let rule_id = sanitize_rule_id(name)
+        .with_context(|| format!("Cannot create rule with name '{}'", name))?;
+
+    // Inform user if sanitization changed the name
+    if rule_id != name {
+        println!(
+            "📝 Rule name '{}' sanitized to rule ID: '{}'",
+            name, rule_id
+        );
+        println!("   (Rule IDs must be lowercase, use hyphens, and contain only alphanumeric characters)");
     }
 
-    // Create skeleton YAML content
-    let skeleton_content = create_skeleton_for_rule(name)?;
+    // Check if rule already exists
+    if store.load_rule(&rule_id)?.is_some() {
+        anyhow::bail!("Rule '{}' already exists", rule_id);
+    }
+
+    // Create skeleton YAML content using both the sanitized rule ID and original name
+    let skeleton_content = create_skeleton_for_rule_with_display_name(&rule_id, name)?;
 
     // Write the skeleton directly to preserve comments
-    let rule_path = store.get_rule_path(name);
+    let rule_path = store.get_rule_path(&rule_id);
     fs::write(&rule_path, skeleton_content)
         .with_context(|| format!("Failed to write rule file: {}", rule_path.display()))?;
 
-    println!("✅ Created new rule: {}", name);
-    println!("📁 File location: {}", store.get_rule_path(name).display());
+    println!("✅ Created new rule: {}", rule_id);
+    println!(
+        "📁 File location: {}",
+        store.get_rule_path(&rule_id).display()
+    );
 
     // Open in editor if available
     if let Some(editor) = &config.editor {
-        let rule_path = store.get_rule_path(name);
+        let rule_path = store.get_rule_path(&rule_id);
         println!("🖊️  Opening in editor: {}", editor);
 
         let status = Command::new(editor)
