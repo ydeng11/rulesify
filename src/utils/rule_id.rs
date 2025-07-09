@@ -1,4 +1,5 @@
 use anyhow::Result;
+use regex::Regex;
 use std::path::Path;
 
 /// Sanitizes a rule name or filename to create a valid rule ID.
@@ -81,6 +82,77 @@ pub fn is_valid_rule_id(input: &str) -> bool {
         && !input.ends_with('-')
 }
 
+/// Embeds a rule ID as an HTML comment at the top of content.
+///
+/// This creates a standardized comment that can be parsed back to retrieve
+/// the original rule ID, ensuring proper tracking across import/sync operations.
+pub fn embed_rule_id_in_content(content: &str, rule_id: &str) -> String {
+    let comment = format!("<!-- rulesify-id: {} -->", rule_id);
+
+    // If content already has a rulesify-id comment, replace it
+    if content.contains("<!-- rulesify-id:") {
+        let re = Regex::new(r"<!-- rulesify-id: [^>]+ -->").unwrap();
+        re.replace(content, &comment).to_string()
+    } else {
+        // Add the comment at the top
+        format!("{}\n{}", comment, content)
+    }
+}
+
+/// Extracts a rule ID from embedded HTML comment in content.
+///
+/// Looks for the pattern `<!-- rulesify-id: {rule_id} -->` and returns the rule ID.
+/// Returns None if no embedded rule ID is found.
+pub fn extract_embedded_rule_id(content: &str) -> Option<String> {
+    let re = Regex::new(r"<!-- rulesify-id: ([^>]+) -->").unwrap();
+
+    re.captures(content)
+        .and_then(|caps| caps.get(1))
+        .map(|m| m.as_str().trim().to_string())
+        .filter(|id| !id.is_empty())
+}
+
+/// Determines the rule ID using a fallback hierarchy.
+///
+/// Priority order:
+/// 1. Embedded rule ID in content (highest priority)
+/// 2. Filename-based rule ID
+/// 3. Rule name from content (sanitized)
+/// 4. Default fallback ID
+pub fn determine_rule_id_with_fallback(
+    content: &str,
+    file_path: Option<&Path>,
+    rule_name: Option<&str>,
+) -> Result<String> {
+    // First priority: embedded rule ID
+    if let Some(embedded_id) = extract_embedded_rule_id(content) {
+        if is_valid_rule_id(&embedded_id) {
+            return Ok(embedded_id);
+        }
+    }
+
+    // Second priority: filename-based rule ID
+    if let Some(path) = file_path {
+        if let Ok(filename_id) = extract_rule_id_from_filename(path) {
+            return Ok(filename_id);
+        }
+    }
+
+    // Third priority: rule name from content
+    if let Some(name) = rule_name {
+        if let Ok(name_id) = sanitize_rule_id(name) {
+            return Ok(name_id);
+        }
+    }
+
+    // Last resort: default fallback
+    let timestamp = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .unwrap()
+        .as_secs();
+    Ok(format!("imported-rule-{}", timestamp))
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -152,5 +224,72 @@ mod tests {
         assert!(!is_valid_rule_id("rule-")); // ends with hyphen
         assert!(!is_valid_rule_id("a")); // too short
         assert!(!is_valid_rule_id(&"x".repeat(51))); // too long
+    }
+
+    #[test]
+    fn test_embed_rule_id_in_content() {
+        let content = "# My Rule\n\nSome content here";
+        let result = embed_rule_id_in_content(content, "my-rule");
+        assert_eq!(
+            result,
+            "<!-- rulesify-id: my-rule -->\n# My Rule\n\nSome content here"
+        );
+
+        // Test replacing existing embedded ID
+        let content_with_id = "<!-- rulesify-id: old-rule -->\n# My Rule\n\nSome content";
+        let result = embed_rule_id_in_content(content_with_id, "new-rule");
+        assert_eq!(
+            result,
+            "<!-- rulesify-id: new-rule -->\n# My Rule\n\nSome content"
+        );
+    }
+
+    #[test]
+    fn test_extract_embedded_rule_id() {
+        let content = "<!-- rulesify-id: my-rule -->\n# My Rule\n\nSome content";
+        assert_eq!(
+            extract_embedded_rule_id(content),
+            Some("my-rule".to_string())
+        );
+
+        let content_no_id = "# My Rule\n\nSome content";
+        assert_eq!(extract_embedded_rule_id(content_no_id), None);
+
+        let content_empty_id = "<!-- rulesify-id:  -->\n# My Rule";
+        assert_eq!(extract_embedded_rule_id(content_empty_id), None);
+    }
+
+    #[test]
+    fn test_determine_rule_id_with_fallback() {
+        // Test embedded rule ID (highest priority)
+        let content_with_embedded = "<!-- rulesify-id: embedded-rule -->\n# Some Rule";
+        let path = PathBuf::from("filename-rule.md");
+        let result = determine_rule_id_with_fallback(
+            content_with_embedded,
+            Some(&path),
+            Some("Content Rule Name"),
+        )
+        .unwrap();
+        assert_eq!(result, "embedded-rule");
+
+        // Test filename fallback
+        let content_no_embedded = "# Some Rule\n\nContent";
+        let result = determine_rule_id_with_fallback(
+            content_no_embedded,
+            Some(&path),
+            Some("Content Rule Name"),
+        )
+        .unwrap();
+        assert_eq!(result, "filename-rule");
+
+        // Test rule name fallback
+        let result =
+            determine_rule_id_with_fallback(content_no_embedded, None, Some("Content Rule Name"))
+                .unwrap();
+        assert_eq!(result, "content-rule-name");
+
+        // Test default fallback
+        let result = determine_rule_id_with_fallback(content_no_embedded, None, None).unwrap();
+        assert!(result.starts_with("imported-rule-"));
     }
 }

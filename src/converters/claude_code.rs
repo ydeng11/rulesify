@@ -1,5 +1,6 @@
 use crate::converters::RuleConverter;
 use crate::models::rule::{RuleContent, RuleMetadata, UniversalRule};
+use crate::utils::rule_id::{determine_rule_id_with_fallback, embed_rule_id_in_content};
 use anyhow::Result;
 use std::path::{Path, PathBuf};
 
@@ -34,20 +35,21 @@ impl RuleConverter for ClaudeCodeConverter {
             output.push_str("\n\n");
         }
 
-        Ok(output)
+        // Embed rule ID for tracking
+        let output_with_id = embed_rule_id_in_content(&output, &rule.id);
+
+        Ok(output_with_id)
     }
 
     fn convert_from_tool_format(&self, content: &str) -> Result<UniversalRule> {
         let (name, description, content_sections) = parse_claude_code_format(content)?;
 
-        // Generate rule ID from name
-        let rule_id = name
-            .to_lowercase()
-            .replace(' ', "-")
-            .replace('_', "-")
-            .chars()
-            .filter(|c| c.is_alphanumeric() || *c == '-')
-            .collect::<String>();
+        // Generate rule ID using fallback hierarchy
+        let rule_id = determine_rule_id_with_fallback(
+            content,
+            None, // No filename context in convert_from_tool_format
+            Some(&name),
+        )?;
 
         let metadata = RuleMetadata {
             name,
@@ -119,9 +121,15 @@ fn parse_claude_code_format(content: &str) -> Result<(String, Option<String>, Ve
             let title = line[3..].trim().to_string();
             current_section = Some((title, Vec::new()));
         } else if let Some((_, ref mut content_lines)) = current_section {
-            content_lines.push(line.to_string());
-        } else if !line.is_empty() && !line.starts_with('#') {
-            // Content without a section header
+            // Skip rulesify HTML comments
+            if !line.starts_with("<!-- rulesify-id:") {
+                content_lines.push(line.to_string());
+            }
+        } else if !line.is_empty()
+            && !line.starts_with('#')
+            && !line.starts_with("<!-- rulesify-id:")
+        {
+            // Content without a section header (skip rulesify HTML comments)
             if content_sections.is_empty() && current_section.is_none() {
                 current_section = Some(("Content".to_string(), vec![line.to_string()]));
             }

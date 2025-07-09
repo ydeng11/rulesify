@@ -8,7 +8,7 @@ use crate::converters::{
 };
 use crate::store::{file_store::FileStore, RuleStore};
 use crate::utils::config::load_config_from_path;
-use crate::utils::rule_id::extract_rule_id_from_filename;
+use crate::utils::rule_id::determine_rule_id_with_fallback;
 
 pub fn run(
     tool: String,
@@ -36,25 +36,28 @@ pub fn run(
         .convert_from_tool_format(&content)
         .with_context(|| format!("Failed to convert {} format to URF", tool))?;
 
-    // Determine final rule ID: CLI override > filename > content-based fallback
+    // Determine final rule ID: CLI override > embedded ID > filename > content-based fallback
     let final_rule_id = if let Some(custom_id) = rule_id {
         // User provided explicit override
         custom_id
     } else {
-        // Extract rule ID from filename (new default behavior)
-        let filename_based_id = extract_rule_id_from_filename(&file)
-            .with_context(|| format!("Cannot derive rule ID from filename: {}", file.display()))?;
+        // Use the new fallback hierarchy to determine rule ID
+        let determined_id =
+            determine_rule_id_with_fallback(&content, Some(&file), Some(&rule.metadata.name))
+                .with_context(|| {
+                    format!("Cannot determine rule ID from file: {}", file.display())
+                })?;
 
-        // Check if filename-based ID differs from content-based ID
-        if filename_based_id != rule.id {
+        // Check if determined ID differs from content-based ID
+        if determined_id != rule.id {
             println!(
-                "ℹ️  Note: Using filename '{}' as rule ID (content suggests '{}')",
-                filename_based_id, rule.id
+                "ℹ️  Note: Using determined rule ID '{}' (content suggests '{}')",
+                determined_id, rule.id
             );
-            println!("   Use --rule-id to override or rename the file to match content naming");
+            println!("   Use --rule-id to override this behavior");
         }
 
-        filename_based_id
+        determined_id
     };
 
     // Override the rule ID with our determined value

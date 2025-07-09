@@ -9,7 +9,7 @@ use crate::converters::{
 use crate::models::rule::UniversalRule;
 use crate::store::{file_store::FileStore, RuleStore};
 use crate::utils::config::load_config_from_path;
-use crate::utils::rule_id::extract_rule_id_from_filename;
+use crate::utils::rule_id::determine_rule_id_with_fallback;
 
 pub fn run(
     dry_run: bool,
@@ -158,10 +158,15 @@ fn sync_rule_from_file(
     let content = fs::read_to_string(file_path)
         .with_context(|| format!("Failed to read file: {}", file_path.display()))?;
 
-    // Extract rule ID from filename using our shared utility
-    let rule_id = extract_rule_id_from_filename(file_path).with_context(|| {
+    // Determine rule ID using fallback hierarchy
+    let rule_id = determine_rule_id_with_fallback(
+        &content,
+        Some(file_path),
+        None, // We'll get rule name from the converted rule
+    )
+    .with_context(|| {
         format!(
-            "Cannot extract rule ID from filename: {}",
+            "Cannot determine rule ID from file: {}",
             file_path.display()
         )
     })?;
