@@ -243,6 +243,7 @@ This system ensures that rule IDs remain stable across import, export, and sync 
 - `rulesify deploy --all` - Deploy all rules to all configured default tools
 - `rulesify deploy --tool <tool> --all` - Deploy all rules to a specific tool (cursor, cline, claude-code, goose)
 - `rulesify deploy --tool <tool> --rule <rule>` - Deploy a specific rule to a specific tool
+- `rulesify deploy --tool <tool> --rule <rule1,rule2,rule3>` - Deploy multiple rules (triggers merge) - prompts for merged rule ID
 
 ### Synchronization
 **Sync detects changes in deployed tool files and updates the corresponding URF files to maintain consistency.**
@@ -283,6 +284,37 @@ rulesify deploy --tool cursor --rule react-best-practices
 # Deploy to multiple tools
 rulesify deploy --tool cline --rule react-best-practices
 rulesify deploy --tool claude-code --rule react-best-practices
+```
+
+### Merge & Deploy Multiple Rules
+**When deploying multiple rules, rulesify automatically merges them based on priority and prompts for a new rule ID.**
+
+```bash
+# Deploy multiple rules - triggers interactive merge
+rulesify deploy --tool claude-code --rule "typescript-style,react-patterns,testing-standards"
+
+# Example interaction:
+# 📦 Multiple rules detected for merging:
+#   1. typescript-style
+#   2. react-patterns
+#   3. testing-standards
+#
+# 📋 Merge Preview:
+# Rules will be combined in priority order (highest first):
+#   1. typescript-style (priority: 8)
+#   2. testing-standards (priority: 6)
+#   3. react-patterns (priority: 4)
+# 📋 Combined tags: typescript, style, testing, react, components
+#
+# 🔗 Enter ID for the merged rule: full-frontend-guide
+# ✅ Merged 3 rules → CLAUDE.md
+
+# The merged rule combines:
+# - Metadata from highest priority rule (typescript-style)
+# - Descriptions concatenated with separators
+# - Tags deduplicated across all rules
+# - Content sections in priority order
+# - Tool overrides from highest priority rule
 ```
 
 ### Sync Deployed Rules Back to URF
@@ -347,6 +379,9 @@ rulesify sync --dry-run    # Preview changes
 rulesify sync              # Apply changes
 rulesify validate --all    # Ensure quality
 rulesify deploy --all      # Deploy updates
+
+# Merge and deploy multiple rules for comprehensive tooling
+rulesify deploy --tool claude-code --rule "typescript-style,react-patterns,testing-standards"
 ```
 
 ### Interactive Features
@@ -354,6 +389,7 @@ rulesify deploy --all      # Deploy updates
 **Confirmation Prompts:**
 - `rulesify rule delete <name>` - Requires confirmation before deletion
 - Import commands ask if you want to open the rule in editor after import
+- Multi-rule deployment prompts for merged rule ID and overwrite confirmation
 
 **Editor Integration:**
 - `rulesify rule new <name>` - Automatically opens new rule in configured editor
@@ -402,10 +438,10 @@ cargo test --test validation_tests
 ```
 
 ### Test Coverage
-- **75 total tests** across all modules
+- **75+ total tests** across all modules
 - **19 converter tests** (import/export functionality)
 - **22 validation tests** (quality assurance)
-- **8 CLI integration tests**
+- **10+ CLI integration tests** (including multi-rule merge)
 - **11 import tests**
 - **4 end-to-end tests** (complete workflows)
 - **5 storage tests** (persistence layer)

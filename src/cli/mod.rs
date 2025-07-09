@@ -46,7 +46,10 @@ pub enum Commands {
     Deploy {
         #[arg(long, help = "Target tool: cursor, cline, claude-code, or goose")]
         tool: Option<String>,
-        #[arg(long, help = "Deploy specific rule by name")]
+        #[arg(
+            long,
+            help = "Deploy specific rule(s) by name (comma-separated for multiple)"
+        )]
         rule: Option<String>,
         #[arg(long, help = "Deploy all rules")]
         all: bool,

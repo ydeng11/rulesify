@@ -1,5 +1,11 @@
 /target
-.cursor
-.clinerules
-*.goosehints
+
 .DS_Store
+
+.cursor
+
+.clinerules
+
+*.goosehints
+
+CLAUDE.md
