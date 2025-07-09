@@ -184,7 +184,7 @@ fn test_all_converters_deployment_paths() {
 
     let claude = ClaudeCodeConverter::new();
     let claude_path = claude.get_deployment_path(project_root);
-    assert_eq!(claude_path, project_root.to_path_buf());
+    assert_eq!(claude_path, project_root.join("CLAUDE.md"));
 
     let goose = GooseConverter::new();
     let goose_path = goose.get_deployment_path(project_root);

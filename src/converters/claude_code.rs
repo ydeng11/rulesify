@@ -68,7 +68,7 @@ impl RuleConverter for ClaudeCodeConverter {
     }
 
     fn get_deployment_path(&self, project_root: &Path) -> PathBuf {
-        project_root.to_path_buf()
+        project_root.join("CLAUDE.md")
     }
 
     fn get_file_extension(&self) -> &str {

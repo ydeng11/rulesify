@@ -98,10 +98,7 @@ fn test_complete_rule_creation_and_deployment_workflow() {
         .path()
         .join(".clinerules/integration-test-rule.md")
         .exists());
-    assert!(project_temp_dir
-        .path()
-        .join("integration-test-rule.md")
-        .exists());
+    assert!(project_temp_dir.path().join("CLAUDE.md").exists());
     assert!(project_temp_dir
         .path()
         .join("integration-test-rule.goosehints")
