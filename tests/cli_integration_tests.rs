@@ -307,6 +307,193 @@ default_tools:
 }
 
 #[test]
+fn test_cli_deploy_merge_multiple_rules() {
+    let temp_dir = TempDir::new().expect("Failed to create temp directory");
+    let rules_dir = temp_dir.path().join("rules");
+    fs::create_dir_all(&rules_dir).expect("Failed to create rules directory");
+
+    // Create test rules with different priorities
+    let high_priority_rule = r#"
+id: high-priority-rule
+version: 1.0.0
+metadata:
+  name: High Priority Rule
+  description: |
+    This is a high priority rule for TypeScript
+  tags: [typescript, style]
+  priority: 8
+content:
+  - title: TypeScript Guidelines
+    format: markdown
+    value: |-
+      • Use strict mode
+      • Prefer const over let
+references: []
+conditions: []
+tool_overrides:
+  cursor:
+    apply_mode: intelligent
+  cline: {}
+  claude-code: {}
+  goose: {}
+"#;
+
+    let medium_priority_rule = r#"
+id: medium-priority-rule
+version: 1.0.0
+metadata:
+  name: Medium Priority Rule
+  description: |
+    Testing guidelines for the project
+  tags: [testing, jest, quality]
+  priority: 6
+content:
+  - title: Testing Standards
+    format: markdown
+    value: |-
+      • Write unit tests
+      • Use descriptive test names
+references: []
+conditions: []
+tool_overrides:
+  cursor:
+    apply_mode: always
+  cline: {}
+  claude-code: {}
+  goose: {}
+"#;
+
+    let low_priority_rule = r#"
+id: low-priority-rule
+version: 1.0.0
+metadata:
+  name: Low Priority Rule
+  description: |
+    Documentation standards
+  tags: [documentation, readme]
+  priority: 3
+content:
+  - title: Documentation Rules
+    format: markdown
+    value: |-
+      • Keep README up to date
+      • Document public APIs
+references: []
+conditions: []
+tool_overrides:
+  cursor: {}
+  cline: {}
+  claude-code: {}
+  goose: {}
+"#;
+
+    // Write rule files
+    fs::write(
+        rules_dir.join("high-priority-rule.urf.yaml"),
+        high_priority_rule,
+    )
+    .expect("Failed to write high priority rule");
+    fs::write(
+        rules_dir.join("medium-priority-rule.urf.yaml"),
+        medium_priority_rule,
+    )
+    .expect("Failed to write medium priority rule");
+    fs::write(
+        rules_dir.join("low-priority-rule.urf.yaml"),
+        low_priority_rule,
+    )
+    .expect("Failed to write low priority rule");
+
+    // Set up config
+    let config_dir = temp_dir.path().join("config");
+    fs::create_dir_all(&config_dir).expect("Failed to create config directory");
+
+    let config_content = format!(
+        r#"
+rules_directory: "{}"
+editor: null
+default_tools:
+  - cursor
+"#,
+        rules_dir.display()
+    );
+
+    let config_file = config_dir.join("config.yaml");
+    fs::write(&config_file, config_content).expect("Failed to write config file");
+
+    // Note: This test can't fully test the interactive merge since it requires user input
+    // We would need to mock stdin or create a non-interactive mode for full testing
+
+    // Test that the command properly parses multiple rules and validates they exist
+    let (stdout, stderr, exit_code) = run_rulesify_command(
+        &[
+            "--config",
+            config_file.to_str().unwrap(),
+            "deploy",
+            "--tool",
+            "cursor",
+            "--rule",
+            "high-priority-rule,medium-priority-rule,low-priority-rule",
+        ],
+        temp_dir.path(),
+    )
+    .expect("Failed to run rulesify deploy with multiple rules");
+
+    // The command should fail with a prompt for merged rule ID (since we can't provide input in this test)
+    // But it should get past the validation stage and show the merge preview
+    assert!(
+        stdout.contains("Multiple rules detected for merging")
+            || stderr.contains("Multiple rules detected for merging")
+    );
+    assert!(stdout.contains("high-priority-rule") || stderr.contains("high-priority-rule"));
+    assert!(stdout.contains("medium-priority-rule") || stderr.contains("medium-priority-rule"));
+    assert!(stdout.contains("low-priority-rule") || stderr.contains("low-priority-rule"));
+}
+
+#[test]
+fn test_cli_deploy_nonexistent_rule() {
+    let temp_dir = TempDir::new().expect("Failed to create temp directory");
+    let rules_dir = temp_dir.path().join("rules");
+    fs::create_dir_all(&rules_dir).expect("Failed to create rules directory");
+
+    // Set up config
+    let config_dir = temp_dir.path().join("config");
+    fs::create_dir_all(&config_dir).expect("Failed to create config directory");
+
+    let config_content = format!(
+        r#"
+rules_directory: "{}"
+editor: null
+default_tools:
+  - cursor
+"#,
+        rules_dir.display()
+    );
+
+    let config_file = config_dir.join("config.yaml");
+    fs::write(&config_file, config_content).expect("Failed to write config file");
+
+    // Test deploying a mix of existing and non-existing rules
+    let (stdout, stderr, exit_code) = run_rulesify_command(
+        &[
+            "--config",
+            config_file.to_str().unwrap(),
+            "deploy",
+            "--tool",
+            "cursor",
+            "--rule",
+            "nonexistent-rule,another-missing-rule",
+        ],
+        temp_dir.path(),
+    )
+    .expect("Failed to run rulesify deploy with nonexistent rules");
+
+    // Should fail early with validation error
+    assert_ne!(exit_code, 0);
+    assert!(stderr.contains("not found") || stdout.contains("not found"));
+}
+
+#[test]
 fn test_cli_import_command() {
     let temp_dir = TempDir::new().expect("Failed to create temp directory");
     let rules_dir = temp_dir.path().join("rules");
