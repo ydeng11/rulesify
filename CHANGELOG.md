@@ -5,6 +5,54 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.0] - 2025-01-09
+
+### Added
+- **🚀 Multi-Rule Merging Support**: Enhanced deploy command with intelligent rule combination functionality
+  - **Comma-Separated Rule Deployment**: Deploy multiple rules using `--rule "rule1,rule2,rule3"` syntax
+  - **Priority-Based Merging**: Rules automatically sorted and merged by priority (10 → 1, highest first)
+  - **Interactive User Experience**:
+    - Merge preview showing rules in priority order with combined metadata
+    - User-prompted merged rule ID with automatic sanitization
+    - Conflict detection and overwrite confirmation
+  - **Smart Metadata Combination**:
+    - Name: Uses highest priority rule's name
+    - Description: Concatenates all descriptions with separators (`\n\n---\n\n`)
+    - Tags: Deduplicates across all rules while preserving priority order
+    - Tool Overrides: Uses complete overrides from highest priority rule
+  - **Universal Compatibility**: Works with all supported AI tools (cursor, cline, claude-code, goose)
+
+### Enhanced
+- **Deploy Command**: Extended to support both single and multiple rule deployment
+  - Backward compatible: existing single-rule deployments work identically
+  - Enhanced validation: all specified rules validated before proceeding
+  - Improved error handling and user feedback
+- **CLI Help**: Updated command descriptions to reflect new multi-rule capabilities
+- **Documentation**: Comprehensive examples and usage scenarios for multi-rule workflows
+
+### Added Functions
+- `merge_rules()`: Core merging logic with priority-based rule combination
+- `prompt_for_merged_rule_id()`: Interactive user input with validation and sanitization
+- `show_merge_preview()`: User-friendly preview of merge operation showing priority order
+- `deploy_merged_rule()`: Specialized deployment logic for merged rules
+
+### Testing
+- **6 New Unit Tests**: Complete coverage of merge logic (priority ordering, tag deduplication, content combination, description concatenation, edge cases)
+- **2 New Integration Tests**: CLI behavior validation and error handling for multi-rule scenarios
+- **Zero Breaking Changes**: All existing tests continue to pass (78+ total tests)
+
+### Technical Improvements
+- Enhanced rule parsing to handle comma-separated input with validation
+- Improved user interaction patterns with clear previews and confirmations
+- Better error messages and user guidance throughout the merge process
+- Comprehensive test coverage ensuring reliability and preventing regressions
+
+### Use Cases Enabled
+- **Single-File AI Tools**: Perfect solution for claude-code (CLAUDE.md) and goose (.goosehints) that support only one rule file
+- **Comprehensive Rule Sets**: Combine multiple specialized rules (e.g., typescript-style + react-patterns + testing-standards) into unified guidance
+- **Team Workflows**: Merge individual contributor rules into team-wide standards
+- **Tool Migration**: Easily consolidate rules when switching between AI tools
+
 ## [0.1.6] - 2025-01-09
 
 ### Added
