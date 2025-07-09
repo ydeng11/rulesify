@@ -192,6 +192,39 @@ tool_overrides:
 - Round-trip guarantee: `urf → tool file → urf` is lossless (auto-validated).
 - Tool-specific quirks are isolated in `tool_overrides`.
 
+## Rule ID Management
+
+Rulesify uses a **unified rule ID system** that ensures consistent, machine-safe identifiers across all operations:
+
+### Rule ID Format
+- **Lowercase with hyphens**: `typescript-style`, `react-patterns`
+- **Alphanumeric and hyphens only**: Special characters are removed
+- **Length limits**: 2-50 characters
+- **No consecutive hyphens**: Multiple hyphens are collapsed to single hyphens
+
+### ID Generation Hierarchy
+When creating or importing rules, Rulesify determines the rule ID using this priority order:
+
+1. **Embedded HTML comment** (highest priority): `<!-- rulesify-id: custom-id -->`
+2. **Filename-based ID**: Extracted from filename and sanitized
+3. **Rule name**: Sanitized version of the rule's display name
+4. **Timestamp fallback**: `imported-rule-{timestamp}` as last resort
+
+### Sanitization Examples
+```bash
+"TypeScript Style Guide" → "typescript-style-guide"
+"React_Components"       → "react-components"
+"My Rule!!!"            → "my-rule"
+"rule with   spaces"     → "rule-with-spaces"
+```
+
+### ID Tracking in Sync Operations
+- **HTML Comment Embedding**: Deployed files include `<!-- rulesify-id: {id} -->` for tracking
+- **Filename Preservation**: Sync operations preserve original rule IDs based on `.urf.yaml` filenames
+- **Conflict Resolution**: Filename-based IDs take precedence during sync to maintain consistency
+
+This system ensures that rule IDs remain stable across import, export, and sync operations while maintaining compatibility with all supported AI tools.
+
 ## Command Reference
 
 ### Rule Management

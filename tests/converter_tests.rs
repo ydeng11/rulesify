@@ -60,8 +60,11 @@ fn test_cursor_converter_basic_conversion() {
 
     let output = result.unwrap();
 
+    // Check rule ID comment is embedded
+    assert!(output.starts_with("<!-- rulesify-id: test-rule -->"));
+
     // Check YAML frontmatter
-    assert!(output.starts_with("---\n"));
+    assert!(output.contains("---\n"));
     assert!(output.contains("description: \"A test rule for unit testing\""));
     assert!(output.contains("notes: \"Rule: Test Rule\""));
     assert!(output.contains("alwaysApply: false"));
@@ -87,8 +90,11 @@ fn test_cline_converter_basic_conversion() {
 
     let output = result.unwrap();
 
+    // Check rule ID comment is embedded
+    assert!(output.starts_with("<!-- rulesify-id: test-rule -->"));
+
     // Check main title
-    assert!(output.starts_with("# Test Rule\n\n"));
+    assert!(output.contains("# Test Rule\n\n"));
 
     // Check description
     assert!(output.contains("A test rule for unit testing"));
@@ -110,8 +116,11 @@ fn test_claude_code_converter_basic_conversion() {
 
     let output = result.unwrap();
 
+    // Check rule ID comment is embedded
+    assert!(output.starts_with("<!-- rulesify-id: test-rule -->"));
+
     // Check main title
-    assert!(output.starts_with("# Test Rule\n\n"));
+    assert!(output.contains("# Test Rule\n\n"));
 
     // Check description
     assert!(output.contains("A test rule for unit testing"));
@@ -133,8 +142,11 @@ fn test_goose_converter_basic_conversion() {
 
     let output = result.unwrap();
 
+    // Check rule ID comment is embedded
+    assert!(output.starts_with("<!-- rulesify-id: test-rule -->"));
+
     // Check title with underline
-    assert!(output.starts_with("Test Rule\n========="));
+    assert!(output.contains("Test Rule\n========="));
 
     // Check description
     assert!(output.contains("A test rule for unit testing"));
@@ -184,7 +196,7 @@ fn test_all_converters_deployment_paths() {
 
     let claude = ClaudeCodeConverter::new();
     let claude_path = claude.get_deployment_path(project_root);
-    assert_eq!(claude_path, project_root.to_path_buf());
+    assert_eq!(claude_path, project_root.join("CLAUDE.md"));
 
     let goose = GooseConverter::new();
     let goose_path = goose.get_deployment_path(project_root);
@@ -415,6 +427,8 @@ Just plain text content.
             imported_rule.references.len(),
             original_rule.references.len()
         );
+        // Most importantly, verify the rule ID is preserved
+        assert_eq!(imported_rule.id, original_rule.id);
     }
 
     #[test]
@@ -437,6 +451,8 @@ Just plain text content.
             original_rule.metadata.description
         );
         assert_eq!(imported_rule.content.len(), original_rule.content.len());
+        // Most importantly, verify the rule ID is preserved
+        assert_eq!(imported_rule.id, original_rule.id);
     }
 
     #[test]
@@ -459,6 +475,8 @@ Just plain text content.
             original_rule.metadata.description
         );
         assert_eq!(imported_rule.content.len(), original_rule.content.len());
+        // Most importantly, verify the rule ID is preserved
+        assert_eq!(imported_rule.id, original_rule.id);
     }
 
     #[test]
@@ -481,6 +499,8 @@ Just plain text content.
             original_rule.metadata.description
         );
         assert_eq!(imported_rule.content.len(), original_rule.content.len());
+        // Most importantly, verify the rule ID is preserved
+        assert_eq!(imported_rule.id, original_rule.id);
     }
 
     #[test]

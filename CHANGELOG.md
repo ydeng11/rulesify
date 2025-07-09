@@ -5,6 +5,33 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.6] - 2025-01-09
+
+### Added
+- **Unified Rule ID Sanitization System**: New comprehensive rule ID management with consistent sanitization across all operations
+  - Added `src/utils/rule_id.rs` module with unified sanitization logic
+  - Rule IDs now consistently use lowercase, hyphens, and alphanumeric characters only
+  - Enforced length limits (2-50 characters) with proper validation
+  - Unified sanitization across rule creation, import, and sync operations
+
+### Enhanced
+- **Improved Sync Operations with HTML Comment Tracking**: Enhanced rule ID preservation during sync operations
+  - Added HTML comment embedding (`<!-- rulesify-id: {rule_id} -->`) for better rule tracking
+  - Sync operations now preserve original rule IDs more reliably using filename-based fallback hierarchy
+  - Improved rule ID determination with priority-based fallback system (embedded ID → filename → rule name)
+  - Better handling of edge cases where rule names differ from filenames
+
+### Fixed
+- **Claude Code Converter Naming**: Resolved naming inconsistencies in Claude Code rule handling
+- **Sync Test Race Conditions**: Fixed intermittent test failures in CI/CD by improving test isolation
+- **Rule ID Generation**: Consistent rule ID generation across all converters and commands
+
+### Technical Improvements
+- Added comprehensive test coverage for rule ID sanitization and validation
+- Enhanced error handling for invalid rule IDs and file references
+- Improved code organization with centralized rule ID management utilities
+- Better documentation and inline comments for rule ID handling logic
+
 ## [0.1.5] - 2024-12-19
 
 ### Added

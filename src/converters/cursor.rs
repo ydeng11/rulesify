@@ -1,5 +1,6 @@
 use crate::converters::RuleConverter;
 use crate::models::rule::{FileReference, RuleCondition, RuleContent, RuleMetadata, UniversalRule};
+use crate::utils::rule_id::{determine_rule_id_with_fallback, embed_rule_id_in_content};
 use anyhow::{anyhow, Result};
 use serde_yaml;
 use std::path::{Path, PathBuf};
@@ -103,7 +104,10 @@ impl RuleConverter for CursorConverter {
             output.push_str(&format!("@{}\n", reference.path));
         }
 
-        Ok(output)
+        // Embed rule ID for tracking
+        let output_with_id = embed_rule_id_in_content(&output, &rule.id);
+
+        Ok(output_with_id)
     }
 
     fn convert_from_tool_format(&self, content: &str) -> Result<UniversalRule> {
@@ -168,15 +172,12 @@ impl RuleConverter for CursorConverter {
             })
             .unwrap_or_default();
 
-        // Generate rule ID from name
-        let rule_id = metadata
-            .name
-            .to_lowercase()
-            .replace(' ', "-")
-            .replace('_', "-")
-            .chars()
-            .filter(|c| c.is_alphanumeric() || *c == '-')
-            .collect::<String>();
+        // Generate rule ID using fallback hierarchy
+        let rule_id = determine_rule_id_with_fallback(
+            content,
+            None, // No filename context in convert_from_tool_format
+            Some(&metadata.name),
+        )?;
 
         // Create tool overrides with apply_mode for cursor
         let always_apply = frontmatter
@@ -239,16 +240,25 @@ impl RuleConverter for CursorConverter {
 }
 
 fn parse_cursor_format(content: &str) -> Result<(serde_yaml::Value, String)> {
-    // Check if content starts with YAML frontmatter
-    if !content.starts_with("---") {
+    let lines: Vec<&str> = content.lines().collect();
+
+    // Find the start of YAML frontmatter (skip any HTML comments)
+    let mut frontmatter_start = 0;
+    for (i, line) in lines.iter().enumerate() {
+        if line.trim() == "---" {
+            frontmatter_start = i;
+            break;
+        }
+    }
+
+    // If no frontmatter found, return the content as-is
+    if frontmatter_start == 0 && !lines.get(0).unwrap_or(&"").trim().starts_with("---") {
         return Ok((serde_yaml::Value::Null, content.to_string()));
     }
 
     // Find the end of frontmatter
-    let lines: Vec<&str> = content.lines().collect();
     let mut frontmatter_end = 0;
-
-    for (i, line) in lines.iter().enumerate().skip(1) {
+    for (i, line) in lines.iter().enumerate().skip(frontmatter_start + 1) {
         if line.trim() == "---" {
             frontmatter_end = i;
             break;
@@ -260,7 +270,7 @@ fn parse_cursor_format(content: &str) -> Result<(serde_yaml::Value, String)> {
     }
 
     // Parse frontmatter
-    let frontmatter_str = lines[1..frontmatter_end].join("\n");
+    let frontmatter_str = lines[frontmatter_start + 1..frontmatter_end].join("\n");
     let frontmatter: serde_yaml::Value = serde_yaml::from_str(&frontmatter_str)
         .map_err(|e| anyhow!("Failed to parse YAML frontmatter: {}", e))?;
 
@@ -304,9 +314,12 @@ fn parse_markdown_content(markdown: &str) -> Result<(Vec<RuleContent>, Vec<FileR
             let path = line[1..].trim().to_string();
             references.push(FileReference { path });
         } else if let Some((_, ref mut content_lines)) = current_section {
-            content_lines.push(line.to_string());
-        } else if !line.trim().is_empty() {
-            // Content before any heading - start a default section
+            // Skip rulesify HTML comments
+            if !line.starts_with("<!-- rulesify-id:") {
+                content_lines.push(line.to_string());
+            }
+        } else if !line.trim().is_empty() && !line.starts_with("<!-- rulesify-id:") {
+            // Content before any heading - start a default section (skip rulesify HTML comments)
             if current_section.is_none() {
                 current_section = Some(("Content".to_string(), vec![line.to_string()]));
             }
