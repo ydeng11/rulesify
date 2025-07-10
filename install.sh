@@ -79,10 +79,27 @@ rm -rf "$TMPDIR"
 NEW_VERSION=$("$BINARY_PATH" --version 2>/dev/null | head -n1 | grep -o 'v[0-9]\+\.[0-9]\+\.[0-9]\+' || echo "$LATEST_TAG")
 echo "✅ Successfully installed $BINARY_NAME $NEW_VERSION to $INSTALL_DIR/$BINARY_NAME"
 
+# Setup shell completion
+setup_completion() {
+    local shell="$1"
+    local completion_dir="$2"
+    local completion_file="$3"
+    
+    mkdir -p "$completion_dir"
+    
+    if "$BINARY_PATH" completion "$shell" > "$completion_file"; then
+        echo "✅ Installed $shell completion to $completion_file"
+        return 0
+    else
+        echo "⚠️  Failed to generate $shell completion"
+        return 1
+    fi
+}
+
+# Detect shell more reliably
+CURRENT_SHELL=$(basename "$SHELL")
 # Add to PATH if needed
 if ! echo "$PATH" | grep -q "$INSTALL_DIR"; then
-    # Detect shell more reliably
-    CURRENT_SHELL=$(basename "$SHELL")
     PROFILE=""
     case "$CURRENT_SHELL" in
         zsh)
@@ -103,4 +120,54 @@ if ! echo "$PATH" | grep -q "$INSTALL_DIR"; then
     fi
 fi
 
+
+case "$CURRENT_SHELL" in
+    zsh)
+        if [ -d "$HOME/.local/share/zsh/site-functions" ]; then
+            setup_completion zsh "$HOME/.local/share/zsh/site-functions" "$HOME/.local/share/zsh/site-functions/_rulesify"
+        elif [ -d "$HOME/.oh-my-zsh/completions" ]; then
+            setup_completion zsh "$HOME/.oh-my-zsh/completions" "$HOME/.oh-my-zsh/completions/_rulesify"
+        else
+            # Fallback to sourcing from profile
+            COMPLETION_FILE="$HOME/.rulesify-completion.zsh"
+            if setup_completion zsh "$(dirname "$COMPLETION_FILE")" "$COMPLETION_FILE"; then
+                if ! grep -q "source.*rulesify-completion.zsh" "$HOME/.zshrc" 2>/dev/null; then
+                    echo "source $COMPLETION_FILE" >> "$HOME/.zshrc"
+                    echo "Added completion source to ~/.zshrc"
+                fi
+            fi
+        fi
+		echo "📚 To enable tab completion in your current session:"
+        echo "  source ~/.zshrc   # or restart your terminal"
+        ;;
+    bash)
+        if [ -d "$HOME/.local/share/bash-completion/completions" ]; then
+            setup_completion bash "$HOME/.local/share/bash-completion/completions" "$HOME/.local/share/bash-completion/completions/rulesify"
+        elif [ -d "$HOME/.bash_completion.d" ]; then
+            setup_completion bash "$HOME/.bash_completion.d" "$HOME/.bash_completion.d/rulesify"
+        else
+            # Fallback to sourcing from profile
+            COMPLETION_FILE="$HOME/.rulesify-completion.bash"
+            if setup_completion bash "$(dirname "$COMPLETION_FILE")" "$COMPLETION_FILE"; then
+                if ! grep -q "source.*rulesify-completion.bash" "$HOME/.bashrc" 2>/dev/null; then
+                    echo "source $COMPLETION_FILE" >> "$HOME/.bashrc"
+                    echo "Added completion source to ~/.bashrc"
+                fi
+            fi
+        fi
+		echo "📚 To enable tab completion in your current session:"
+        echo "  source ~/.bashrc  # or restart your terminal"
+        ;;
+    fish)
+        FISH_COMPLETION_DIR="$HOME/.config/fish/completions"
+        setup_completion fish "$FISH_COMPLETION_DIR" "$FISH_COMPLETION_DIR/rulesify.fish"
+        echo "✅ Fish completion is automatically loaded."
+        ;;
+    *)
+        echo "ℹ️  Shell completion not automatically configured for $CURRENT_SHELL"
+        echo "  Generate completion: rulesify completion $CURRENT_SHELL"
+        ;;
+esac
+
+echo ""
 echo "Done! Run 'rulesify --help' to get started."
