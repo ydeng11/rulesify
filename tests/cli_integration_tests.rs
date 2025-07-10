@@ -646,3 +646,109 @@ fn test_cli_verbose_output() {
     assert_eq!(exit_code, 0);
     assert!(stdout.contains("Rulesify manages Universal Rule Files"));
 }
+
+#[test]
+fn test_cli_completion_command_bash() {
+    let temp_dir = TempDir::new().expect("Failed to create temp directory");
+
+    // Test bash completion generation
+    let (stdout, stderr, exit_code) = run_rulesify_command(
+        &["completion", "bash"],
+        temp_dir.path(),
+    )
+    .expect("Failed to run rulesify completion bash");
+
+    assert_eq!(exit_code, 0, "Command failed with stderr: {}", stderr);
+    assert!(stdout.contains("_rulesify"), "Bash completion should contain function name");
+    assert!(stdout.contains("complete"), "Bash completion should contain complete command");
+    assert!(stdout.len() > 100, "Bash completion should be substantial");
+}
+
+#[test]
+fn test_cli_completion_command_zsh() {
+    let temp_dir = TempDir::new().expect("Failed to create temp directory");
+
+    // Test zsh completion generation
+    let (stdout, stderr, exit_code) = run_rulesify_command(
+        &["completion", "zsh"],
+        temp_dir.path(),
+    )
+    .expect("Failed to run rulesify completion zsh");
+
+    assert_eq!(exit_code, 0, "Command failed with stderr: {}", stderr);
+    assert!(stdout.contains("_rulesify"), "Zsh completion should contain function name");
+    assert!(stdout.contains("compdef"), "Zsh completion should contain compdef");
+    assert!(stdout.len() > 100, "Zsh completion should be substantial");
+}
+
+#[test]
+fn test_cli_completion_command_fish() {
+    let temp_dir = TempDir::new().expect("Failed to create temp directory");
+
+    // Test fish completion generation
+    let (stdout, stderr, exit_code) = run_rulesify_command(
+        &["completion", "fish"],
+        temp_dir.path(),
+    )
+    .expect("Failed to run rulesify completion fish");
+
+    assert_eq!(exit_code, 0, "Command failed with stderr: {}", stderr);
+    assert!(stdout.contains("complete"), "Fish completion should contain complete command");
+    assert!(stdout.contains("rulesify"), "Fish completion should reference rulesify");
+    assert!(stdout.len() > 100, "Fish completion should be substantial");
+}
+
+#[test]
+fn test_cli_completion_command_powershell() {
+    let temp_dir = TempDir::new().expect("Failed to create temp directory");
+
+    // Test PowerShell completion generation
+    let (stdout, stderr, exit_code) = run_rulesify_command(
+        &["completion", "powershell"],
+        temp_dir.path(),
+    )
+    .expect("Failed to run rulesify completion powershell");
+
+    assert_eq!(exit_code, 0, "Command failed with stderr: {}", stderr);
+    assert!(stdout.contains("Register-ArgumentCompleter"), "PowerShell completion should contain Register-ArgumentCompleter");
+    assert!(stdout.contains("rulesify"), "PowerShell completion should reference rulesify");
+    assert!(stdout.len() > 100, "PowerShell completion should be substantial");
+}
+
+#[test]
+fn test_cli_completion_command_invalid_shell() {
+    let temp_dir = TempDir::new().expect("Failed to create temp directory");
+
+    // Test invalid shell
+    let (stdout, stderr, exit_code) = run_rulesify_command(
+        &["completion", "invalid-shell"],
+        temp_dir.path(),
+    )
+    .expect("Failed to run rulesify completion with invalid shell");
+
+    assert_ne!(exit_code, 0, "Command should fail with invalid shell");
+    assert!(
+        stdout.contains("invalid value") || stderr.contains("invalid value") ||
+        stdout.contains("possible values") || stderr.contains("possible values"),
+        "Should indicate invalid shell value"
+    );
+}
+
+#[test]
+fn test_cli_completion_command_help() {
+    let temp_dir = TempDir::new().expect("Failed to create temp directory");
+
+    // Test completion help
+    let (stdout, stderr, exit_code) = run_rulesify_command(
+        &["completion", "--help"],
+        temp_dir.path(),
+    )
+    .expect("Failed to run rulesify completion --help");
+
+    assert_eq!(exit_code, 0, "Command failed with stderr: {}", stderr);
+    assert!(stdout.contains("Generate shell completion scripts"), "Help should describe completion functionality");
+    assert!(stdout.contains("bash"), "Help should mention bash");
+    assert!(stdout.contains("zsh"), "Help should mention zsh");
+    assert!(stdout.contains("fish"), "Help should mention fish");
+    assert!(stdout.contains("powershell"), "Help should mention powershell");
+}

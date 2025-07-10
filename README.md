@@ -264,6 +264,9 @@ This system ensures that rule IDs remain stable across import, export, and sync 
 - `rulesify import --tool <tool> <file>` - Import existing rule from AI tool format to URF
 - `rulesify import --tool <tool> <file> --rule-id <custom-id>` - Import with custom rule ID
 
+### Shell Completion
+- `rulesify completion <shell>` - Generate shell completion script (bash, zsh, fish, etc.)
+
 **Global Options (available on all commands):**
 - `--config <path>` - Use custom configuration file
 - `--verbose` - Enable detailed output for debugging
