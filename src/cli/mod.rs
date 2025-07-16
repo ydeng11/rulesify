@@ -1,4 +1,5 @@
 use clap::{Parser, Subcommand};
+use clap_complete::Shell;
 use log::{debug, error};
 use std::path::PathBuf;
 
@@ -22,7 +23,8 @@ EXAMPLES:
     rulesify deploy --all                 # Deploy all rules to all tools
     rulesify deploy --tool cursor --all   # Deploy to Cursor only
     rulesify config show                  # Show current configuration
-    rulesify sync --dry-run               # Preview sync changes"#
+    rulesify sync --dry-run               # Preview sync changes
+    rulesify completion shell             # Generate shell completion script"#
 )]
 pub struct Cli {
     #[command(subcommand)]
@@ -84,6 +86,11 @@ pub enum Commands {
         #[command(subcommand)]
         action: commands::config::ConfigAction,
     },
+    /// Generate shell completion scripts
+    Completion {
+        #[arg(help = "Shell to generate completion for")]
+        shell: Shell,
+    },
 }
 
 impl Cli {
@@ -131,6 +138,10 @@ impl Cli {
             Commands::Config { action } => {
                 debug!("Executing config command: {:?}", action);
                 commands::config::run(action, self.config)
+            }
+            Commands::Completion { shell } => {
+                debug!("Generating completion script for shell: {:?}", shell);
+                commands::completion::run(shell, self.config)
             }
         };
 
