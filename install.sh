@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -e
 
-REPO="ydeng11/rulesify"
+REPO="ihelio/rulesify"
 BINARY_NAME="rulesify"
 INSTALL_DIR="$HOME/.local/bin"
 BINARY_PATH="$INSTALL_DIR/$BINARY_NAME"
@@ -12,26 +12,19 @@ if [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
     echo "Usage: $0 [OPTIONS]"
     echo ""
     echo "Options:"
-    echo "  --edge SHA|PR_NUMBER    Install edge release by SHA or PR number"
+    echo "  --edge [SHA]            Install latest edge release, or a specific edge SHA"
     echo "  --help, -h              Show this help message"
     echo ""
     echo "Examples:"
     echo "  $0                      Install latest stable release"
-    echo "  $0 --edge abc1234       Install edge release by commit SHA"
-    echo "  $0 --edge pr42          Install edge release for PR #42"
+    echo "  $0 --edge               Install latest edge release (tag: edge)"
+    echo "  $0 --edge abc1234       Install edge release for commit SHA (tag: edge-abc1234)"
     echo "  $0 v0.3.0               Install specific version tag"
     exit 0
 elif [ "$1" = "--edge" ] || [ "$1" = "-e" ]; then
-    if [ -z "$2" ]; then
-        echo "Error: --edge requires a SHA or PR number"
-        echo "Usage: $0 --edge SHA|PR_NUMBER"
-        echo "Example: $0 --edge abc1234"
-        echo "Example: $0 --edge pr42"
-        exit 1
-    fi
-    # If it starts with "pr", use as-is, otherwise assume it's a SHA
-    if [[ "$2" =~ ^pr[0-9]+$ ]]; then
-        TARGET_TAG="edge-$2"
+    # No arg => latest edge
+    if [ -z "${2:-}" ]; then
+        TARGET_TAG="edge"
     else
         TARGET_TAG="edge-$2"
     fi
@@ -60,7 +53,7 @@ ASSET="${BINARY_NAME}-${OS}-${ARCH}.tar.gz"
 # Get release tag
 if [ -n "$TARGET_TAG" ]; then
     LATEST_TAG="$TARGET_TAG"
-    echo "Installing edge release: $LATEST_TAG"
+    echo "Installing from tag: $LATEST_TAG"
 else
     # Get latest release tag from GitHub API
     LATEST_TAG=$(curl -s https://api.github.com/repos/$REPO/releases/latest | grep '"tag_name"' | cut -d '"' -f4)
@@ -79,7 +72,7 @@ if [ -x "$BINARY_PATH" ]; then
         echo "Current installed version: $CURRENT_VERSION"
 
         # Compare versions (skip comparison for edge releases)
-        if [[ "$LATEST_TAG" =~ ^edge- ]]; then
+        if [[ "$LATEST_TAG" =~ ^edge($|-) ]]; then
             echo "🔄 Installing edge release: $LATEST_TAG"
         elif [ "$CURRENT_VERSION" = "$LATEST_TAG" ]; then
             echo "✅ You already have the latest version ($LATEST_TAG) installed!"
@@ -88,14 +81,14 @@ if [ -x "$BINARY_PATH" ]; then
             echo "🔄 Updating from $CURRENT_VERSION to $LATEST_TAG"
         fi
     else
-        if [[ "$LATEST_TAG" =~ ^edge- ]]; then
+        if [[ "$LATEST_TAG" =~ ^edge($|-) ]]; then
             echo "📦 Installing edge release: $LATEST_TAG"
         else
             echo "🔄 Updating existing installation to $LATEST_TAG"
         fi
     fi
 else
-    if [[ "$LATEST_TAG" =~ ^edge- ]]; then
+    if [[ "$LATEST_TAG" =~ ^edge($|-) ]]; then
         echo "📦 Installing edge release: $LATEST_TAG"
     else
         echo "📦 Installing $BINARY_NAME $LATEST_TAG"
@@ -113,7 +106,7 @@ TMPDIR=$(mktemp -d)
 echo "Downloading $ASSET from $URL ..."
 if ! curl -sSLf "$URL" -o "$TMPDIR/$ASSET"; then
     echo "Failed to download binary from $URL"
-    if [[ "$LATEST_TAG" =~ ^edge- ]]; then
+    if [[ "$LATEST_TAG" =~ ^edge($|-) ]]; then
         echo "The edge release $LATEST_TAG may not exist or may not have binaries for your platform."
         echo "Visit https://github.com/$REPO/releases/tag/$LATEST_TAG to check available assets."
     else
@@ -133,7 +126,7 @@ chmod +x "$INSTALL_DIR/$BINARY_NAME"
 rm -rf "$TMPDIR"
 
 # Verify installation
-if [[ "$LATEST_TAG" =~ ^edge- ]]; then
+if [[ "$LATEST_TAG" =~ ^edge($|-) ]]; then
     echo "✅ Successfully installed edge release $LATEST_TAG to $INSTALL_DIR/$BINARY_NAME"
 else
     NEW_VERSION=$("$BINARY_PATH" --version 2>/dev/null | head -n1 | grep -o 'v[0-9]\+\.[0-9]\+\.[0-9]\+' || echo "$LATEST_TAG")

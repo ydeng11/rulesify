@@ -62,7 +62,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # Check if release already exists (created by versioning workflow)
+          # Check if release already exists (created by releases workflow)
           if gh release view ${{ github.ref_name }} &>/dev/null; then
             echo "Release already exists, updating notes..."
             gh release edit ${{ github.ref_name }} --notes-file RELEASE_NOTES.md

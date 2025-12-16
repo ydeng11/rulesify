@@ -1,0 +1,338 @@
+name: Releases
+
+on:
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+    inputs:
+      action:
+        description: 'Action to perform'
+        required: true
+        type: choice
+        options:
+          - production-tag
+          - bump-version
+      release_version:
+        description: 'Release version (e.g., 0.3.0) - only for production-tag'
+        required: false
+        type: string
+      next_version:
+        description: 'Next version (e.g., 0.3.1) - only for bump-version'
+        required: false
+        type: string
+
+env:
+  CARGO_TERM_COLOR: always
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: releases-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  create-edge-releases:
+    name: Create Edge Releases
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+    runs-on: ubuntu-latest
+    outputs:
+      sha_short: ${{ steps.sha.outputs.sha_short }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Compute commit SHA
+        id: sha
+        shell: bash
+        run: |
+          SHA_SHORT=$(echo "${{ github.sha }}" | cut -c1-7)
+          echo "sha_short=$SHA_SHORT" >> "$GITHUB_OUTPUT"
+
+      - name: Create/update edge releases
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          SHA_SHORT="${{ steps.sha.outputs.sha_short }}"
+          EDGE_TAG="edge"
+          EDGE_SHA_TAG="edge-$SHA_SHORT"
+
+          NOTES_EDGE="Latest edge build from ${{ github.ref_name }}\n\nCommit: $SHA_SHORT\n"
+          NOTES_SHA="Edge build for specific commit\n\nCommit: $SHA_SHORT\n"
+
+          # Moving edge release: delete + recreate to avoid edit/upload races
+          if gh release view "$EDGE_TAG" >/dev/null 2>&1; then
+            gh release delete "$EDGE_TAG" --yes
+          fi
+          gh release create "$EDGE_TAG" \
+            --target "${{ github.sha }}" \
+            --title "Edge ($SHA_SHORT)" \
+            --notes "$NOTES_EDGE" \
+            --prerelease
+
+          # Immutable edge-SHA release: create only if it doesn't exist
+          if ! gh release view "$EDGE_SHA_TAG" >/dev/null 2>&1; then
+            gh release create "$EDGE_SHA_TAG" \
+              --target "${{ github.sha }}" \
+              --title "Edge ($SHA_SHORT)" \
+              --notes "$NOTES_SHA" \
+              --prerelease
+          fi
+
+          # Keep install.sh available on edge tags too
+          gh release upload "$EDGE_TAG" install.sh --clobber
+          gh release upload "$EDGE_SHA_TAG" install.sh --clobber
+
+  build-edge-assets:
+    name: Build Edge Assets
+    needs: create-edge-releases
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            target: x86_64-unknown-linux-gnu
+            artifact_name: rulesify
+            asset_name: rulesify-linux-amd64
+          - os: macos-latest
+            target: x86_64-apple-darwin
+            artifact_name: rulesify
+            asset_name: rulesify-darwin-amd64
+          - os: macos-latest
+            target: aarch64-apple-darwin
+            artifact_name: rulesify
+            asset_name: rulesify-darwin-arm64
+          - os: windows-latest
+            target: x86_64-pc-windows-msvc
+            artifact_name: rulesify.exe
+            asset_name: rulesify-windows-amd64.exe
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+
+      - name: Build
+        run: cargo build --release --target ${{ matrix.target }}
+
+      - name: Package binary and checksum
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd target/${{ matrix.target }}/release
+          if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
+            7z a ../../../${{ matrix.asset_name }}.zip ${{ matrix.artifact_name }}
+            certutil -hashfile ../../../${{ matrix.asset_name }}.zip SHA256 > ../../../${{ matrix.asset_name }}.zip.sha256
+          else
+            tar -czf ../../../${{ matrix.asset_name }}.tar.gz ${{ matrix.artifact_name }}
+            shasum -a 256 ../../../${{ matrix.asset_name }}.tar.gz > ../../../${{ matrix.asset_name }}.tar.gz.sha256
+          fi
+          cd -
+
+      - name: Upload assets to edge releases
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          SHA_SHORT="${{ needs.create-edge-releases.outputs.sha_short }}"
+          EDGE_TAG="edge"
+          EDGE_SHA_TAG="edge-$SHA_SHORT"
+
+          upload() {
+            local tag="$1"
+            if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
+              gh release upload "$tag" ${{ matrix.asset_name }}.zip --clobber
+              gh release upload "$tag" ${{ matrix.asset_name }}.zip.sha256 --clobber
+            else
+              gh release upload "$tag" ${{ matrix.asset_name }}.tar.gz --clobber
+              gh release upload "$tag" ${{ matrix.asset_name }}.tar.gz.sha256 --clobber
+            fi
+          }
+
+          upload "$EDGE_TAG"
+          upload "$EDGE_SHA_TAG"
+
+  production-tag:
+    name: Create Production Tag (Manual)
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'production-tag'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+
+      - name: Determine version
+        id: ver
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          CARGO_VERSION=$(grep '^version = ' Cargo.toml | sed 's/version = "\(.*\)"/\1/')
+          INPUT_VERSION="${{ github.event.inputs.release_version }}"
+
+          if [ -n "$INPUT_VERSION" ]; then
+            VERSION="$INPUT_VERSION"
+          else
+            VERSION="$CARGO_VERSION"
+          fi
+
+          # Basic semver (x.y.z)
+          if ! [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Invalid version '$VERSION' (expected x.y.z)" >&2
+            exit 1
+          fi
+
+          # Guardrail: Cargo.toml must already be set to the release version
+          if [ "$CARGO_VERSION" != "$VERSION" ]; then
+            echo "Cargo.toml version ($CARGO_VERSION) does not match release version ($VERSION)." >&2
+            echo "Update Cargo.toml via PR first, then run production-tag." >&2
+            exit 1
+          fi
+
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Guardrail - version must increment
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          VERSION="${{ steps.ver.outputs.version }}"
+          TAG="v$VERSION"
+
+          if git rev-parse "$TAG" >/dev/null 2>&1; then
+            echo "Tag $TAG already exists." >&2
+            exit 1
+          fi
+
+          LATEST_TAG=$(git tag -l 'v*' | sort -V | tail -1 || true)
+          if [ -n "$LATEST_TAG" ]; then
+            LATEST_VERSION=${LATEST_TAG#v}
+            # VERSION must be strictly greater than LATEST_VERSION
+            HIGHEST=$(printf '%s\n%s\n' "$LATEST_VERSION" "$VERSION" | sort -V | tail -1)
+            if [ "$HIGHEST" != "$VERSION" ] || [ "$VERSION" = "$LATEST_VERSION" ]; then
+              echo "Release version ($VERSION) must be > latest tag ($LATEST_VERSION)." >&2
+              exit 1
+            fi
+          fi
+
+      - name: Create and push tag
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          VERSION="${{ steps.ver.outputs.version }}"
+          TAG="v$VERSION"
+
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+
+          git tag -a "$TAG" -m "Release $TAG" "${{ github.sha }}"
+          git push origin "$TAG"
+
+          echo "::notice::Pushed tag $TAG. The tag-triggered release workflow will build and publish assets."
+
+  bump-version:
+    name: Propose Version Bump PR (Manual)
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.action == 'bump-version'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Compute current/next version
+        id: bump
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          CURRENT=$(grep '^version = ' Cargo.toml | sed 's/version = "\(.*\)"/\1/')
+          INPUT_NEXT="${{ github.event.inputs.next_version }}"
+
+          if [ -n "$INPUT_NEXT" ]; then
+            NEXT="$INPUT_NEXT"
+          else
+            MAJOR=$(echo "$CURRENT" | cut -d. -f1)
+            MINOR=$(echo "$CURRENT" | cut -d. -f2)
+            PATCH=$(echo "$CURRENT" | cut -d. -f3)
+            PATCH=$((PATCH + 1))
+            NEXT="${MAJOR}.${MINOR}.${PATCH}"
+          fi
+
+          if ! [[ "$NEXT" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Invalid next_version '$NEXT' (expected x.y.z)" >&2
+            exit 1
+          fi
+
+          # Guardrail: NEXT must be strictly greater than CURRENT
+          HIGHEST=$(printf '%s\n%s\n' "$CURRENT" "$NEXT" | sort -V | tail -1)
+          if [ "$HIGHEST" != "$NEXT" ] || [ "$NEXT" = "$CURRENT" ]; then
+            echo "Next version ($NEXT) must be > current version ($CURRENT)." >&2
+            exit 1
+          fi
+
+          echo "current=$CURRENT" >> "$GITHUB_OUTPUT"
+          echo "next=$NEXT" >> "$GITHUB_OUTPUT"
+
+      - name: Create branch + PR (skip if already exists)
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          BASE_BRANCH="${{ github.ref_name }}"
+          CURRENT="${{ steps.bump.outputs.current }}"
+          NEXT="${{ steps.bump.outputs.next }}"
+          BRANCH="chore/bump-version-$NEXT"
+
+          if git ls-remote --heads origin "$BRANCH" | grep -q "$BRANCH"; then
+            echo "Branch $BRANCH already exists; leaving it untouched." >&2
+            gh pr list --head "$BRANCH" --base "$BASE_BRANCH" || true
+            exit 0
+          fi
+
+          git checkout -b "$BRANCH"
+          sed -i.bak "s/^version = \".*\"/version = \"$NEXT\"/" Cargo.toml
+          rm Cargo.toml.bak
+
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+
+          git add Cargo.toml
+          git commit -m "[CI] Bump version to $NEXT"
+          git push origin "$BRANCH"
+
+          PR_TITLE="[CI] Bump version to $NEXT"
+          PR_BODY="Version bump proposal.\n\n- Current: $CURRENT\n- Next: $NEXT\n\nGuardrails: workflow enforces NEXT > CURRENT and NEXT > latest tag when tagging."
+
+          gh pr create \
+            --title "$PR_TITLE" \
+            --body "$PR_BODY" \
+            --base "$BASE_BRANCH" \
+            --head "$BRANCH" \
+            --label "automated" || true

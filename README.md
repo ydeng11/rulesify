@@ -46,16 +46,16 @@ curl -sSL https://github.com/ihelio/rulesify/releases/latest/download/install.sh
 
 ### Installing Edge Releases
 
-Edge releases are pre-release builds created for each pull request. They allow you to test the latest changes before they're merged to main.
+Edge releases are pre-release builds from the latest merged commit on the default branch. They allow you to test the newest changes without waiting for a production tag.
 
-**Install edge release by commit SHA:**
+**Install latest edge release (moving tag `edge`):**
 ```bash
-curl -sSL https://github.com/ihelio/rulesify/releases/latest/download/install.sh | bash -s -- --edge abc1234
+curl -sSL https://github.com/ihelio/rulesify/releases/latest/download/install.sh | bash -s -- --edge
 ```
 
-**Install edge release by PR number:**
+**Install a specific edge release by commit SHA (tag `edge-<sha>`):**
 ```bash
-curl -sSL https://github.com/ihelio/rulesify/releases/latest/download/install.sh | bash -s -- --edge pr42
+curl -sSL https://github.com/ihelio/rulesify/releases/latest/download/install.sh | bash -s -- --edge abc1234
 ```
 
 **Install specific version tag:**
@@ -68,7 +68,7 @@ curl -sSL https://github.com/ihelio/rulesify/releases/latest/download/install.sh
 curl -sSL https://github.com/ihelio/rulesify/releases/latest/download/install.sh | bash -s -- --help
 ```
 
-**Note:** Edge releases are automatically created for each PR and tagged as `edge-pr{number}` or `edge-{sha}`. They are pre-release builds and may be unstable. Use stable releases for production.
+**Note:** Edge releases are tagged as `edge` (latest) and `edge-<sha>` (immutable). They are pre-release builds and may be unstable. Use stable releases for production.
 
 ### Manual Installation (Fallback)
 
