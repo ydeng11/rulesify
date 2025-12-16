@@ -1,0 +1,149 @@
+# =====================================================================
+#  UNIVERSAL RULE FILE (URF) – SINGLE SOURCE OF TRUTH
+#
+#  This file defines a rule that can be deployed to all AI coding tools:
+#  - Cursor (.cursor/rules/*.mdc)
+#  - Cline (.clinerules/*.md)
+#  - Claude Code (CLAUDE.md)
+#  - Goose (.goosehints)
+# =====================================================================
+
+# Unique identifier for this rule (auto-filled from filename)
+id: playwright-quarkus
+
+# Semantic version - increment when making breaking changes
+version: 1.0.0
+
+# Core metadata that appears in all exported formats
+metadata:
+  # Human-readable name - becomes H1 heading in exported files
+  name: "Quarkus Playwright & Quinoa E2E Testing Guide"
+
+  # Brief description - shows up in Cursor frontmatter and tool descriptions
+  description: |
+    Detailed guide for implementing reliable End-to-End (E2E) tests in Quarkus applications using Playwright for browser automation and Quinoa for frontend management.
+
+  # Tags for categorization and search (e.g. [react, typescript, testing])
+  tags: [java, quarkus, playwright, quinoa, testing, e2e]
+
+  # Priority for rule ordering: 1 (low) → 10 (high)
+  priority: 8
+
+# Content sections - these become H2 headings in exported files
+content:
+  # Main guidelines section
+  - title: "Guidelines"
+    format: markdown        # Options: markdown, plaintext, code
+    value: |-
+      ### 1. Dependency and Configuration
+      * **Dependencies**: Ensure `io.quarkiverse.quinoa:quarkus-quinoa` and `io.quarkiverse.playwright:quarkus-playwright` are included in `pom.xml`.
+      * **Scope**: The Playwright dependency and `quarkus-junit5` must use `<scope>test</scope>`.
+      * **Quinoa Test Profile**: For testing the frontend served by Quinoa, ensure the test is run in a profile that enables the UI build/serve process (e.g., using a custom `QuarkusTestProfile` or ensuring Quinoa is configured to run during tests if not using `quarkus-quinoa-testing`).
+
+      ### 2. Test Structure and Injection
+      * **Test Annotations**: Always annotate the test class with `@QuarkusTest` and `@WithPlaywright`.
+      * **Context Injection**: Inject the browser context using `@InjectPlaywright BrowserContext context;`. Using `BrowserContext` ensures isolated sessions for each test.
+      * **URL Resolution**: Use `@TestHTTPResource("/") URL index;` to dynamically and safely retrieve the correct URL and port for the running Quarkus application. **Avoid** hardcoding `localhost:8080`.
+
+      ### 3. Synchronization and Best Practices
+      * **Avoid Hard Waits**: Never use `Thread.sleep()` or fixed delays. Rely on Playwright's auto-waiting mechanism.
+      * **Dynamic Waiting**: Use explicit waits for asynchronous content loaded by Quinoa's SPA:
+          * `page.waitForLoadState()` after navigation.
+          * `page.waitForSelector(".my-element")` or Playwright's Locator assertions (e.g., `expect(locator).toBeVisible()`) to ensure dynamic elements are ready.
+      * **Debugging**: To visually debug a failing test, temporarily set the annotation to `@WithPlaywright(debug = true)`.
+
+      ### 4. CI/CD Environment
+      * **Browser Setup**: In Continuous Integration (CI) environments, ensure the necessary browser dependencies are installed before tests run using the Playwright CLI:
+          * `mvn exec:java -e -Dexec.mainClass=com.microsoft.playwright.CLI -Dexec.args="install-deps chromium"`
+
+  - title: "Code Example"
+    format: code
+    value: |-
+      package org.acme.e2e;
+
+      import com.microsoft.playwright.*;
+      import io.quarkiverse.playwright.InjectPlaywright;
+      import io.quarkiverse.playwright.WithPlaywright;
+      import io.quarkus.test.common.http.TestHTTPResource;
+      import io.quarkus.test.junit.QuarkusTest;
+      import org.junit.jupiter.api.Assertions;
+      import org.junit.jupiter.api.Test;
+      import java.net.URL;
+
+      @QuarkusTest
+      @WithPlaywright(browser = "chromium", headless = true)
+      public class QuinoaE2ETest {
+
+          @InjectPlaywright
+          BrowserContext context;
+
+          @TestHTTPResource("/")
+          URL index;
+
+          @Test
+          public void testWebUIInteraction() {
+              // 1. Create a new isolated page
+              final Page page = context.newPage();
+
+              // 2. Navigate to the application root URL
+              page.navigate(index.toString());
+
+              // 3. Wait for the SPA content (Quinoa served) to load and render
+              page.waitForSelector("#app-root-element");
+
+              // 4. Perform an interaction and assertion
+              Locator titleLocator = page.locator("h1");
+              Assertions.assertEquals("Welcome to My Quinoa App", titleLocator.innerText());
+          }
+      }
+
+# OPTIONAL: Reference external files (appears as @filename in Cursor)
+references:
+  - https://docs.quarkiverse.io/quarkus-playwright/dev/index.html
+  - https://docs.quarkiverse.io/quarkus-quinoa/dev/index.html
+
+# OPTIONAL: File patterns that trigger auto-attachment
+conditions:
+  - type: file_pattern
+    value: "pom.xml"
+  - type: file_pattern
+    value: "src/test/java/**/*.java"
+
+# =====================================================================
+#  TOOL-SPECIFIC OVERRIDES
+#  These settings only apply to specific tools and are ignored by others
+# =====================================================================
+
+tool_overrides:
+  # Cursor-specific settings
+  cursor:
+    # Application mode - how Cursor should apply this rule:
+    # • always: Apply to every chat and cmd-k session (equivalent to old auto_apply: true)
+    # • intelligent: When Agent decides it's relevant based on description (RECOMMENDED)
+    # • specific_files: When file matches specified patterns (uses globs below)
+    # • manual: Only when @-mentioned by user (equivalent to old auto_apply: false)
+    apply_mode: intelligent     # Options: always | intelligent | specific_files | manual
+
+    globs: ["pom.xml", "src/test/java/**/*.java"]                   # File patterns: [src/**/*.tsx, src/**/*.jsx]
+                               # Only used when apply_mode is "specific_files"
+
+    # Legacy field for backwards compatibility (deprecated - use apply_mode instead)
+    # auto_apply: false
+
+  # Cline-specific settings
+  cline: {}
+
+  # Claude Code-specific settings
+  claude-code: {}
+
+  # Goose-specific settings
+  goose: {}
+
+# =====================================================================
+#  USAGE EXAMPLES:
+#
+#  Deploy to all tools:     rulesify deploy --all
+#  Deploy to Cursor only:   rulesify deploy --tool cursor --rule playwright-quarkus
+#  Edit this rule:          rulesify rule edit playwright-quarkus
+#  View deployed rules:     rulesify rule list
+# =====================================================================

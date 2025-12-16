@@ -2,7 +2,12 @@ use rulesify::cli::commands::sync;
 use rulesify::models::rule::{ContentFormat, RuleContent, RuleMetadata, UniversalRule};
 use rulesify::store::{file_store::FileStore, RuleStore};
 use std::fs;
+use std::sync::Mutex;
 use tempfile::TempDir;
+
+// Global mutex to serialize tests that change the current working directory
+// This prevents race conditions when tests run in parallel
+static DIR_CHANGE_LOCK: Mutex<()> = Mutex::new(());
 
 #[test]
 fn test_sync_preserves_original_rule_id() {
@@ -62,10 +67,6 @@ This is a new section added to test sync functionality.
 
     fs::write(&cursor_file, cursor_content).unwrap();
 
-    // Change to the temp directory for the sync operation
-    let original_dir = std::env::current_dir().unwrap();
-    std::env::set_current_dir(temp_path).unwrap();
-
     // Create a minimal config
     let config_dir = temp_path.join(".rulesify");
     fs::create_dir_all(&config_dir).unwrap();
@@ -80,7 +81,12 @@ default_tools:
     );
     fs::write(&config_file, config_content).unwrap();
 
-    // Run sync command
+    // Run sync command (changing directory to temp_path for the operation)
+    // Use a lock to prevent race conditions with other tests
+    let _lock = DIR_CHANGE_LOCK.lock().unwrap();
+    let original_dir = std::env::current_dir().unwrap();
+    std::env::set_current_dir(temp_path).unwrap();
+
     let result = sync::run(
         false,                                // not dry run
         Some("rust-programming".to_string()), // specific rule
@@ -88,8 +94,9 @@ default_tools:
         Some(config_file),
     );
 
-    // Restore original directory
-    std::env::set_current_dir(original_dir).unwrap();
+    // Restore original directory before any assertions
+    let _ = std::env::set_current_dir(&original_dir);
+    drop(_lock); // Explicitly drop the lock before assertions
 
     assert!(result.is_ok(), "Sync should succeed: {:?}", result);
 
@@ -154,10 +161,6 @@ This is new content.
 
     fs::write(&cursor_file, cursor_content).unwrap();
 
-    // Change to the temp directory for the sync operation
-    let original_dir = std::env::current_dir().unwrap();
-    std::env::set_current_dir(temp_path).unwrap();
-
     // Create a minimal config
     let config_dir = temp_path.join(".rulesify");
     fs::create_dir_all(&config_dir).unwrap();
@@ -172,7 +175,12 @@ default_tools:
     );
     fs::write(&config_file, config_content).unwrap();
 
-    // Run sync command
+    // Run sync command (changing directory to temp_path for the operation)
+    // Use a lock to prevent race conditions with other tests
+    let _lock = DIR_CHANGE_LOCK.lock().unwrap();
+    let original_dir = std::env::current_dir().unwrap();
+    std::env::set_current_dir(temp_path).unwrap();
+
     let result = sync::run(
         false,                        // not dry run
         Some("new-rule".to_string()), // specific rule
@@ -180,8 +188,9 @@ default_tools:
         Some(config_file),
     );
 
-    // Restore original directory
-    std::env::set_current_dir(original_dir).unwrap();
+    // Restore original directory before any assertions
+    let _ = std::env::set_current_dir(&original_dir);
+    drop(_lock); // Explicitly drop the lock before assertions
 
     assert!(result.is_ok(), "Sync should succeed: {:?}", result);
 
@@ -247,10 +256,6 @@ Modified content
 
     fs::write(&cursor_file, cursor_content).unwrap();
 
-    // Change to the temp directory for the sync operation
-    let original_dir = std::env::current_dir().unwrap();
-    std::env::set_current_dir(temp_path).unwrap();
-
     // Create a minimal config
     let config_dir = temp_path.join(".rulesify");
     fs::create_dir_all(&config_dir).unwrap();
@@ -265,7 +270,12 @@ default_tools:
     );
     fs::write(&config_file, config_content).unwrap();
 
-    // Run sync command in dry run mode
+    // Run sync command in dry run mode (changing directory to temp_path for the operation)
+    // Use a lock to prevent race conditions with other tests
+    let _lock = DIR_CHANGE_LOCK.lock().unwrap();
+    let original_dir = std::env::current_dir().unwrap();
+    std::env::set_current_dir(temp_path).unwrap();
+
     let result = sync::run(
         true,                          // dry run
         Some("test-rule".to_string()), // specific rule
@@ -273,8 +283,9 @@ default_tools:
         Some(config_file),
     );
 
-    // Restore original directory
-    std::env::set_current_dir(original_dir).unwrap();
+    // Restore original directory before any assertions
+    let _ = std::env::set_current_dir(&original_dir);
+    drop(_lock); // Explicitly drop the lock before assertions
 
     assert!(result.is_ok(), "Sync should succeed: {:?}", result);
 

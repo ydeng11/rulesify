@@ -71,11 +71,29 @@ pub enum ContentFormat {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+#[serde(from = "FileReferenceInput")]
 pub struct FileReference {
     pub path: String,
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(untagged)]
+enum FileReferenceInput {
+    String(String),
+    Object { path: String },
+}
+
+impl From<FileReferenceInput> for FileReference {
+    fn from(input: FileReferenceInput) -> Self {
+        match input {
+            FileReferenceInput::String(path) => FileReference { path },
+            FileReferenceInput::Object { path } => FileReference { path },
+        }
+    }
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+#[serde(tag = "type")]
 pub enum RuleCondition {
     #[serde(rename = "file_pattern")]
     FilePattern { value: String },
