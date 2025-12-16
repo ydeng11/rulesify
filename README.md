@@ -32,7 +32,7 @@ Rulesify is a command-line tool (written in Rust) that provides **unified manage
 
 ### One-liner (Recommended)
 
-Run this command to install the latest pre-built binary:
+Run this command to install the latest stable release:
 
 ```bash
 curl -sSL https://github.com/ihelio/rulesify/releases/latest/download/install.sh | bash
@@ -43,6 +43,32 @@ curl -sSL https://github.com/ihelio/rulesify/releases/latest/download/install.sh
   ```bash
   export PATH="$HOME/.local/bin:$PATH"
   ```
+
+### Installing Edge Releases
+
+Edge releases are pre-release builds created for each pull request. They allow you to test the latest changes before they're merged to main.
+
+**Install edge release by commit SHA:**
+```bash
+curl -sSL https://github.com/ihelio/rulesify/releases/latest/download/install.sh | bash -s -- --edge abc1234
+```
+
+**Install edge release by PR number:**
+```bash
+curl -sSL https://github.com/ihelio/rulesify/releases/latest/download/install.sh | bash -s -- --edge pr42
+```
+
+**Install specific version tag:**
+```bash
+curl -sSL https://github.com/ihelio/rulesify/releases/latest/download/install.sh | bash -s -- v0.3.0
+```
+
+**Show help:**
+```bash
+curl -sSL https://github.com/ihelio/rulesify/releases/latest/download/install.sh | bash -s -- --help
+```
+
+**Note:** Edge releases are automatically created for each PR and tagged as `edge-pr{number}` or `edge-{sha}`. They are pre-release builds and may be unstable. Use stable releases for production.
 
 ### Manual Installation (Fallback)
 

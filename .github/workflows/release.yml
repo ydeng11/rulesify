@@ -1,4 +1,4 @@
-name: Release
+name: Production Release
 
 on:
   push:
@@ -53,22 +53,30 @@ jobs:
           echo "### Changelog" >> RELEASE_NOTES.md
           echo "" >> RELEASE_NOTES.md
           # Extract the current version's changelog section using sed
-          sed -n "/^## \[${{ steps.get_version.outputs.version }}\]/,/^## \[/p" CHANGELOG.md | sed '$d' >> RELEASE_NOTES.md
+          if [ -f CHANGELOG.md ]; then
+            sed -n "/^## \[${{ steps.get_version.outputs.version }}\]/,/^## \[/p" CHANGELOG.md | sed '$d' >> RELEASE_NOTES.md || true
+          fi
 
       - name: Create Release
         id: create_release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # Create the release using gh cli
-          gh release create ${{ github.ref_name }} \
-            --title "Rulesify CLI ${{ steps.get_version.outputs.version }}" \
-            --notes-file RELEASE_NOTES.md \
-            --draft=false \
-            --prerelease=false
-
-          # Get the release upload URL and set it as output
-          UPLOAD_URL=$(gh api repos/${{ github.repository }}/releases/tags/${{ github.ref_name }} | jq -r .upload_url)
+          # Check if release already exists (created by versioning workflow)
+          if gh release view ${{ github.ref_name }} &>/dev/null; then
+            echo "Release already exists, updating notes..."
+            gh release edit ${{ github.ref_name }} --notes-file RELEASE_NOTES.md
+            UPLOAD_URL=$(gh api repos/${{ github.repository }}/releases/tags/${{ github.ref_name }} | jq -r .upload_url)
+          else
+            # Create the release using gh cli
+            gh release create ${{ github.ref_name }} \
+              --title "Rulesify CLI ${{ steps.get_version.outputs.version }}" \
+              --notes-file RELEASE_NOTES.md \
+              --draft=false \
+              --prerelease=false
+            # Get the release upload URL and set it as output
+            UPLOAD_URL=$(gh api repos/${{ github.repository }}/releases/tags/${{ github.ref_name }} | jq -r .upload_url)
+          fi
           echo "upload_url=$UPLOAD_URL" >> $GITHUB_OUTPUT
 
   build-and-release:
