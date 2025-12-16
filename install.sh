@@ -6,6 +6,40 @@ BINARY_NAME="rulesify"
 INSTALL_DIR="$HOME/.local/bin"
 BINARY_PATH="$INSTALL_DIR/$BINARY_NAME"
 
+# Parse arguments
+TARGET_TAG=""
+if [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
+    echo "Usage: $0 [OPTIONS]"
+    echo ""
+    echo "Options:"
+    echo "  --edge SHA|PR_NUMBER    Install edge release by SHA or PR number"
+    echo "  --help, -h              Show this help message"
+    echo ""
+    echo "Examples:"
+    echo "  $0                      Install latest stable release"
+    echo "  $0 --edge abc1234       Install edge release by commit SHA"
+    echo "  $0 --edge pr42          Install edge release for PR #42"
+    echo "  $0 v0.3.0               Install specific version tag"
+    exit 0
+elif [ "$1" = "--edge" ] || [ "$1" = "-e" ]; then
+    if [ -z "$2" ]; then
+        echo "Error: --edge requires a SHA or PR number"
+        echo "Usage: $0 --edge SHA|PR_NUMBER"
+        echo "Example: $0 --edge abc1234"
+        echo "Example: $0 --edge pr42"
+        exit 1
+    fi
+    # If it starts with "pr", use as-is, otherwise assume it's a SHA
+    if [[ "$2" =~ ^pr[0-9]+$ ]]; then
+        TARGET_TAG="edge-$2"
+    else
+        TARGET_TAG="edge-$2"
+    fi
+elif [ -n "$1" ]; then
+    # Allow direct tag specification
+    TARGET_TAG="$1"
+fi
+
 # Detect OS
 OS="$(uname -s | tr '[:upper:]' '[:lower:]')"
 ARCH="$(uname -m)"
@@ -23,13 +57,18 @@ esac
 # Compose asset name
 ASSET="${BINARY_NAME}-${OS}-${ARCH}.tar.gz"
 
-# Get latest release tag from GitHub API
-LATEST_TAG=$(curl -s https://api.github.com/repos/$REPO/releases/latest | grep '"tag_name"' | cut -d '"' -f4)
-if [ -z "$LATEST_TAG" ]; then
-    echo "Could not fetch latest release tag."; exit 1
+# Get release tag
+if [ -n "$TARGET_TAG" ]; then
+    LATEST_TAG="$TARGET_TAG"
+    echo "Installing edge release: $LATEST_TAG"
+else
+    # Get latest release tag from GitHub API
+    LATEST_TAG=$(curl -s https://api.github.com/repos/$REPO/releases/latest | grep '"tag_name"' | cut -d '"' -f4)
+    if [ -z "$LATEST_TAG" ]; then
+        echo "Could not fetch latest release tag."; exit 1
+    fi
+    echo "Latest available version: $LATEST_TAG"
 fi
-
-echo "Latest available version: $LATEST_TAG"
 
 # Check if binary already exists and get current version
 CURRENT_VERSION=""
@@ -39,18 +78,28 @@ if [ -x "$BINARY_PATH" ]; then
     if [ -n "$CURRENT_VERSION" ]; then
         echo "Current installed version: $CURRENT_VERSION"
 
-        # Compare versions
-        if [ "$CURRENT_VERSION" = "$LATEST_TAG" ]; then
+        # Compare versions (skip comparison for edge releases)
+        if [[ "$LATEST_TAG" =~ ^edge- ]]; then
+            echo "🔄 Installing edge release: $LATEST_TAG"
+        elif [ "$CURRENT_VERSION" = "$LATEST_TAG" ]; then
             echo "✅ You already have the latest version ($LATEST_TAG) installed!"
             echo "Re-installing anyway..."
         else
             echo "🔄 Updating from $CURRENT_VERSION to $LATEST_TAG"
         fi
     else
-        echo "🔄 Updating existing installation to $LATEST_TAG"
+        if [[ "$LATEST_TAG" =~ ^edge- ]]; then
+            echo "📦 Installing edge release: $LATEST_TAG"
+        else
+            echo "🔄 Updating existing installation to $LATEST_TAG"
+        fi
     fi
 else
-    echo "📦 Installing $BINARY_NAME $LATEST_TAG"
+    if [[ "$LATEST_TAG" =~ ^edge- ]]; then
+        echo "📦 Installing edge release: $LATEST_TAG"
+    else
+        echo "📦 Installing $BINARY_NAME $LATEST_TAG"
+    fi
 fi
 
 # Download URL
@@ -63,7 +112,15 @@ mkdir -p "$INSTALL_DIR"
 TMPDIR=$(mktemp -d)
 echo "Downloading $ASSET from $URL ..."
 if ! curl -sSLf "$URL" -o "$TMPDIR/$ASSET"; then
-    echo "Failed to download binary. Please check your OS/arch or visit the releases page."; exit 1
+    echo "Failed to download binary from $URL"
+    if [[ "$LATEST_TAG" =~ ^edge- ]]; then
+        echo "The edge release $LATEST_TAG may not exist or may not have binaries for your platform."
+        echo "Visit https://github.com/$REPO/releases/tag/$LATEST_TAG to check available assets."
+    else
+        echo "Please check your OS/arch or visit the releases page:"
+        echo "https://github.com/$REPO/releases"
+    fi
+    exit 1
 fi
 
 # Extract the binary
@@ -76,17 +133,21 @@ chmod +x "$INSTALL_DIR/$BINARY_NAME"
 rm -rf "$TMPDIR"
 
 # Verify installation
-NEW_VERSION=$("$BINARY_PATH" --version 2>/dev/null | head -n1 | grep -o 'v[0-9]\+\.[0-9]\+\.[0-9]\+' || echo "$LATEST_TAG")
-echo "✅ Successfully installed $BINARY_NAME $NEW_VERSION to $INSTALL_DIR/$BINARY_NAME"
+if [[ "$LATEST_TAG" =~ ^edge- ]]; then
+    echo "✅ Successfully installed edge release $LATEST_TAG to $INSTALL_DIR/$BINARY_NAME"
+else
+    NEW_VERSION=$("$BINARY_PATH" --version 2>/dev/null | head -n1 | grep -o 'v[0-9]\+\.[0-9]\+\.[0-9]\+' || echo "$LATEST_TAG")
+    echo "✅ Successfully installed $BINARY_NAME $NEW_VERSION to $INSTALL_DIR/$BINARY_NAME"
+fi
 
 # Setup shell completion
 setup_completion() {
     local shell="$1"
     local completion_dir="$2"
     local completion_file="$3"
-    
+
     mkdir -p "$completion_dir"
-    
+
     if "$BINARY_PATH" completion "$shell" > "$completion_file"; then
         echo "✅ Installed $shell completion to $completion_file"
         return 0
