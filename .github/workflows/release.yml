@@ -4,9 +4,16 @@ on:
   push:
     tags:
       - 'v*' # Trigger on version tags
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag to build/release (e.g., v0.3.0)'
+        required: true
+        type: string
 
 env:
   CARGO_TERM_COLOR: always
+  RELEASE_TAG: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.tag || github.ref_name }}
 
 # Add permissions block at workflow level
 permissions:
@@ -17,6 +24,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.RELEASE_TAG }}
+          fetch-depth: 0
+          fetch-tags: true
+
+      - name: Validate tag exists
+        shell: bash
+        run: |
+          set -euo pipefail
+          git rev-parse "refs/tags/${RELEASE_TAG}" >/dev/null 2>&1 || {
+            echo "Tag ${RELEASE_TAG} not found. Create it first (e.g. via Releases workflow)."
+            exit 1
+          }
 
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
@@ -35,10 +55,17 @@ jobs:
       version: ${{ steps.get_version.outputs.version }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.RELEASE_TAG }}
+          fetch-depth: 0
+          fetch-tags: true
 
       - name: Get version from tag
         id: get_version
-        run: echo "version=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "version=${RELEASE_TAG#v}" >> "$GITHUB_OUTPUT"
 
       - name: Generate Release Notes
         id: release_notes
@@ -47,7 +74,7 @@ jobs:
           echo "" >> RELEASE_NOTES.md
           echo "### Installation" >> RELEASE_NOTES.md
           echo '```bash' >> RELEASE_NOTES.md
-          echo "curl -fsSL https://raw.githubusercontent.com/${{ github.repository }}/${{ github.ref_name }}/install.sh | sh" >> RELEASE_NOTES.md
+          echo "curl -fsSL https://raw.githubusercontent.com/${{ github.repository }}/${RELEASE_TAG}/install.sh | sh" >> RELEASE_NOTES.md
           echo '```' >> RELEASE_NOTES.md
           echo "" >> RELEASE_NOTES.md
           echo "### Changelog" >> RELEASE_NOTES.md
@@ -63,19 +90,19 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           # Check if release already exists (created by releases workflow)
-          if gh release view ${{ github.ref_name }} &>/dev/null; then
+          if gh release view "${RELEASE_TAG}" &>/dev/null; then
             echo "Release already exists, updating notes..."
-            gh release edit ${{ github.ref_name }} --notes-file RELEASE_NOTES.md
-            UPLOAD_URL=$(gh api repos/${{ github.repository }}/releases/tags/${{ github.ref_name }} | jq -r .upload_url)
+            gh release edit "${RELEASE_TAG}" --notes-file RELEASE_NOTES.md
+            UPLOAD_URL=$(gh api repos/${{ github.repository }}/releases/tags/"${RELEASE_TAG}" | jq -r .upload_url)
           else
             # Create the release using gh cli
-            gh release create ${{ github.ref_name }} \
+            gh release create "${RELEASE_TAG}" \
               --title "Rulesify CLI ${{ steps.get_version.outputs.version }}" \
               --notes-file RELEASE_NOTES.md \
               --draft=false \
               --prerelease=false
             # Get the release upload URL and set it as output
-            UPLOAD_URL=$(gh api repos/${{ github.repository }}/releases/tags/${{ github.ref_name }} | jq -r .upload_url)
+            UPLOAD_URL=$(gh api repos/${{ github.repository }}/releases/tags/"${RELEASE_TAG}" | jq -r .upload_url)
           fi
           echo "upload_url=$UPLOAD_URL" >> $GITHUB_OUTPUT
 
@@ -104,6 +131,10 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.RELEASE_TAG }}
+          fetch-depth: 0
+          fetch-tags: true
 
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
@@ -132,9 +163,9 @@ jobs:
         shell: bash
         run: |
           if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
-            gh release upload ${{ github.ref_name }} ${{ matrix.asset_name }}.zip --clobber
+            gh release upload "${RELEASE_TAG}" ${{ matrix.asset_name }}.zip --clobber
           else
-            gh release upload ${{ github.ref_name }} ${{ matrix.asset_name }}.tar.gz --clobber
+            gh release upload "${RELEASE_TAG}" ${{ matrix.asset_name }}.tar.gz --clobber
           fi
 
       - name: Upload Checksum
@@ -143,9 +174,9 @@ jobs:
         shell: bash
         run: |
           if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
-            gh release upload ${{ github.ref_name }} ${{ matrix.asset_name }}.zip.sha256 --clobber
+            gh release upload "${RELEASE_TAG}" ${{ matrix.asset_name }}.zip.sha256 --clobber
           else
-            gh release upload ${{ github.ref_name }} ${{ matrix.asset_name }}.tar.gz.sha256 --clobber
+            gh release upload "${RELEASE_TAG}" ${{ matrix.asset_name }}.tar.gz.sha256 --clobber
           fi
 
   upload-install-script:
@@ -153,8 +184,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.RELEASE_TAG }}
+          fetch-depth: 0
+          fetch-tags: true
 
       - name: Upload Install Script
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh release upload ${{ github.ref_name }} install.sh --clobber
+        run: gh release upload "${RELEASE_TAG}" install.sh --clobber
