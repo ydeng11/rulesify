@@ -74,14 +74,16 @@ jobs:
           echo "" >> RELEASE_NOTES.md
           echo "### Installation" >> RELEASE_NOTES.md
           echo '```bash' >> RELEASE_NOTES.md
-          echo "curl -fsSL https://raw.githubusercontent.com/${{ github.repository }}/${RELEASE_TAG}/install.sh | sh" >> RELEASE_NOTES.md
+          echo "curl -fsSL https://github.com/${{ github.repository }}/releases/latest/download/install.sh | sh" >> RELEASE_NOTES.md
           echo '```' >> RELEASE_NOTES.md
           echo "" >> RELEASE_NOTES.md
           echo "### Changelog" >> RELEASE_NOTES.md
           echo "" >> RELEASE_NOTES.md
-          # Extract the current version's changelog section using sed
-          if [ -f CHANGELOG.md ]; then
+          # Extract the current version's changelog section
+          if [ -f CHANGELOG.md ] && grep -q "^## \[${{ steps.get_version.outputs.version }}\]" CHANGELOG.md; then
             sed -n "/^## \[${{ steps.get_version.outputs.version }}\]/,/^## \[/p" CHANGELOG.md | sed '$d' >> RELEASE_NOTES.md || true
+          else
+            echo "_Changelog entry not found in CHANGELOG.md for ${{ steps.get_version.outputs.version }}._" >> RELEASE_NOTES.md
           fi
 
       - name: Create Release
@@ -193,3 +195,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: gh release upload "${RELEASE_TAG}" install.sh --clobber
+
+      - name: Upload CHANGELOG
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release upload "${RELEASE_TAG}" CHANGELOG.md --clobber

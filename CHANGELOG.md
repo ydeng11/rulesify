@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.1] - 2025-12-16
+
+### Fixed
+- **URF parsing for `references`**: accept both string references (e.g. `- https://...`) and object references (e.g. `- path: https://...`).
+- **URF parsing for `conditions`**: correctly deserialize condition entries via a tagged `type` field (e.g. `type: file_pattern`).
+
+### Testing
+- Added regression tests + fixture to prevent parsing regressions for real-world URF files.
+- Reduced CI flakiness by serializing tests that change the process working directory.
+
 ## [0.3.0] - 2025-01-09
 
 ### Added
