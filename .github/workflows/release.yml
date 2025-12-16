@@ -79,12 +79,25 @@ jobs:
           echo "" >> RELEASE_NOTES.md
           echo "### Changelog" >> RELEASE_NOTES.md
           echo "" >> RELEASE_NOTES.md
-          # Extract the current version's changelog section
-          if [ -f CHANGELOG.md ] && grep -q "^## \[${{ steps.get_version.outputs.version }}\]" CHANGELOG.md; then
-            sed -n "/^## \[${{ steps.get_version.outputs.version }}\]/,/^## \[/p" CHANGELOG.md | sed '$d' >> RELEASE_NOTES.md || true
-          else
-            echo "_Changelog entry not found in CHANGELOG.md for ${{ steps.get_version.outputs.version }}._" >> RELEASE_NOTES.md
+          # Extract the current version's changelog section.
+          #
+          # IMPORTANT: tags are sometimes created before CHANGELOG.md is updated.
+          # To avoid missing entries for existing tags, prefer CHANGELOG.md from the default branch.
+          VERSION="${{ steps.get_version.outputs.version }}"
+          DEFAULT_BRANCH="${{ github.event.repository.default_branch }}"
+          CHANGELOG_SRC="CHANGELOG.md"
+          CHANGELOG_TMP="$(mktemp)"
+          if curl -fsSL "https://raw.githubusercontent.com/${{ github.repository }}/${DEFAULT_BRANCH}/CHANGELOG.md" -o "$CHANGELOG_TMP"; then
+            CHANGELOG_SRC="$CHANGELOG_TMP"
           fi
+
+          if grep -q "^## \[$VERSION\]" "$CHANGELOG_SRC"; then
+            sed -n "/^## \[$VERSION\]/,/^## \[/p" "$CHANGELOG_SRC" | sed '$d' >> RELEASE_NOTES.md || true
+          else
+            echo "_Changelog entry not found in CHANGELOG.md for $VERSION._" >> RELEASE_NOTES.md
+          fi
+
+          rm -f "$CHANGELOG_TMP" || true
 
       - name: Create Release
         id: create_release
