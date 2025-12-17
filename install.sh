@@ -1,34 +1,43 @@
 #!/usr/bin/env bash
-set -e
+set -euo pipefail
 
-REPO="ihelio/rulesify"
+# Auto-detect repo from environment variable, or default to ihelio/rulesify
+# Users can override by setting: RULESIFY_REPO=ydeng11/rulesify
+REPO="${RULESIFY_REPO:-ydeng11/rulesify}"
 BINARY_NAME="rulesify"
 INSTALL_DIR="$HOME/.local/bin"
 BINARY_PATH="$INSTALL_DIR/$BINARY_NAME"
 
 # Parse arguments
 TARGET_TAG=""
-if [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
+if [ "${1:-}" = "--help" ] || [ "${1:-}" = "-h" ]; then
     echo "Usage: $0 [OPTIONS]"
     echo ""
     echo "Options:"
     echo "  --edge [SHA]            Install latest edge release, or a specific edge SHA"
     echo "  --help, -h              Show this help message"
     echo ""
+    echo "Environment Variables:"
+    echo "  RULESIFY_REPO           Override the GitHub repo (default: ydeng11/rulesify)"
+    echo "                          Example: RULESIFY_REPO=ydeng11/rulesify"
+    echo ""
     echo "Examples:"
     echo "  $0                      Install latest stable release"
     echo "  $0 --edge               Install latest edge release (tag: edge)"
     echo "  $0 --edge abc1234       Install edge release for commit SHA (tag: edge-abc1234)"
     echo "  $0 v0.3.0               Install specific version tag"
+    echo ""
+    echo "  # Install from a fork:"
+    echo "  RULESIFY_REPO=ydeng11/rulesify $0"
     exit 0
-elif [ "$1" = "--edge" ] || [ "$1" = "-e" ]; then
+elif [ "${1:-}" = "--edge" ] || [ "${1:-}" = "-e" ]; then
     # No arg => latest edge
     if [ -z "${2:-}" ]; then
         TARGET_TAG="edge"
     else
         TARGET_TAG="edge-$2"
     fi
-elif [ -n "$1" ]; then
+elif [ -n "${1:-}" ]; then
     # Allow direct tag specification
     TARGET_TAG="$1"
 fi
@@ -55,11 +64,36 @@ if [ -n "$TARGET_TAG" ]; then
     LATEST_TAG="$TARGET_TAG"
     echo "Installing from tag: $LATEST_TAG"
 else
-    # Get latest release tag from GitHub API
-    LATEST_TAG=$(curl -s https://api.github.com/repos/$REPO/releases/latest | grep '"tag_name"' | cut -d '"' -f4)
-    if [ -z "$LATEST_TAG" ]; then
-        echo "Could not fetch latest release tag."; exit 1
+    # Prefer GitHub's redirect-based "latest" (avoids API rate limiting).
+    # https://github.com/<org>/<repo>/releases/latest 302 -> .../releases/tag/<tag>
+    LATEST_TAG="$(
+        curl -fsSL -o /dev/null -w '%{url_effective}' "https://github.com/$REPO/releases/latest" \
+          | sed -E 's#^.*/tag/##'
+    )"
+
+    # Fallback to GitHub API (can fail due to rate limiting, proxies, or missing releases)
+    if [ -z "${LATEST_TAG:-}" ] || [ "$LATEST_TAG" = "latest" ]; then
+        API_JSON="$(curl -fsSL \
+            -H "Accept: application/vnd.github+json" \
+            -H "User-Agent: rulesify-install" \
+            "https://api.github.com/repos/$REPO/releases/latest" 2>/dev/null || true)"
+
+        if command -v jq >/dev/null 2>&1 && [ -n "${API_JSON:-}" ]; then
+            LATEST_TAG="$(printf '%s' "$API_JSON" | jq -r '.tag_name // empty' 2>/dev/null || true)"
+        elif [ -n "${API_JSON:-}" ]; then
+            LATEST_TAG="$(printf '%s' "$API_JSON" | grep -m1 '"tag_name"' | cut -d '"' -f4 || true)"
+        fi
     fi
+
+    if [ -z "${LATEST_TAG:-}" ]; then
+        echo "Could not fetch latest release tag."
+        echo "This can happen if GitHub API access is rate-limited/blocked, or if the repo has no published releases."
+        echo "Workarounds:"
+        echo "  - Install a specific tag: curl -fsSL https://github.com/$REPO/releases/latest/download/install.sh | sh -s -- vX.Y.Z"
+        echo "  - Or set RULESIFY_REPO to a fork: RULESIFY_REPO=owner/rulesify ..."
+        exit 1
+    fi
+
     echo "Latest available version: $LATEST_TAG"
 fi
 
@@ -105,13 +139,22 @@ mkdir -p "$INSTALL_DIR"
 TMPDIR=$(mktemp -d)
 echo "Downloading $ASSET from $URL ..."
 if ! curl -sSLf "$URL" -o "$TMPDIR/$ASSET"; then
-    echo "Failed to download binary from $URL"
+    echo "❌ Failed to download binary from $URL"
+    echo ""
     if [[ "$LATEST_TAG" =~ ^edge($|-) ]]; then
         echo "The edge release $LATEST_TAG may not exist or may not have binaries for your platform."
         echo "Visit https://github.com/$REPO/releases/tag/$LATEST_TAG to check available assets."
     else
-        echo "Please check your OS/arch or visit the releases page:"
-        echo "https://github.com/$REPO/releases"
+        echo "Possible reasons:"
+        echo "  1. The release $LATEST_TAG doesn't exist in $REPO"
+        echo "  2. The binary for your platform ($OS-$ARCH) wasn't built for this release"
+        echo "  3. You're trying to install from a different fork/repo"
+        echo ""
+        echo "Solutions:"
+        echo "  • Check available releases: https://github.com/$REPO/releases"
+        echo "  • If installing from a fork, set the repo:"
+        echo "    RULESIFY_REPO=owner/repo curl -fsSL https://github.com/owner/repo/releases/latest/download/install.sh | sh"
+        echo "  • Or specify a different tag: $0 <tag>"
     fi
     exit 1
 fi
