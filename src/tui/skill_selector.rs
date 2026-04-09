@@ -1,15 +1,15 @@
 use ratatui::{
     backend::CrosstermBackend,
-    crossterm::event::{self, Event, KeyCode},
     widgets::{Block, Borders, List, ListItem},
     Terminal,
 };
-use crate::models::Skill;
-use std::io;
 use crossterm::{
+    event::{self, Event, KeyCode},
     execute,
     terminal::{EnterAlternateScreen, LeaveAlternateScreen, enable_raw_mode, disable_raw_mode},
 };
+use crate::models::Skill;
+use std::io;
 
 pub struct SkillSelector {
     skills: Vec<(String, Skill)>,
@@ -83,7 +83,7 @@ impl SkillSelector {
     fn render(&self, f: &mut ratatui::Frame) {
         let items: Vec<ListItem> = self.skills.iter()
             .enumerate()
-            .map(|(i, (id, skill))| {
+            .map(|(i, (_id, skill))| {
                 let marker = if self.selected_indices.contains(&i) { "[x]" } else { "[ ]" };
                 let cursor = if i == self.current_index { ">" } else { " " };
                 ListItem::new(format!(

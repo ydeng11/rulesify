@@ -1,5 +1,5 @@
 use crate::models::Registry;
-use crate::utils::{Result, RulesifyError};
+use crate::utils::Result;
 use std::path::PathBuf;
 use std::fs;
 

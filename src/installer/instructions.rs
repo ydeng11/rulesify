@@ -7,7 +7,7 @@ pub fn generate_instructions(skills: &[(String, Skill)], tools: &[String]) -> St
     output.push_str("Copy the following instructions for your AI agent:\n\n");
     output.push_str("---\n\n");
     
-    for (id, skill) in skills {
+    for (_id, skill) in skills {
         output.push_str(&format!("## Skill: {}\n\n", skill.name));
         output.push_str(&format!("**Source:** {}\n\n", skill.source));
         

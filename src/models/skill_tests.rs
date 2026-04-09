@@ -1,6 +1,6 @@
 #[cfg(test)]
 mod tests {
-    use super::*;
+    use crate::models::Skill;
 
     #[test]
     fn test_matches_tools() {

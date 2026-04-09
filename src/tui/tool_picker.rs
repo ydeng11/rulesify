@@ -1,14 +1,14 @@
 use ratatui::{
     backend::CrosstermBackend,
-    crossterm::event::{self, Event, KeyCode},
     widgets::{Block, Borders, List, ListItem},
     Terminal,
 };
-use std::io;
 use crossterm::{
+    event::{self, Event, KeyCode},
     execute,
     terminal::{EnterAlternateScreen, LeaveAlternateScreen, enable_raw_mode, disable_raw_mode},
 };
+use std::io;
 
 const TOOLS: [&str; 4] = ["cursor", "claude-code", "cline", "goose"];
 

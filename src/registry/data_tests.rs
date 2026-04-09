@@ -1,6 +1,6 @@
 #[cfg(test)]
 mod tests {
-    use super::*;
+    use crate::registry::load_builtin;
 
     #[test]
     fn test_load_builtin() {

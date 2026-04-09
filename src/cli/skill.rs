@@ -7,11 +7,10 @@ use std::path::Path;
 pub async fn run(command: SkillCommands, verbose: bool) -> Result<()> {
     match command {
         SkillCommands::List => list_skills(verbose),
-        SkillCommands::Add { id } => add_skill(id, verbose).await?,
+        SkillCommands::Add { id } => add_skill(id, verbose).await,
         SkillCommands::Remove { id } => remove_skill(id, verbose),
-        SkillCommands::Update => update_registry(verbose).await?,
+        SkillCommands::Update => update_registry(verbose).await,
     }
-    Ok(())
 }
 
 fn list_skills(verbose: bool) -> Result<()> {
@@ -36,7 +35,7 @@ fn list_skills(verbose: bool) -> Result<()> {
     Ok(())
 }
 
-async fn add_skill(id: String, verbose: bool) -> Result<()> {
+async fn add_skill(id: String, _verbose: bool) -> Result<()> {
     let registry = load_registry().await?;
     
     let skill = registry.get_skill(&id)
@@ -62,7 +61,7 @@ async fn add_skill(id: String, verbose: bool) -> Result<()> {
     Ok(())
 }
 
-fn remove_skill(id: String, verbose: bool) -> Result<()> {
+fn remove_skill(id: String, _verbose: bool) -> Result<()> {
     let config_path = Path::new(".rulesify.toml");
     
     if !config_path.exists() {

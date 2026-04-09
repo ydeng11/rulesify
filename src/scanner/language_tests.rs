@@ -1,6 +1,6 @@
 #[cfg(test)]
 mod tests {
-    use super::*;
+    use crate::scanner::language::detect;
     use std::fs;
     use tempfile::tempdir;
 
