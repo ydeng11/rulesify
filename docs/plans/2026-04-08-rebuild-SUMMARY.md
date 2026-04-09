@@ -127,9 +127,17 @@ Rulesify has been completely rebuilt from a rule management tool to an agent/ski
 
 ## Deviations
 
-**No deviations from plan** - All tasks executed exactly as specified.
+**Bug fixes applied during verification:**
+- Fixed crossterm imports in TUI (use direct `crossterm::event` instead of `ratatui::crossterm::event`)
+- Fixed match arm type mismatch in skill.rs (removed `.await?` unwrap, just return `.await`)
+- Fixed test imports (use `crate::module` instead of `super::`)
+- Deleted legacy tests directory that referenced deleted modules (converters, store, templates, validation)
 
-**Note:** Rust toolchain not installed on execution system, so `cargo check/build/test` could not be run for verification. Build verification deferred to user environment.
+**Build verified successfully:**
+- `cargo check` - passes
+- `cargo test` - 9 tests pass
+- `cargo build --release` - binary created
+- CLI commands verified: `--help`, `skill list`, `skill add`, `skill remove`
 
 ---
 
