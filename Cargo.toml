@@ -1,0 +1,25 @@
+[package]
+name = "rulesify"
+version = "0.4.0"
+edition = "2021"
+description = "Discover and install AI agent skills"
+license = "MIT"
+
+[dependencies]
+anyhow = "1.0"
+thiserror = "1.0"
+clap = { version = "4.5", features = ["derive"] }
+tokio = { version = "1.37", features = ["rt-multi-thread", "macros"] }
+reqwest = { version = "0.12", features = ["json"] }
+serde = { version = "1.0", features = ["derive"] }
+toml = "0.8"
+ratatui = "0.26"
+crossterm = "0.27"
+dirs = "5.0"
+walkdir = "2.4"
+chrono = { version = "0.4", features = ["serde"] }
+env_logger = "0.10"
+log = "0.4"
+
+[dev-dependencies]
+tempfile = "3.8"
