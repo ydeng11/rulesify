@@ -2,6 +2,9 @@ pub mod language;
 pub mod framework;
 pub mod tool_config;
 
+#[cfg(test)]
+mod language_tests;
+
 use crate::models::ProjectContext;
 use crate::utils::Result;
 
