@@ -1,0 +1,42 @@
+version = 1
+updated = "2026-04-08"
+
+[skills.test-driven-development]
+name = "Test-Driven Development"
+description = "Write tests before implementation code using TDD methodology"
+source = "https://github.com/anthropic/skills/tree/main/tdd"
+tags = ["testing", "development", "best-practices"]
+compatible_tools = ["cursor", "claude-code", "cline", "goose"]
+popularity = 150
+
+[skills.systematic-debugging]
+name = "Systematic Debugging"
+description = "Investigate bugs using scientific method before proposing fixes"
+source = "https://github.com/anthropic/skills/tree/main/debugging"
+tags = ["debugging", "troubleshooting", "investigation"]
+compatible_tools = ["cursor", "claude-code", "cline"]
+popularity = 89
+
+[skills.brainstorming]
+name = "Brainstorming"
+description = "Explore user intent and design before implementation"
+source = "https://github.com/anthropic/skills/tree/main/brainstorming"
+tags = ["design", "planning", "creative"]
+compatible_tools = ["cursor", "claude-code", "cline", "goose"]
+popularity = 120
+
+[skills.verification-before-completion]
+name = "Verification Before Completion"
+description = "Run verification commands before claiming work is complete"
+source = "https://github.com/anthropic/skills/tree/main/verification"
+tags = ["quality", "verification", "testing"]
+compatible_tools = ["cursor", "claude-code"]
+popularity = 95
+
+[skills.writing-plans]
+name = "Writing Plans"
+description = "Create implementation plans before touching code"
+source = "https://github.com/anthropic/skills/tree/main/planning"
+tags = ["planning", "documentation", "process"]
+compatible_tools = ["cursor", "claude-code", "cline", "goose"]
+popularity = 110
