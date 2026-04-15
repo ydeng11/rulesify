@@ -14,15 +14,15 @@ mod tests {
         let registry = load_builtin().unwrap();
         assert!(registry.get_skill("test-driven-development").is_some());
     }
-    
+
     #[test]
-    fn test_filter_by_tools() {
+    fn test_filter_by_domain() {
         let registry = load_builtin().unwrap();
-        let filtered = registry.filter_by_tools(&["cursor".to_string()]);
+        let filtered = registry.filter_by_domain("development");
         assert!(filtered.len() > 0);
-        
+
         for (_, skill) in filtered {
-            assert!(skill.compatible_tools.contains(&"cursor".to_string()));
+            assert_eq!(skill.domain, "development");
         }
     }
 }

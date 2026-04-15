@@ -1,14 +1,14 @@
+use crate::models::Skill;
+use crossterm::{
+    event::{self, Event, KeyCode},
+    execute,
+    terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
+};
 use ratatui::{
     backend::CrosstermBackend,
     widgets::{Block, Borders, List, ListItem},
     Terminal,
 };
-use crossterm::{
-    event::{self, Event, KeyCode},
-    execute,
-    terminal::{EnterAlternateScreen, LeaveAlternateScreen, enable_raw_mode, disable_raw_mode},
-};
-use crate::models::Skill;
 use std::io;
 
 pub struct SkillSelector {
@@ -25,22 +25,22 @@ impl SkillSelector {
             current_index: 0,
         }
     }
-    
+
     pub fn run(mut self) -> io::Result<Vec<(String, Skill)>> {
         if self.skills.is_empty() {
             return Ok(vec![]);
         }
-        
+
         enable_raw_mode()?;
         let mut stdout = io::stdout();
         execute!(stdout, EnterAlternateScreen)?;
-        
+
         let backend = CrosstermBackend::new(stdout);
         let mut terminal = Terminal::new(backend)?;
-        
+
         loop {
             terminal.draw(|f| self.render(f))?;
-            
+
             if let Event::Key(key) = event::read()? {
                 match key.code {
                     KeyCode::Up => {
@@ -65,39 +65,47 @@ impl SkillSelector {
                         disable_raw_mode()?;
                         execute!(terminal.backend_mut(), LeaveAlternateScreen)?;
                         return Ok(vec![]);
-                    },
+                    }
                     _ => {}
                 }
             }
         }
-        
+
         disable_raw_mode()?;
         execute!(terminal.backend_mut(), LeaveAlternateScreen)?;
-        
-        Ok(self.selected_indices
+
+        Ok(self
+            .selected_indices
             .into_iter()
             .map(|i| self.skills[i].clone())
             .collect())
     }
-    
+
     fn render(&self, f: &mut ratatui::Frame) {
-        let items: Vec<ListItem> = self.skills.iter()
+        let items: Vec<ListItem> = self
+            .skills
+            .iter()
             .enumerate()
             .map(|(i, (_id, skill))| {
-                let marker = if self.selected_indices.contains(&i) { "[x]" } else { "[ ]" };
+                let marker = if self.selected_indices.contains(&i) {
+                    "[x]"
+                } else {
+                    "[ ]"
+                };
                 let cursor = if i == self.current_index { ">" } else { " " };
                 ListItem::new(format!(
                     "{}{} {} - {} (★{})",
-                    cursor, marker, skill.name, skill.description, skill.popularity
+                    cursor, marker, skill.name, skill.description, skill.stars
                 ))
             })
             .collect();
-        
-        let list = List::new(items)
-            .block(Block::default()
+
+        let list = List::new(items).block(
+            Block::default()
                 .title("Select Skills (↑↓ navigate, Space select, Enter confirm)")
-                .borders(Borders::ALL));
-        
+                .borders(Borders::ALL),
+        );
+
         f.render_widget(list, f.size());
     }
 }

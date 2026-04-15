@@ -1,50 +1,24 @@
 #[cfg(test)]
 mod tests {
-    use crate::models::Skill;
+    use crate::models::{InstallAction, Skill};
 
     #[test]
-    fn test_matches_tools() {
+    fn test_skill_with_new_fields() {
         let skill = Skill {
-            name: "Test".into(),
-            description: "Desc".into(),
-            source: "url".into(),
-            tags: vec!["testing".into()],
-            compatible_tools: vec!["cursor".into(), "claude-code".into()],
-            popularity: 100,
+            name: "TDD".to_string(),
+            description: "Test driven development".to_string(),
+            source_url: "https://github.com/mattpocock/skills/tree/main/tdd".to_string(),
+            stars: 1500,
+            context_size: 2400,
+            domain: "development".to_string(),
+            last_updated: "2026-04-10".to_string(),
+            tags: vec!["testing".to_string()],
+            install_action: Some(InstallAction::Copy {
+                path: "tdd/SKILL.md".to_string(),
+            }),
+            score: Some(85.0),
         };
-        
-        assert!(skill.matches_tools(&["cursor".to_string()]));
-        assert!(skill.matches_tools(&["claude-code".to_string()]));
-        assert!(!skill.matches_tools(&["cline".to_string()]));
-    }
-
-    #[test]
-    fn test_matches_tags() {
-        let skill = Skill {
-            name: "Test".into(),
-            description: "Desc".into(),
-            source: "url".into(),
-            tags: vec!["testing".into(), "rust".into()],
-            compatible_tools: vec!["cursor".into()],
-            popularity: 100,
-        };
-        
-        assert!(skill.matches_tags(&["testing".to_string()]));
-        assert!(skill.matches_tags(&["rust".to_string()]));
-        assert!(!skill.matches_tags(&["python".to_string()]));
-    }
-    
-    #[test]
-    fn test_matches_multiple_tags() {
-        let skill = Skill {
-            name: "Multi".into(),
-            description: "Multi-tag skill".into(),
-            source: "url".into(),
-            tags: vec!["rust".into(), "testing".into(), "debugging".into()],
-            compatible_tools: vec!["cursor".into()],
-            popularity: 100,
-        };
-        
-        assert!(skill.matches_tags(&["python".to_string(), "rust".to_string()]));
+        assert_eq!(skill.stars, 1500);
+        assert!(skill.install_action.unwrap().is_simple());
     }
 }

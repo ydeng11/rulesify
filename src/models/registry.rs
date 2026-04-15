@@ -1,6 +1,6 @@
+use crate::models::Skill;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
-use crate::models::Skill;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Registry {
@@ -13,15 +13,15 @@ impl Registry {
     pub fn get_skill(&self, id: &str) -> Option<&Skill> {
         self.skills.get(id)
     }
-    
-    pub fn filter_by_tools(&self, tools: &[String]) -> Vec<(String, Skill)> {
+
+    pub fn filter_by_domain(&self, domain: &str) -> Vec<(String, Skill)> {
         self.skills
             .iter()
-            .filter(|(_, s)| s.matches_tools(tools))
+            .filter(|(_, s)| s.matches_domain(domain))
             .map(|(k, v)| (k.clone(), v.clone()))
             .collect()
     }
-    
+
     pub fn filter_by_tags(&self, tags: &[String]) -> Vec<(String, Skill)> {
         self.skills
             .iter()
@@ -29,7 +29,7 @@ impl Registry {
             .map(|(k, v)| (k.clone(), v.clone()))
             .collect()
     }
-    
+
     pub fn all_skills(&self) -> Vec<(String, Skill)> {
         self.skills
             .iter()

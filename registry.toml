@@ -1,42 +1,52 @@
 version = 1
-updated = "2026-04-08"
+updated = "2026-04-14"
 
 [skills.test-driven-development]
 name = "Test-Driven Development"
 description = "Write tests before implementation code using TDD methodology"
-source = "https://github.com/anthropic/skills/tree/main/tdd"
+source_url = "https://github.com/anthropic/skills/tree/main/tdd"
+stars = 150
+context_size = 2400
+domain = "development"
+last_updated = "2026-04-10"
 tags = ["testing", "development", "best-practices"]
-compatible_tools = ["cursor", "claude-code", "cline", "goose"]
-popularity = 150
 
 [skills.systematic-debugging]
 name = "Systematic Debugging"
 description = "Investigate bugs using scientific method before proposing fixes"
-source = "https://github.com/anthropic/skills/tree/main/debugging"
+source_url = "https://github.com/anthropic/skills/tree/main/debugging"
+stars = 89
+context_size = 1800
+domain = "development"
+last_updated = "2026-04-08"
 tags = ["debugging", "troubleshooting", "investigation"]
-compatible_tools = ["cursor", "claude-code", "cline"]
-popularity = 89
 
 [skills.brainstorming]
 name = "Brainstorming"
 description = "Explore user intent and design before implementation"
-source = "https://github.com/anthropic/skills/tree/main/brainstorming"
+source_url = "https://github.com/anthropic/skills/tree/main/brainstorming"
+stars = 120
+context_size = 1500
+domain = "planning"
+last_updated = "2026-04-09"
 tags = ["design", "planning", "creative"]
-compatible_tools = ["cursor", "claude-code", "cline", "goose"]
-popularity = 120
 
 [skills.verification-before-completion]
 name = "Verification Before Completion"
 description = "Run verification commands before claiming work is complete"
-source = "https://github.com/anthropic/skills/tree/main/verification"
+source_url = "https://github.com/anthropic/skills/tree/main/verification"
+stars = 95
+context_size = 1200
+domain = "quality"
+last_updated = "2026-04-07"
 tags = ["quality", "verification", "testing"]
-compatible_tools = ["cursor", "claude-code"]
-popularity = 95
 
 [skills.writing-plans]
 name = "Writing Plans"
 description = "Create implementation plans before touching code"
-source = "https://github.com/anthropic/skills/tree/main/planning"
+source_url = "https://github.com/anthropic/skills/tree/main/planning"
+stars = 110
+context_size = 2000
+domain = "planning"
+last_updated = "2026-04-10"
 tags = ["planning", "documentation", "process"]
-compatible_tools = ["cursor", "claude-code", "cline", "goose"]
-popularity = 110

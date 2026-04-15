@@ -2,25 +2,26 @@ use crate::models::Skill;
 
 pub fn generate_instructions(skills: &[(String, Skill)], tools: &[String]) -> String {
     let mut output = String::new();
-    
+
     output.push_str("# Installation Instructions\n\n");
     output.push_str("Copy the following instructions for your AI agent:\n\n");
     output.push_str("---\n\n");
-    
+
     for (_id, skill) in skills {
         output.push_str(&format!("## Skill: {}\n\n", skill.name));
-        output.push_str(&format!("**Source:** {}\n\n", skill.source));
-        
+        output.push_str(&format!("**Source:** {}\n\n", skill.source_url));
+
         for tool in tools {
-            if skill.compatible_tools.contains(tool) {
-                output.push_str(&format!("### For {}\n\n", tool));
-                output.push_str(&generate_tool_specific_instructions(tool, &skill.source));
-            }
+            output.push_str(&format!("### For {}\n\n", tool));
+            output.push_str(&generate_tool_specific_instructions(
+                tool,
+                &skill.source_url,
+            ));
         }
-        
+
         output.push_str("\n---\n\n");
     }
-    
+
     output
 }
 
