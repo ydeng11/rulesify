@@ -7,6 +7,8 @@ pub mod skill;
 #[cfg(test)]
 mod install_action_tests;
 #[cfg(test)]
+mod registry_tests;
+#[cfg(test)]
 mod skill_tests;
 
 pub use config::ProjectConfig;
