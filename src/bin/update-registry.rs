@@ -17,12 +17,13 @@ async fn fetch_skill(
     let parsed = SkillParser::parse(&content)?;
     let skill_id = source.parse_skill_id(path).unwrap_or("unknown".into());
     let context_size = SkillParser::estimate_context_size(&content);
+    let folder = source.parse_skill_folder(path).unwrap_or_default();
 
     let source_url = format!(
         "https://github.com/{}/skills/tree/{}/{}",
         source.owner(),
         source.branch(),
-        path.replace("/SKILL.md", "")
+        folder
     );
 
     Ok(SkillMetadata {
@@ -30,16 +31,14 @@ async fn fetch_skill(
         name: parsed.name,
         description: parsed.description,
         source_repo: source.full_name(),
-        source_folder: path.replace("/SKILL.md", ""),
+        source_folder: folder.clone(),
         source_url,
         tags: parsed.tags,
         stars: repo_stars,
         context_size,
         domain: source.domain().into(),
         last_updated: chrono::Utc::now().format("%Y-%m-%d").to_string(),
-        install_action: InstallAction::Copy {
-            folder: path.replace("/SKILL.md", ""),
-        },
+        install_action: InstallAction::Copy { folder },
     })
 }
 
