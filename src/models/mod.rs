@@ -3,6 +3,7 @@ pub mod context;
 pub mod domain;
 pub mod install_action;
 pub mod registry;
+pub mod repo_metrics;
 pub mod skill;
 pub mod skill_metadata;
 
@@ -22,5 +23,6 @@ pub use context::ProjectContext;
 pub use domain::Domain;
 pub use install_action::InstallAction;
 pub use registry::Registry;
+pub use repo_metrics::RepoMetrics;
 pub use skill::Skill;
 pub use skill_metadata::SkillMetadata;

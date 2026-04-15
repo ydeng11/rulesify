@@ -1,5 +1,6 @@
+use crate::models::RepoMetrics;
 use crate::utils::{Result, RulesifyError};
-use chrono::{DateTime, Utc};
+use chrono::{DateTime, Duration as ChronoDuration, Utc};
 use serde::Deserialize;
 use std::time::Duration;
 
@@ -49,6 +50,19 @@ pub struct ContentEntry {
 pub struct FileContent {
     pub content: Option<String>,
     pub encoding: Option<String>,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+pub struct Issue {
+    pub state: String,
+    pub created_at: DateTime<Utc>,
+    pub closed_at: Option<DateTime<Utc>>,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+pub struct Contributor {
+    pub login: String,
+    pub contributions: u32,
 }
 
 pub struct GitHubClient {
@@ -204,5 +218,84 @@ impl GitHubClient {
         resp.text()
             .await
             .map_err(|e| RulesifyError::GitHubApi(e.to_string()).into())
+    }
+
+    pub async fn fetch_issues(
+        &self,
+        owner: &str,
+        repo: &str,
+        since: DateTime<Utc>,
+    ) -> Result<Vec<Issue>> {
+        let since_str = since.format("%Y-%m-%dT%H:%M:%SZ");
+        let url = format!(
+            "https://api.github.com/repos/{}/{}/issues?state=all&since={}&per_page=100",
+            owner, repo, since_str
+        );
+        let resp = self
+            .request(&url)
+            .send()
+            .await
+            .map_err(|e| RulesifyError::GitHubApi(e.to_string()))?;
+
+        if !resp.status().is_success() {
+            return Err(RulesifyError::GitHubApi(format!("HTTP {}", resp.status())).into());
+        }
+
+        resp.json::<Vec<Issue>>()
+            .await
+            .map_err(|e| RulesifyError::GitHubApi(e.to_string()).into())
+    }
+
+    pub async fn fetch_contributors(&self, owner: &str, repo: &str) -> Result<Vec<Contributor>> {
+        let url = format!(
+            "https://api.github.com/repos/{}/{}/contributors?per_page=100",
+            owner, repo
+        );
+        let resp = self
+            .request(&url)
+            .send()
+            .await
+            .map_err(|e| RulesifyError::GitHubApi(e.to_string()))?;
+
+        if !resp.status().is_success() {
+            return Err(RulesifyError::GitHubApi(format!("HTTP {}", resp.status())).into());
+        }
+
+        resp.json::<Vec<Contributor>>()
+            .await
+            .map_err(|e| RulesifyError::GitHubApi(e.to_string()).into())
+    }
+
+    pub async fn fetch_repo_metrics(&self, owner: &str, repo: &str) -> Result<RepoMetrics> {
+        let repo_info = self.fetch_repo(owner, repo).await?;
+
+        let three_months_ago = Utc::now() - ChronoDuration::days(90);
+        let issues = self.fetch_issues(owner, repo, three_months_ago).await?;
+
+        let mut issues_open_3mo = 0u32;
+        let mut issues_closed_3mo = 0u32;
+        for issue in issues.iter() {
+            if issue.created_at >= three_months_ago {
+                if issue.state == "open" {
+                    issues_open_3mo += 1;
+                } else if issue.state == "closed" {
+                    issues_closed_3mo += 1;
+                }
+            }
+        }
+
+        let contributors = self.fetch_contributors(owner, repo).await?;
+        let contributors_total = contributors.len() as u32;
+        let contributors_active_3mo =
+            contributors.iter().filter(|c| c.contributions > 0).count() as u32;
+
+        Ok(RepoMetrics {
+            stars: repo_info.stargazers_count,
+            pushed_at: repo_info.pushed_at,
+            issues_open_3mo,
+            issues_closed_3mo,
+            contributors_total,
+            contributors_active_3mo,
+        })
     }
 }

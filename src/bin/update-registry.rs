@@ -2,7 +2,7 @@ use anyhow::Result;
 use clap::Parser;
 use rulesify::{
     llm::{Classifier, SkillClassification},
-    models::{InstallAction, Registry, SkillMetadata},
+    models::{InstallAction, Registry, RepoMetrics, SkillMetadata},
     registry::{GitHubClient, RegistryGenerator, Scorer, SkillParser, SourceRepo},
 };
 use std::collections::HashMap;
@@ -23,7 +23,7 @@ async fn fetch_skill(
     client: &GitHubClient,
     source: SourceRepo,
     path: &str,
-    repo_stars: u32,
+    repo_metrics: &RepoMetrics,
 ) -> Result<SkillMetadata> {
     let content = client
         .fetch_file(source.owner(), source.repo(), path)
@@ -48,7 +48,7 @@ async fn fetch_skill(
         source_folder: folder.clone(),
         source_url,
         tags: parsed.tags,
-        stars: repo_stars,
+        stars: repo_metrics.stars,
         context_size,
         domain: String::new(),
         last_updated: chrono::Utc::now().format("%Y-%m-%d").to_string(),
@@ -121,11 +121,18 @@ async fn main() -> Result<()> {
     for source in SourceRepo::all() {
         log::info!("Fetching from {}", source.full_name());
 
-        let repo = match client.fetch_repo(source.owner(), source.repo()).await {
-            Ok(r) => r,
+        let repo_metrics = match client
+            .fetch_repo_metrics(source.owner(), source.repo())
+            .await
+        {
+            Ok(m) => m,
             Err(e) => {
-                log::warn!("Failed to fetch repo {}: {}", source.full_name(), e);
-                continue;
+                log::warn!(
+                    "Failed to fetch repo metrics for {}: {}",
+                    source.full_name(),
+                    e
+                );
+                RepoMetrics::default()
             }
         };
 
@@ -141,9 +148,9 @@ async fn main() -> Result<()> {
         };
 
         for entry in tree.tree.iter().filter(|e| source.matches_pattern(&e.path)) {
-            match fetch_skill(&client, source, &entry.path, repo.stargazers_count).await {
+            match fetch_skill(&client, source, &entry.path, &repo_metrics).await {
                 Ok(meta) => {
-                    let score = scorer.calculate(&meta);
+                    let score = scorer.calculate_for_skill(&meta, &repo_metrics);
                     log::debug!("Skill {} scored {:.1}", meta.skill_id, score);
                     all_skills.push((meta, score));
                 }
@@ -152,7 +159,7 @@ async fn main() -> Result<()> {
         }
     }
 
-    let filtered = scorer.filter_above_threshold(all_skills, 60.0);
+    let filtered = scorer.filter_above_threshold(all_skills, 30.0);
     let top = scorer.sort_and_limit(filtered, 50);
 
     let mut pending_skills: HashMap<String, (SkillMetadata, f32)> = HashMap::new();
