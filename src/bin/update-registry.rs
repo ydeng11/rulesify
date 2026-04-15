@@ -12,11 +12,11 @@ use std::path::Path;
 #[command(name = "update-registry")]
 #[command(about = "Update skill registry from GitHub sources")]
 struct Args {
-    #[arg(
-        long,
-        help = "Force re-classification of all skills (ignore cached domain/tags)"
-    )]
+    #[arg(long, help = "Force re-classification of all skills (ignore cached domain/tags)")]
     force: bool,
+
+    #[arg(short, long, help = "Enable verbose/debug logging")]
+    verbose: bool,
 }
 
 async fn fetch_skill(
@@ -94,8 +94,18 @@ fn apply_cache(meta: &mut SkillMetadata, cached: &HashMap<String, (String, Vec<S
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    env_logger::init();
     let args = Args::parse();
+
+    if args.verbose {
+        env_logger::Builder::from_env(env_logger::Env::default().default_filter_or("debug"))
+            .init();
+    } else {
+        env_logger::Builder::from_env(env_logger::Env::default().default_filter_or("info"))
+            .init();
+    }
+
+    log::info!("Starting registry update");
+    log::info!("Args: force={}, verbose={}", args.force, args.verbose);
 
     let token = std::env::var("GITHUB_TOKEN").ok();
     let client = if let Some(t) = token {
@@ -112,8 +122,10 @@ async fn main() -> Result<()> {
         log::info!("Force flag set - skipping cache");
         HashMap::new()
     } else {
-        log::info!("Loading cached registry");
-        load_cached_registry(registry_path)
+        log::info!("Loading cached registry from {}", registry_path.display());
+        let c = load_cached_registry(registry_path);
+        log::info!("Found {} cached skill classifications", c.len());
+        c
     };
 
     let mut all_skills: Vec<(SkillMetadata, f32)> = vec![];
@@ -162,34 +174,68 @@ async fn main() -> Result<()> {
     let filtered = scorer.filter_above_threshold(all_skills, 30.0);
     let top = scorer.sort_and_limit(filtered, 50);
 
+    log::info!(
+        "Found {} skills after filtering (threshold: 30.0, limit: 50)",
+        top.len()
+    );
+
     let mut pending_skills: HashMap<String, (SkillMetadata, f32)> = HashMap::new();
     let mut skills_to_classify: Vec<(String, String)> = vec![];
     let mut final_skills: HashMap<String, rulesify::models::Skill> = HashMap::new();
+    let mut cached_count = 0;
 
     for (mut meta, score) in top {
         let was_cached = apply_cache(&mut meta, &cached);
 
         if was_cached {
-            log::debug!("Using cached classification for {}", meta.skill_id);
+            cached_count += 1;
+            log::debug!(
+                "Using cached classification for {}: domain={}, tags={:?}",
+                meta.skill_id,
+                meta.domain,
+                meta.tags
+            );
             final_skills.insert(meta.skill_id.clone(), meta.to_skill(score));
         } else {
+            log::debug!(
+                "Skill {} needs classification (no cache)",
+                meta.skill_id
+            );
             skills_to_classify.push((meta.skill_id.clone(), meta.description.clone()));
             pending_skills.insert(meta.skill_id.clone(), (meta, score));
         }
     }
 
-    if !skills_to_classify.is_empty() {
+    log::info!(
+        "Cached: {} skills, Need classification: {} skills",
+        cached_count,
+        skills_to_classify.len()
+    );
+
+    if skills_to_classify.is_empty() {
+        log::info!("No skills need classification - all are cached");
+    } else {
+        let model = std::env::var("OPENROUTER_MODEL")
+            .unwrap_or_else(|_| "anthropic/claude-3.5-haiku".to_string());
         log::info!(
             "Classifying {} skills with LLM (model: {})",
             skills_to_classify.len(),
-            std::env::var("OPENROUTER_MODEL")
-                .unwrap_or_else(|_| "anthropic/claude-3.5-haiku".to_string())
+            model
         );
 
         let classifier = Classifier::from_env()?;
-        let classifications = classifier.classify(skills_to_classify).await?;
+        log::info!("Classifier initialized successfully");
+
+        let classifications = classifier.classify(skills_to_classify.clone()).await?;
+        log::info!("Received {} classifications from LLM", classifications.len());
 
         for (skill_id, classification) in classifications {
+            log::debug!(
+                "Classification for {}: domain={}, tags={:?}",
+                skill_id,
+                classification.domain,
+                classification.tags
+            );
             if let Some((mut meta, score)) = pending_skills.remove(&skill_id) {
                 apply_classification(&mut meta, &classification);
                 final_skills.insert(skill_id, meta.to_skill(score));
@@ -197,7 +243,7 @@ async fn main() -> Result<()> {
         }
 
         for (skill_id, (meta, score)) in pending_skills {
-            log::warn!("Skill '{}' not classified, using fallback", skill_id);
+            log::warn!("Skill '{}' not classified by LLM, using fallback", skill_id);
             let mut updated_meta = meta;
             updated_meta.domain = "development".to_string();
             updated_meta.tags = vec![];

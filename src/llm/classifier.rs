@@ -6,7 +6,7 @@ use serde::Deserialize;
 use std::collections::HashMap;
 use std::str::FromStr;
 
-const BATCH_SIZE: usize = 25;
+const BATCH_SIZE: usize = 20;
 
 #[derive(Debug, Clone)]
 pub struct SkillClassification {
@@ -71,17 +71,24 @@ impl Classifier {
             return Ok(ClassificationResult::new());
         }
 
+        let skill_names: Vec<&str> = batch.iter().map(|(id, _)| id.as_str()).collect();
         log::info!(
-            "Classifying batch of {} skills using model {}",
+            "Classifying batch {} of {} skills: [{}]",
             batch.len(),
-            self.client.model()
+            self.client.model(),
+            skill_names.join(", ")
         );
 
         let user_prompt = build_user_prompt(batch);
+        log::debug!("User prompt ({} bytes): {}", user_prompt.len(), user_prompt);
+
         let response = self
             .client
             .classify_batch(&self.system_prompt, &user_prompt)
             .await?;
+
+        log::debug!("LLM response ({} bytes): {}", response.len(), response);
+        log::info!("Received response for {} skills", batch.len());
 
         self.parse_response(batch, &response)
     }
@@ -103,25 +110,42 @@ impl Classifier {
             .strip_suffix("```")
             .unwrap_or(response.trim());
 
+        if !cleaned.starts_with('{') || !cleaned.ends_with('}') {
+            return Err(anyhow::anyhow!(
+                "Response appears truncated (does not start/end with braces). Length: {} bytes. Consider reducing batch size.",
+                cleaned.len()
+            ));
+        }
+
         let parsed: BatchResponse = serde_json::from_str(cleaned)
-            .with_context(|| format!("Failed to parse LLM response: {}", response))?;
+            .with_context(|| format!("Failed to parse LLM response:\n---\n{}\n---", cleaned))?;
+
+        log::info!("Parsed {} skill classifications from response", parsed.skills.len());
 
         for (skill_id, classification) in parsed.skills {
-            let domain = Domain::from_str(&classification.domain).unwrap_or_else(|_| {
+            let domain = Domain::from_str(&classification.domain).unwrap_or_else(|e| {
                 log::warn!(
-                    "Invalid domain '{}' for skill '{}', using fallback",
+                    "Invalid domain '{}' for skill '{}' (error: {}), using fallback 'development'",
                     classification.domain,
-                    skill_id
+                    skill_id,
+                    e
                 );
                 Domain::default_fallback()
             });
 
-            let tags = classification
+            let tags: Vec<String> = classification
                 .tags
                 .iter()
                 .map(|t| t.to_lowercase().replace(' ', "-"))
                 .take(3)
                 .collect();
+
+            log::info!(
+                "Classification: {} -> domain={}, tags={:?}",
+                skill_id,
+                domain.as_str(),
+                tags
+            );
 
             results.insert(skill_id.clone(), SkillClassification { domain, tags });
         }

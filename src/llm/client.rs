@@ -18,6 +18,7 @@ pub struct OpenRouterClient {
 struct ChatRequest {
     model: String,
     messages: Vec<Message>,
+    max_tokens: u32,
 }
 
 #[derive(Debug, Serialize)]
@@ -76,7 +77,14 @@ impl OpenRouterClient {
                     content: user_prompt.to_string(),
                 },
             ],
+            max_tokens: 4096,
         };
+
+        log::debug!(
+            "Sending request to OpenRouter: model={}, max_tokens=4096, prompt_len={} bytes",
+            self.model,
+            user_prompt.len()
+        );
 
         for attempt in 0..MAX_RETRIES {
             let response = self
@@ -95,7 +103,9 @@ impl OpenRouterClient {
                         resp.json().await.context("Failed to parse LLM response")?;
 
                     if let Some(choice) = chat_response.choices.first() {
-                        return Ok(choice.message.content.clone());
+                        let content = choice.message.content.clone();
+                        log::debug!("LLM returned {} bytes", content.len());
+                        return Ok(content);
                     }
                     return Err(anyhow::anyhow!("No response from LLM"));
                 }
