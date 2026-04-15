@@ -100,4 +100,11 @@ impl SourceRepo {
     pub fn matches_pattern(&self, path: &str) -> bool {
         path.ends_with("SKILL.md") && self.parse_skill_id(path).is_some()
     }
+
+    pub fn parse_skill_folder(&self, path: &str) -> Option<String> {
+        if !path.ends_with("SKILL.md") {
+            return None;
+        }
+        Some(path.replace("/SKILL.md", ""))
+    }
 }

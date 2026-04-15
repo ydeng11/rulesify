@@ -31,4 +31,18 @@ mod tests {
         let id = openai.parse_skill_id("skills/.curated/gh-fix-ci/SKILL.md");
         assert_eq!(id, Some("gh-fix-ci".to_string()));
     }
+
+    #[test]
+    fn test_parse_skill_folder() {
+        let anthropic = SourceRepo::AnthropicSkills;
+        let folder = anthropic.parse_skill_folder("skills/tdd/SKILL.md");
+        assert_eq!(folder, Some("skills/tdd".to_string()));
+
+        let mattpocock = SourceRepo::MattPocockSkills;
+        let folder = mattpocock.parse_skill_folder("brainstorming/SKILL.md");
+        assert_eq!(folder, Some("brainstorming".to_string()));
+
+        let no_folder = anthropic.parse_skill_folder("skills/tdd/README.md");
+        assert_eq!(no_folder, None);
+    }
 }
