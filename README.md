@@ -19,6 +19,7 @@ Rulesify is a command-line tool (written in Rust) that provides **unified manage
 
 - **Rule Management**: Create, edit, list, show, and delete rules
 - **Multi-Tool Deployment**: Deploy rules to all supported AI tools
+- **Skills Registry**: Browse and install AI agent skills from curated GitHub repos
 - **Import Functionality**: Import existing rules from any AI tool format
 - **Validation System**: Comprehensive quality and format validation
 - **Template System**: Create rules from built-in templates
@@ -26,7 +27,79 @@ Rulesify is a command-line tool (written in Rust) that provides **unified manage
 - **Sync**: Synchronize deployed rules back to URF format
 - **Round-Trip Integrity**: Import/export cycle is lossless and auto-validated
 - **Unicode Support**: Handles international text
-- **Comprehensive Testing**: 75 tests, 100% pass rate
+- **Comprehensive Testing**: 99 tests, 100% pass rate
+
+## Skills Registry
+
+Rulesify includes a curated catalog of AI agent skills from trusted GitHub repositories. Skills are pre-built workflows and methodologies that enhance AI assistant capabilities.
+
+### Skill Sources
+
+Skills are fetched from:
+- **anthropics/skills** - Anthropic's official skill collection
+- **openai/skills** - OpenAI's curated and system skills
+- **mattpocock/skills** - Matt Pocock's development skills
+- **MiniMax-AI/skills** - MiniMax's skill collection
+
+### Registry Format
+
+Each skill entry includes metadata for discovery:
+
+```toml
+[skills.tdd]
+name = "Test-Driven Development"
+description = "Write tests before implementation code using TDD methodology"
+source_url = "https://github.com/mattpocock/skills/tree/main/tdd"
+stars = 1500
+context_size = 2400
+domain = "development"
+last_updated = "2026-04-10"
+tags = ["testing", "development", "best-practices"]
+install_action = { type = "copy", value = { path = "tdd/SKILL.md" } }
+```
+
+### Install Actions
+
+Skills have two installation types:
+
+- **Copy** (`type = "copy"`): Simple skills - rulesify fetches SKILL.md and copies to `~/.agents/skills/`
+- **Command** (`type = "command"`): Complex skills - custom install command (agent executes)
+
+### Browse Skills
+
+```bash
+# List all available skills
+rulesify skill list
+
+# Filter by domain
+rulesify skill list --domain development
+
+# Filter by tags
+rulesify skill list --tags testing,debugging
+
+# Show skill details
+rulesify skill show tdd
+```
+
+### Install Skills
+
+```bash
+# Install a skill (for simple skills)
+rulesify skill add tdd
+
+# For complex skills, rulesify outputs the install command
+rulesify skill add gsd
+# Output: Run: git clone https://github.com/gsd-build/get-shit-done ~/.agents/skills/gsd
+```
+
+### Update Registry
+
+The registry updates weekly via GitHub Actions. To manually refresh:
+
+```bash
+# Requires GITHUB_TOKEN for authenticated requests
+GITHUB_TOKEN=your_token cargo run --bin update-registry
+```
 
 ## Installation
 
@@ -261,6 +334,15 @@ This system ensures that rule IDs remain stable across import, export, and sync 
 - `rulesify rule show <name>` - Show detailed rule information including content and metadata
 - `rulesify rule delete <name>` - Delete a rule (requires confirmation)
 
+### Skills Management
+- `rulesify skill list` - List all available skills from registry
+- `rulesify skill list --domain <domain>` - Filter skills by domain (development, planning, etc.)
+- `rulesify skill list --tags <tags>` - Filter skills by tags (comma-separated)
+- `rulesify skill show <skill-id>` - Show detailed skill information
+- `rulesify skill add <skill-id>` - Install a skill (downloads SKILL.md or outputs install command)
+- `rulesify skill remove <skill-id>` - Remove an installed skill
+- `rulesify skill update` - Refresh the local registry cache
+
 ### Validation
 - `rulesify validate [rule]` - Validate specific rule for quality and format compliance
 - `rulesify validate --all` - Validate all rules for issues, warnings, and best practices
@@ -413,6 +495,25 @@ rulesify deploy --all      # Deploy updates
 rulesify deploy --tool claude-code --rule "typescript-style,react-patterns,testing-standards"
 ```
 
+### Skills Workflow Examples
+```bash
+# Discover available skills
+rulesify skill list
+
+# Find skills for debugging
+rulesify skill list --tags debugging
+
+# Install a development skill
+rulesify skill add tdd
+
+# Install a complex skill (outputs command to run)
+rulesify skill add gsd
+# Output: Run: git clone https://github.com/gsd-build/get-shit-done ~/.agents/skills/gsd
+
+# View skill details before installing
+rulesify skill show systematic-debugging
+```
+
 ### Interactive Features
 
 **Confirmation Prompts:**
@@ -437,14 +538,27 @@ See [`DEVELOPMENT_PLAN_DETAILED.md`](./DEVELOPMENT_PLAN_DETAILED.md) for the com
 ```
 rulesify/
 ├── Cargo.toml
+├── registry.toml              # Skills registry catalog
 ├── README.md
 ├── src/
 │   ├── main.rs
 │   ├── lib.rs
+│   ├── bin/
+│   │   └── update-registry.rs # Registry automation binary
 │   ├── cli/
 │   │   ├── mod.rs
 │   │   └── commands/
 │   ├── models/
+│   │   ├── skill.rs           # Skill model
+│   │   ├── registry.rs        # Registry model
+│   │   ├── install_action.rs  # Install types (copy/command)
+│   │   └── skill_metadata.rs  # Raw skill data
+│   ├── registry/
+│   │   ├── source.rs          # GitHub repo sources
+│   │   ├── github.rs          # GitHub API client
+│   │   ├── parser.rs          # SKILL.md parser
+│   │   ├── scorer.rs          # Quality scoring
+│   │   └── generator.rs       # TOML generator
 │   ├── store/
 │   ├── converters/
 │   ├── templates/
@@ -453,6 +567,9 @@ rulesify/
 │   └── utils/
 ├── templates/
 ├── tests/
+├── .github/
+│   └── workflows/
+│       └── update-registry.yml # Weekly registry updates
 └── docs/
 ```
 
@@ -467,7 +584,8 @@ cargo test --test validation_tests
 ```
 
 ### Test Coverage
-- **75+ total tests** across all modules
+- **99+ total tests** across all modules
+- **24 registry tests** (skills catalog, GitHub API, scoring)
 - **19 converter tests** (import/export functionality)
 - **22 validation tests** (quality assurance)
 - **10+ CLI integration tests** (including multi-rule merge)
