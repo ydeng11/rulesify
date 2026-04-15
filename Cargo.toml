@@ -25,3 +25,7 @@ serde_json = "1.0"
 
 [dev-dependencies]
 tempfile = "3.8"
+
+[[bin]]
+name = "update-registry"
+path = "src/bin/update-registry.rs"
