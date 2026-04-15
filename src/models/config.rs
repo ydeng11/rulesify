@@ -22,7 +22,7 @@ impl ProjectConfig {
             installed_skills: HashMap::new(),
         }
     }
-    
+
     pub fn add_skill(&mut self, id: &str, source: &str) {
         self.installed_skills.insert(
             id.to_string(),
@@ -32,11 +32,11 @@ impl ProjectConfig {
             },
         );
     }
-    
+
     pub fn remove_skill(&mut self, id: &str) -> Option<InstalledSkill> {
         self.installed_skills.remove(id)
     }
-    
+
     pub fn list_skills(&self) -> Vec<(String, InstalledSkill)> {
         self.installed_skills
             .iter()

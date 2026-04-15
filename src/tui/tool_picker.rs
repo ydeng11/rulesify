@@ -1,12 +1,12 @@
+use crossterm::{
+    event::{self, Event, KeyCode},
+    execute,
+    terminal::{disable_raw_mode, enable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
+};
 use ratatui::{
     backend::CrosstermBackend,
     widgets::{Block, Borders, List, ListItem},
     Terminal,
-};
-use crossterm::{
-    event::{self, Event, KeyCode},
-    execute,
-    terminal::{EnterAlternateScreen, LeaveAlternateScreen, enable_raw_mode, disable_raw_mode},
 };
 use std::io;
 
@@ -22,20 +22,20 @@ impl ToolPicker {
             selected: vec![false, false, false, false],
         }
     }
-    
+
     pub fn run() -> io::Result<Vec<String>> {
         enable_raw_mode()?;
         let mut stdout = io::stdout();
         execute!(stdout, EnterAlternateScreen)?;
-        
+
         let backend = CrosstermBackend::new(stdout);
         let mut terminal = Terminal::new(backend)?;
-        
+
         let mut picker = Self::new();
-        
+
         loop {
             terminal.draw(|f| picker.render(f))?;
-            
+
             if let Event::Key(key) = event::read()? {
                 match key.code {
                     KeyCode::Char('1') => picker.selected[0] = !picker.selected[0],
@@ -47,23 +47,25 @@ impl ToolPicker {
                         disable_raw_mode()?;
                         execute!(terminal.backend_mut(), LeaveAlternateScreen)?;
                         return Ok(vec![]);
-                    },
+                    }
                     _ => {}
                 }
             }
         }
-        
+
         disable_raw_mode()?;
         execute!(terminal.backend_mut(), LeaveAlternateScreen)?;
-        
-        Ok(TOOLS.iter()
+
+        Ok(TOOLS
+            .iter()
             .zip(picker.selected.iter())
             .filter_map(|(t, s)| if *s { Some(t.to_string()) } else { None })
             .collect())
     }
-    
+
     fn render(&self, f: &mut ratatui::Frame) {
-        let items: Vec<ListItem> = TOOLS.iter()
+        let items: Vec<ListItem> = TOOLS
+            .iter()
             .enumerate()
             .zip(self.selected.iter())
             .map(|((i, t), s)| {
@@ -71,12 +73,13 @@ impl ToolPicker {
                 ListItem::new(format!("{}. {} {}", i + 1, symbol, t))
             })
             .collect();
-        
-        let list = List::new(items)
-            .block(Block::default()
+
+        let list = List::new(items).block(
+            Block::default()
                 .title("Select AI Tools (1-4 to toggle, Enter to confirm)")
-                .borders(Borders::ALL));
-        
+                .borders(Borders::ALL),
+        );
+
         f.render_widget(list, f.size());
     }
 }

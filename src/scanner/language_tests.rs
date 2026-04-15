@@ -9,7 +9,7 @@ mod tests {
         let dir = tempdir().unwrap();
         fs::write(dir.path().join("main.rs"), "").unwrap();
         fs::write(dir.path().join("Cargo.toml"), "").unwrap();
-        
+
         let langs = detect(dir.path()).unwrap();
         assert!(langs.contains(&"rust".to_string()));
     }
@@ -19,18 +19,18 @@ mod tests {
         let dir = tempdir().unwrap();
         fs::write(dir.path().join("app.ts"), "").unwrap();
         fs::write(dir.path().join("package.json"), "{}").unwrap();
-        
+
         let langs = detect(dir.path()).unwrap();
         assert!(langs.contains(&"typescript".to_string()));
     }
-    
+
     #[test]
     fn test_detect_multiple_languages() {
         let dir = tempdir().unwrap();
         fs::write(dir.path().join("main.rs"), "").unwrap();
         fs::write(dir.path().join("app.ts"), "").unwrap();
         fs::write(dir.path().join("lib.py"), "").unwrap();
-        
+
         let langs = detect(dir.path()).unwrap();
         assert!(langs.contains(&"rust".to_string()));
         assert!(langs.contains(&"typescript".to_string()));

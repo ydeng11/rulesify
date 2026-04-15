@@ -14,7 +14,7 @@ impl ProjectContext {
         tags.extend(self.frameworks.iter().cloned());
         tags
     }
-    
+
     pub fn has_tool(&self, tool: &str) -> bool {
         self.existing_tools.contains(&tool.to_string())
     }

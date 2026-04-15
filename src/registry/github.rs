@@ -161,7 +161,12 @@ impl GitHubClient {
         )
     }
 
-    pub async fn list_folder(&self, owner: &str, repo: &str, path: &str) -> Result<Vec<ContentEntry>> {
+    pub async fn list_folder(
+        &self,
+        owner: &str,
+        repo: &str,
+        path: &str,
+    ) -> Result<Vec<ContentEntry>> {
         let url = self.contents_url(owner, repo, path);
         let resp = self
             .request(&url)

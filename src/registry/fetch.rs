@@ -11,13 +11,11 @@ pub async fn fetch_registry() -> Result<Registry> {
         .send()
         .await
         .map_err(|e| RulesifyError::RegistryFetch(e.to_string()))?;
-    
+
     if !response.status().is_success() {
-        return Err(RulesifyError::RegistryFetch(
-            format!("HTTP {}", response.status())
-        ).into());
+        return Err(RulesifyError::RegistryFetch(format!("HTTP {}", response.status())).into());
     }
-    
+
     let content = response.text().await?;
     let registry: Registry = toml::from_str(&content)?;
     Ok(registry)
