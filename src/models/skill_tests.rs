@@ -14,7 +14,7 @@ mod tests {
             last_updated: "2026-04-10".to_string(),
             tags: vec!["testing".to_string()],
             install_action: Some(InstallAction::Copy {
-                path: "tdd/SKILL.md".to_string(),
+                folder: "tdd".to_string(),
             }),
             score: Some(85.0),
         };

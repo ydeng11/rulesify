@@ -18,7 +18,7 @@ mod tests {
             domain: "development".to_string(),
             last_updated: "2026-04-10".to_string(),
             install_action: InstallAction::Copy {
-                path: "tdd/SKILL.md".to_string(),
+                folder: "tdd".to_string(),
             },
         };
         assert_eq!(meta.skill_id, "tdd");

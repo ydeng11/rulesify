@@ -17,7 +17,7 @@ mod tests {
             domain: "development".into(),
             last_updated: "2026-04-10".into(),
             install_action: InstallAction::Copy {
-                path: "test/SKILL.md".into(),
+                folder: "test".into(),
             },
         }
     }

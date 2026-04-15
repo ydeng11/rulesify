@@ -15,7 +15,7 @@ mod tests {
             last_updated: "2026-04-10".into(),
             tags: vec!["test".into()],
             install_action: Some(InstallAction::Copy {
-                path: format!("{}SKILL.md", id),
+                folder: id.to_string(),
             }),
             score: Some(80.0),
         }
