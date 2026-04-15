@@ -55,14 +55,14 @@ context_size = 2400
 domain = "development"
 last_updated = "2026-04-10"
 tags = ["testing", "development", "best-practices"]
-install_action = { type = "copy", value = { path = "tdd/SKILL.md" } }
+install_action = { type = "copy", value = { folder = "tdd" } }
 ```
 
 ### Install Actions
 
 Skills have two installation types:
 
-- **Copy** (`type = "copy"`): Simple skills - rulesify fetches SKILL.md and copies to `~/.agents/skills/`
+- **Copy** (`type = "copy"`): Skills stored as folders - rulesify copies the entire skill folder
 - **Command** (`type = "command"`): Complex skills - custom install command (agent executes)
 
 ### Browse Skills
