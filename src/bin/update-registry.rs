@@ -47,7 +47,13 @@ async fn main() -> Result<()> {
     env_logger::init();
 
     let token = std::env::var("GITHUB_TOKEN").ok();
-    let client = GitHubClient::new(token);
+    let client = if let Some(t) = token {
+        log::info!("Using authenticated GitHub API");
+        GitHubClient::with_token(Some(t))
+    } else {
+        log::warn!("No GITHUB_TOKEN set - using unauthenticated API (60 requests/hr rate limit)");
+        GitHubClient::new()
+    };
     let scorer = Scorer::default();
 
     let mut all_skills: Vec<(SkillMetadata, f32)> = vec![];

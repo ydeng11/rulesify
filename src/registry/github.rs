@@ -57,7 +57,11 @@ pub struct GitHubClient {
 }
 
 impl GitHubClient {
-    pub fn new(token: Option<String>) -> Self {
+    pub fn new() -> Self {
+        Self::with_token(None)
+    }
+
+    pub fn with_token(token: Option<String>) -> Self {
         let http = reqwest::Client::builder()
             .timeout(Duration::from_secs(30))
             .user_agent("rulesify")
