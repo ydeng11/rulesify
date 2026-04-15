@@ -28,6 +28,9 @@ pub enum RulesifyError {
 
     #[error("GitHub API error: {0}")]
     GitHubApi(String),
+
+    #[error("Skill parse error: {0}")]
+    SkillParse(String),
 }
 
 pub type Result<T> = anyhow::Result<T>;
