@@ -37,6 +37,20 @@ pub struct CommitAuthor {
     pub date: DateTime<Utc>,
 }
 
+#[derive(Debug, Clone, Deserialize)]
+pub struct ContentEntry {
+    pub name: String,
+    pub path: String,
+    #[serde(rename = "type")]
+    pub content_type: String,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+pub struct FileContent {
+    pub content: Option<String>,
+    pub encoding: Option<String>,
+}
+
 pub struct GitHubClient {
     http: reqwest::Client,
     pub token: Option<String>,
@@ -123,6 +137,53 @@ impl GitHubClient {
         }
 
         let resp = req
+            .send()
+            .await
+            .map_err(|e| RulesifyError::GitHubApi(e.to_string()))?;
+
+        if !resp.status().is_success() {
+            return Err(RulesifyError::GitHubApi(format!("HTTP {}", resp.status())).into());
+        }
+
+        resp.text()
+            .await
+            .map_err(|e| RulesifyError::GitHubApi(e.to_string()).into())
+    }
+
+    pub fn contents_url(&self, owner: &str, repo: &str, path: &str) -> String {
+        format!(
+            "https://api.github.com/repos/{}/{}/contents/{}",
+            owner, repo, path
+        )
+    }
+
+    pub async fn list_folder(&self, owner: &str, repo: &str, path: &str) -> Result<Vec<ContentEntry>> {
+        let url = self.contents_url(owner, repo, path);
+        let resp = self
+            .request(&url)
+            .send()
+            .await
+            .map_err(|e| RulesifyError::GitHubApi(e.to_string()))?;
+
+        if !resp.status().is_success() {
+            return Err(RulesifyError::GitHubApi(format!("HTTP {}", resp.status())).into());
+        }
+
+        resp.json::<Vec<ContentEntry>>()
+            .await
+            .map_err(|e| RulesifyError::GitHubApi(e.to_string()).into())
+    }
+
+    pub async fn fetch_file_raw(&self, owner: &str, repo: &str, path: &str) -> Result<String> {
+        let url = format!(
+            "https://raw.githubusercontent.com/{}/{}/main/{}",
+            owner, repo, path
+        );
+
+        let resp = self
+            .http
+            .get(&url)
+            .header("User-Agent", "rulesify")
             .send()
             .await
             .map_err(|e| RulesifyError::GitHubApi(e.to_string()))?;
