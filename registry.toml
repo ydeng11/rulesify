@@ -4,49 +4,54 @@ updated = "2026-04-14"
 [skills.test-driven-development]
 name = "Test-Driven Development"
 description = "Write tests before implementation code using TDD methodology"
-source_url = "https://github.com/anthropic/skills/tree/main/tdd"
-stars = 150
-context_size = 2400
+source_url = "https://github.com/mattpocock/skills/tree/main/tdd"
+stars = 100
+context_size = 0
 domain = "development"
-last_updated = "2026-04-10"
+last_updated = "2026-04-14"
 tags = ["testing", "development", "best-practices"]
+install_action = { type = "copy", value = { path = "tdd/SKILL.md" } }
 
 [skills.systematic-debugging]
 name = "Systematic Debugging"
 description = "Investigate bugs using scientific method before proposing fixes"
-source_url = "https://github.com/anthropic/skills/tree/main/debugging"
-stars = 89
-context_size = 1800
+source_url = "https://github.com/anthropics/skills/tree/main/debugging"
+stars = 100
+context_size = 0
 domain = "development"
-last_updated = "2026-04-08"
-tags = ["debugging", "troubleshooting", "investigation"]
+last_updated = "2026-04-14"
+tags = ["debugging", "troubleshooting"]
+install_action = { type = "copy", value = { path = "skills/debugging/SKILL.md" } }
 
 [skills.brainstorming]
 name = "Brainstorming"
 description = "Explore user intent and design before implementation"
-source_url = "https://github.com/anthropic/skills/tree/main/brainstorming"
-stars = 120
-context_size = 1500
-domain = "planning"
-last_updated = "2026-04-09"
-tags = ["design", "planning", "creative"]
+source_url = "https://github.com/anthropics/skills/tree/main/brainstorming"
+stars = 100
+context_size = 0
+domain = "development"
+last_updated = "2026-04-14"
+tags = ["design", "planning"]
+install_action = { type = "copy", value = { path = "skills/brainstorming/SKILL.md" } }
 
 [skills.verification-before-completion]
 name = "Verification Before Completion"
 description = "Run verification commands before claiming work is complete"
-source_url = "https://github.com/anthropic/skills/tree/main/verification"
-stars = 95
-context_size = 1200
-domain = "quality"
-last_updated = "2026-04-07"
-tags = ["quality", "verification", "testing"]
+source_url = "https://github.com/anthropics/skills/tree/main/verification"
+stars = 100
+context_size = 0
+domain = "development"
+last_updated = "2026-04-14"
+tags = ["quality", "verification"]
+install_action = { type = "copy", value = { path = "skills/verification/SKILL.md" } }
 
 [skills.writing-plans]
 name = "Writing Plans"
 description = "Create implementation plans before touching code"
-source_url = "https://github.com/anthropic/skills/tree/main/planning"
-stars = 110
-context_size = 2000
-domain = "planning"
-last_updated = "2026-04-10"
-tags = ["planning", "documentation", "process"]
+source_url = "https://github.com/anthropics/skills/tree/main/planning"
+stars = 100
+context_size = 0
+domain = "development"
+last_updated = "2026-04-14"
+tags = ["planning", "process"]
+install_action = { type = "copy", value = { path = "skills/planning/SKILL.md" } }
