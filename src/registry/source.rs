@@ -56,17 +56,6 @@ impl SourceRepo {
         }
     }
 
-    pub fn domain(&self) -> &'static str {
-        match self {
-            SourceRepo::AnthropicSkills => "development",
-            SourceRepo::OpenAISkillsCurated => "general",
-            SourceRepo::OpenAISkillsSystem => "system",
-            SourceRepo::OpenAISkillsExperimental => "experimental",
-            SourceRepo::MattPocockSkills => "development",
-            SourceRepo::MiniMaxSkills => "general",
-        }
-    }
-
     pub fn parse_skill_id(&self, path: &str) -> Option<String> {
         let parts: Vec<&str> = path.split('/').collect();
 

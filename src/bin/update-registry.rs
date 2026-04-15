@@ -1,9 +1,23 @@
 use anyhow::Result;
+use clap::Parser;
 use rulesify::{
-    models::{InstallAction, SkillMetadata},
+    llm::{Classifier, SkillClassification},
+    models::{InstallAction, Registry, SkillMetadata},
     registry::{GitHubClient, RegistryGenerator, Scorer, SkillParser, SourceRepo},
 };
 use std::collections::HashMap;
+use std::path::Path;
+
+#[derive(Parser, Debug)]
+#[command(name = "update-registry")]
+#[command(about = "Update skill registry from GitHub sources")]
+struct Args {
+    #[arg(
+        long,
+        help = "Force re-classification of all skills (ignore cached domain/tags)"
+    )]
+    force: bool,
+}
 
 async fn fetch_skill(
     client: &GitHubClient,
@@ -36,15 +50,52 @@ async fn fetch_skill(
         tags: parsed.tags,
         stars: repo_stars,
         context_size,
-        domain: source.domain().into(),
+        domain: String::new(),
         last_updated: chrono::Utc::now().format("%Y-%m-%d").to_string(),
         install_action: InstallAction::Copy { folder },
     })
 }
 
+fn load_cached_registry(path: &Path) -> HashMap<String, (String, Vec<String>)> {
+    if !path.exists() {
+        return HashMap::new();
+    }
+
+    let content = std::fs::read_to_string(path).unwrap_or_default();
+    let registry: Registry = toml::from_str(&content).unwrap_or_else(|_| Registry {
+        version: 0,
+        updated: String::new(),
+        skills: HashMap::new(),
+    });
+
+    registry
+        .skills
+        .into_iter()
+        .filter(|(_, skill)| !skill.domain.is_empty())
+        .map(|(id, skill)| (id, (skill.domain, skill.tags)))
+        .collect()
+}
+
+fn apply_classification(meta: &mut SkillMetadata, classification: &SkillClassification) {
+    meta.domain = classification.domain.to_string();
+    meta.tags = classification.tags.clone();
+}
+
+fn apply_cache(meta: &mut SkillMetadata, cached: &HashMap<String, (String, Vec<String>)>) -> bool {
+    if let Some((domain, tags)) = cached.get(&meta.skill_id) {
+        if !domain.is_empty() {
+            meta.domain = domain.clone();
+            meta.tags = tags.clone();
+            return true;
+        }
+    }
+    false
+}
+
 #[tokio::main]
 async fn main() -> Result<()> {
     env_logger::init();
+    let args = Args::parse();
 
     let token = std::env::var("GITHUB_TOKEN").ok();
     let client = if let Some(t) = token {
@@ -55,6 +106,15 @@ async fn main() -> Result<()> {
         GitHubClient::new()
     };
     let scorer = Scorer::default();
+
+    let registry_path = Path::new("registry.toml");
+    let cached = if args.force {
+        log::info!("Force flag set - skipping cache");
+        HashMap::new()
+    } else {
+        log::info!("Loading cached registry");
+        load_cached_registry(registry_path)
+    };
 
     let mut all_skills: Vec<(SkillMetadata, f32)> = vec![];
 
@@ -95,16 +155,54 @@ async fn main() -> Result<()> {
     let filtered = scorer.filter_above_threshold(all_skills, 60.0);
     let top = scorer.sort_and_limit(filtered, 50);
 
-    let skills: HashMap<String, rulesify::models::Skill> = top
-        .into_iter()
-        .map(|(meta, score)| (meta.skill_id.clone(), meta.to_skill(score)))
-        .collect();
+    let mut pending_skills: HashMap<String, (SkillMetadata, f32)> = HashMap::new();
+    let mut skills_to_classify: Vec<(String, String)> = vec![];
+    let mut final_skills: HashMap<String, rulesify::models::Skill> = HashMap::new();
 
-    log::info!("Generated {} skills", skills.len());
+    for (mut meta, score) in top {
+        let was_cached = apply_cache(&mut meta, &cached);
+
+        if was_cached {
+            log::debug!("Using cached classification for {}", meta.skill_id);
+            final_skills.insert(meta.skill_id.clone(), meta.to_skill(score));
+        } else {
+            skills_to_classify.push((meta.skill_id.clone(), meta.description.clone()));
+            pending_skills.insert(meta.skill_id.clone(), (meta, score));
+        }
+    }
+
+    if !skills_to_classify.is_empty() {
+        log::info!(
+            "Classifying {} skills with LLM (model: {})",
+            skills_to_classify.len(),
+            std::env::var("OPENROUTER_MODEL")
+                .unwrap_or_else(|_| "anthropic/claude-3.5-haiku".to_string())
+        );
+
+        let classifier = Classifier::from_env()?;
+        let classifications = classifier.classify(skills_to_classify).await?;
+
+        for (skill_id, classification) in classifications {
+            if let Some((mut meta, score)) = pending_skills.remove(&skill_id) {
+                apply_classification(&mut meta, &classification);
+                final_skills.insert(skill_id, meta.to_skill(score));
+            }
+        }
+
+        for (skill_id, (meta, score)) in pending_skills {
+            log::warn!("Skill '{}' not classified, using fallback", skill_id);
+            let mut updated_meta = meta;
+            updated_meta.domain = "development".to_string();
+            updated_meta.tags = vec![];
+            final_skills.insert(skill_id, updated_meta.to_skill(score));
+        }
+    }
+
+    log::info!("Generated {} skills", final_skills.len());
 
     let gen = RegistryGenerator::new(1);
-    let registry = gen.generate(skills);
-    gen.write(&registry, std::path::Path::new("registry.toml"))?;
+    let registry = gen.generate(final_skills);
+    gen.write(&registry, registry_path)?;
 
     log::info!("Written to registry.toml");
     Ok(())

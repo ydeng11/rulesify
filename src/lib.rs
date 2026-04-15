@@ -1,5 +1,6 @@
 pub mod cli;
 pub mod installer;
+pub mod llm;
 pub mod models;
 pub mod registry;
 pub mod scanner;
