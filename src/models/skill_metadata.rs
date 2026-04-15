@@ -7,7 +7,7 @@ pub struct SkillMetadata {
     pub name: String,
     pub description: String,
     pub source_repo: String,
-    pub source_path: String,
+    pub source_folder: String,
     pub source_url: String,
     #[serde(default)]
     pub tags: Vec<String>,

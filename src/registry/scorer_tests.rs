@@ -9,7 +9,7 @@ mod tests {
             name: "Test".into(),
             description: "Test skill description for testing".into(),
             source_repo: "anthropics/skills".into(),
-            source_path: "test/SKILL.md".into(),
+            source_folder: "test/SKILL.md".into(),
             source_url: "https://github.com/anthropics/skills/tree/main/test".into(),
             tags: vec!["test".into()],
             stars,

@@ -30,7 +30,7 @@ async fn fetch_skill(
         name: parsed.name,
         description: parsed.description,
         source_repo: source.full_name(),
-        source_path: path.into(),
+        source_folder: path.replace("/SKILL.md", ""),
         source_url,
         tags: parsed.tags,
         stars: repo_stars,

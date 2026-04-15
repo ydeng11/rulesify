@@ -10,7 +10,7 @@ mod tests {
             name: "Test-Driven Development".to_string(),
             description: "Write tests before implementation".to_string(),
             source_repo: "mattpocock/skills".to_string(),
-            source_path: "tdd/SKILL.md".to_string(),
+            source_folder: "tdd/SKILL.md".to_string(),
             source_url: "https://github.com/mattpocock/skills/tree/main/tdd".to_string(),
             tags: vec!["testing".to_string()],
             stars: 1500,
