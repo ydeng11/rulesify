@@ -20,6 +20,7 @@ Rulesify is a command-line tool (written in Rust) that provides **unified manage
 - **Rule Management**: Create, edit, list, show, and delete rules
 - **Multi-Tool Deployment**: Deploy rules to all supported AI tools
 - **Skills Registry**: Browse and install AI agent skills from curated GitHub repos
+- **LLM Classification**: Automatic domain and tag assignment for skills via OpenRouter
 - **Import Functionality**: Import existing rules from any AI tool format
 - **Validation System**: Comprehensive quality and format validation
 - **Template System**: Create rules from built-in templates
@@ -27,7 +28,7 @@ Rulesify is a command-line tool (written in Rust) that provides **unified manage
 - **Sync**: Synchronize deployed rules back to URF format
 - **Round-Trip Integrity**: Import/export cycle is lossless and auto-validated
 - **Unicode Support**: Handles international text
-- **Comprehensive Testing**: 99 tests, 100% pass rate
+- **Comprehensive Testing**: 38 tests, 100% pass rate
 
 ## Skills Registry
 
@@ -41,20 +42,38 @@ Skills are fetched from:
 - **mattpocock/skills** - Matt Pocock's development skills
 - **MiniMax-AI/skills** - MiniMax's skill collection
 
+### LLM-Based Classification
+
+Skills are automatically classified using LLM into:
+
+**10 Predefined Domains:**
+- `planning-and-workflows` - Project planning, task management, workflows
+- `development` - Code development, SDKs, application building
+- `design-and-media` - UI design, visual arts, creative work
+- `documentation` - Document creation, formatting, content management
+- `data-and-research` - Data analysis, research, information synthesis
+- `testing-and-debugging` - Testing, debugging, error handling
+- `deployment-and-infrastructure` - Cloud deployment, infrastructure, hosting
+- `integrations-and-tools` - API integrations, tool building, MCP servers
+- `collaboration-and-communication` - Team communication, meeting tools
+- `security-and-privacy` - Security reviews, threat modeling, privacy
+
+**Tags:** Each skill has up to 3 relevant tags describing its capabilities.
+
 ### Registry Format
 
 Each skill entry includes metadata for discovery:
 
 ```toml
 [skills.tdd]
-name = "Test-Driven Development"
+name = "test-driven-development"
 description = "Write tests before implementation code using TDD methodology"
 source_url = "https://github.com/mattpocock/skills/tree/main/tdd"
 stars = 1500
 context_size = 2400
 domain = "development"
-last_updated = "2026-04-10"
-tags = ["testing", "development", "best-practices"]
+last_updated = "2026-04-15"
+tags = ["testing", "tdd", "best-practices"]
 install_action = { type = "copy", value = { folder = "tdd" } }
 ```
 
@@ -94,12 +113,26 @@ rulesify skill add gsd
 
 ### Update Registry
 
-The registry updates weekly via GitHub Actions. To manually refresh:
+The registry updates weekly via GitHub Actions. To manually refresh with LLM classification:
 
 ```bash
-# Requires GITHUB_TOKEN for authenticated requests
-GITHUB_TOKEN=your_token cargo run --bin update-registry
+# Requires both GitHub and OpenRouter tokens
+GITHUB_TOKEN=your_token OPENROUTER_API_KEY=your_key cargo run --bin update-registry
+
+# Force re-classification of all skills (ignore cache)
+cargo run --bin update-registry -- --force
+
+# Verbose mode for debugging
+cargo run --bin update-registry -- --force -v
+
+# Use custom model (default: anthropic/claude-3.5-haiku)
+OPENROUTER_MODEL=openai/gpt-4o-mini cargo run --bin update-registry -- --force
 ```
+
+**Classification Cache:**
+- Domain and tags are cached in registry.toml
+- Only new/unclassified skills call the LLM
+- Use `--force` to re-classify all skills
 
 ## Installation
 
@@ -538,21 +571,27 @@ See [`DEVELOPMENT_PLAN_DETAILED.md`](./DEVELOPMENT_PLAN_DETAILED.md) for the com
 ```
 rulesify/
 ├── Cargo.toml
-├── registry.toml              # Skills registry catalog
+├── registry.toml              # Skills registry catalog (with LLM-derived domains/tags)
 ├── README.md
 ├── src/
 │   ├── main.rs
 │   ├── lib.rs
 │   ├── bin/
-│   │   └── update-registry.rs # Registry automation binary
+│   │   └── update-registry.rs # Registry automation binary (LLM classification)
 │   ├── cli/
 │   │   ├── mod.rs
 │   │   └── commands/
 │   ├── models/
+│   │   ├── domain.rs          # Domain enum (10 predefined domains)
 │   │   ├── skill.rs           # Skill model
 │   │   ├── registry.rs        # Registry model
 │   │   ├── install_action.rs  # Install types (copy/command)
 │   │   └── skill_metadata.rs  # Raw skill data
+│   ├── llm/
+│   │   ├── mod.rs             # LLM module exports
+│   │   ├── client.rs          # OpenRouter HTTP client
+│   │   ├── classifier.rs      # Batch classification (20 skills/request)
+│   │   └── prompt.rs          # System/user prompt builder
 │   ├── registry/
 │   │   ├── source.rs          # GitHub repo sources
 │   │   ├── github.rs          # GitHub API client
@@ -584,7 +623,8 @@ cargo test --test validation_tests
 ```
 
 ### Test Coverage
-- **99+ total tests** across all modules
+- **38 total tests** across all modules
+- **10 domain tests** (Domain enum parsing, validation, serialization)
 - **24 registry tests** (skills catalog, GitHub API, scoring)
 - **19 converter tests** (import/export functionality)
 - **22 validation tests** (quality assurance)

@@ -5,6 +5,31 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.0] - 2026-04-15
+
+### Added
+- **LLM-Based Skill Classification**: Automatic domain and tag assignment for skills using LLM
+  - 10 predefined domains: planning-and-workflows, development, design-and-media, documentation, data-and-research, testing-and-debugging, deployment-and-infrastructure, integrations-and-tools, collaboration-and-communication, security-and-privacy
+  - Up to 3 relevant tags per skill
+  - Batch classification (20 skills per request) via OpenRouter API
+  - Structured JSON input/output format for reliable parsing
+  - Cache embedded in registry.toml to avoid re-classification
+
+### Enhanced
+- **Registry Update Command**: Enhanced with LLM classification integration
+  - Added `--force` flag to override cache and re-classify all skills
+  - Added `-v/--verbose` flag for detailed debug logging
+  - Environment variables: `OPENROUTER_API_KEY` (required), `OPENROUTER_MODEL` (optional, default: claude-3.5-haiku)
+  - Automatic truncation detection and error handling
+  - Rate limit handling with exponential backoff retry
+
+### Technical Improvements
+- New `src/llm/` module with OpenRouter client, classifier, and prompt builder
+- New `src/models/domain.rs` with Domain enum and validation
+- Removed hardcoded `domain()` method from SourceRepo
+- Added 10 domain enum tests
+- Total tests: 38 (all passing)
+
 ## [0.3.1] - 2025-12-16
 
 ### Fixed
