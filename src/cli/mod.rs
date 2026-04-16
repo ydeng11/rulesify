@@ -35,12 +35,18 @@ pub enum SkillCommands {
     Add {
         /// Skill ID to add
         id: String,
+        /// Install to global skill directory instead of project
+        #[arg(long)]
+        global: bool,
     },
 
     /// Remove an installed skill
     Remove {
         /// Skill ID to remove
         id: String,
+        /// Remove from global skill directory instead of project
+        #[arg(long)]
+        global: bool,
     },
 
     /// Update registry cache

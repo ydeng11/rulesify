@@ -83,7 +83,9 @@ rulesify/
 │   │   └ skill_selector.rs # Interactive skill selection (ratatui)
 │   ├── installer/
 │   │   ├── mod.rs          # Installer module exports
-│   │   └ instructions.rs   # Installation instruction generator
+│   │   ├── instructions.rs # Install/uninstall instruction generator
+│   │   ├── tool_paths.rs   # Tool-specific skill path mapping
+│   │   └ *_tests.rs        # Unit tests
 │   └ utils/
 │       ├── mod.rs          # Utils exports
 │       └ error.rs          # Error types (RulesifyError enum)
@@ -220,21 +222,52 @@ RUST_LOG=debug cargo run --bin update-registry
 # Interactive setup
 rulesify init
 
-# List installed skills
+# List installed skills (shows scope)
 rulesify skill list
+rulesify -v skill list  # verbose shows source URLs
 
-# Add skill from registry
+# Add skill from registry (project level)
 rulesify skill add test-driven-development
 
-# Remove installed skill
+# Add skill globally
+rulesify skill add test-driven-development --global
+
+# Remove installed skill (project level)
 rulesify skill remove test-driven-development
+
+# Remove skill from global
+rulesify skill remove test-driven-development --global
 
 # Update registry cache
 rulesify skill update
-
-# Verbose mode
-rulesify -v skill list
 ```
+
+---
+
+## Supported AI Tools
+
+| Tool | Project Path | Global Path |
+|------|---------------|--------------|
+| **Claude Code** | `.claude/skills/<name>/SKILL.md` | `~/.claude/skills/<name>/SKILL.md` |
+| **Codex** | `.agents/skills/<name>/SKILL.md` | `~/.agents/skills/<name>/SKILL.md` |
+| **Cursor** | `.cursor/skills/<name>/SKILL.md` | `~/.cursor/skills/<name>/SKILL.md` |
+| **OpenCode** | `.opencode/skills/<name>/SKILL.md` | `~/.config/opencode/skills/<name>/SKILL.md` |
+| **Pi** | `.pi/skills/pi-skills/<name>/SKILL.md` | `~/.pi/agent/skills/pi-skills/<name>/SKILL.md` |
+
+**Scope:**
+- `--global` flag installs to user's global skill directory
+- Default (no flag) installs to project-level directory
+
+---
+
+## Skill Install/Uninstall Flow
+
+1. `rulesify init` → Creates `.rulesify.toml` with selected tools
+2. `rulesify skill add <id>` → Generates tool-specific install instructions
+3. `rulesify skill remove <id>` → Generates tool-specific uninstall instructions
+4. AI agent executes the instructions (copy/delete files)
+
+**No auto-installation** - rulesify provides paths, AI agent performs file operations.
 
 ---
 
@@ -344,7 +377,9 @@ rulesify -v skill list
 | `Cargo.toml` | Dependencies | Low (add new deps) |
 | `registry.toml` | Skill registry | Medium (add skills) |
 | `src/cli/mod.rs` | CLI structure | Low (new commands) |
-| `src/models/*.rs` | Data structures | Medium |
+| `src/models/config.rs` | ProjectConfig, InstalledSkill, Scope enum | Medium |
+| `src/installer/tool_paths.rs` | Tool-specific skill paths | Low |
+| `src/installer/instructions.rs` | Install/uninstall instruction generators | Medium |
 | `src/utils/error.rs` | Error types | Low |
 | `.planning/STATE.md` | Project state | High (update per task) |
 
@@ -366,14 +401,16 @@ rulesify -v skill list
 1. **Layered modules** - cli → models → utils (no circular deps)
 2. **Registry as catalog** - registry.toml contains metadata only (no skill files)
 3. **Install actions** - skills have `install_action` (copy vs command types)
-4. **Separation of concerns**:
+4. **Scope support** - skills can be installed at project or global level
+5. **Tool-specific paths** - each AI tool has its own skill directory structure
+6. **Separation of concerns**:
    - Scanner: detects context (languages, frameworks, tools)
    - Registry: provides skill metadata + install instructions
    - TUI: interactive selection
    - Installer: generates instructions (AI executes them)
-5. **No auto-installation** - rulesify outputs install command, AI agent executes
-6. **Terminal UI** - ratatui for interactive selection (arrow keys, space, enter)
-7. **GitHub Actions** - weekly automation updates registry from source repos
+7. **No auto-installation** - rulesify outputs install command, AI agent executes
+8. **Terminal UI** - ratatui for interactive selection (arrow keys, space, enter)
+9. **GitHub Actions** - weekly automation updates registry from source repos
 
 ### Registry Data Flow
 
@@ -402,4 +439,4 @@ cargo clippy   # Optional but recommended
 
 ---
 
-*Last updated: 2026-04-14*
+*Last updated: 2026-04-16*

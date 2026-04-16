@@ -1,4 +1,5 @@
-use crate::models::Skill;
+use crate::installer::tool_paths::{get_skill_folder, get_skill_path};
+use crate::models::{Scope, Skill};
 
 pub fn generate_instructions(skills: &[(String, Skill)], tools: &[String]) -> String {
     let mut output = String::new();
@@ -16,6 +17,7 @@ pub fn generate_instructions(skills: &[(String, Skill)], tools: &[String]) -> St
             output.push_str(&generate_tool_specific_instructions(
                 tool,
                 &skill.source_url,
+                &skill.name,
             ));
         }
 
@@ -25,23 +27,86 @@ pub fn generate_instructions(skills: &[(String, Skill)], tools: &[String]) -> St
     output
 }
 
-fn generate_tool_specific_instructions(tool: &str, source: &str) -> String {
+pub fn generate_install_instructions(
+    skill_name: &str,
+    source_url: &str,
+    tools: &[String],
+    scope: Scope,
+) -> String {
+    let mut output = String::new();
+    let scope_label = match scope {
+        Scope::Project => "project",
+        Scope::Global => "global",
+    };
+
+    output.push_str("# Install Instructions\n\n");
+    output.push_str(&format!("Scope: {} level\n\n", scope_label));
+
+    for tool in tools {
+        let skill_path = get_skill_path(tool, scope.clone(), skill_name);
+        let skill_folder = get_skill_folder(tool, scope.clone(), skill_name);
+
+        output.push_str(&format!("## {} ({})\n\n", tool, scope_label));
+        output.push_str(&format!("1. Fetch SKILL.md from:\n   {}\n\n", source_url));
+        output.push_str(&format!(
+            "2. Create folder:\n   {}\n\n",
+            skill_folder.display()
+        ));
+        output.push_str(&format!(
+            "3. Copy SKILL.md to:\n   {}\n\n",
+            skill_path.display()
+        ));
+        output.push_str("---\n\n");
+    }
+
+    output
+}
+
+pub fn generate_uninstall_instructions(skill_name: &str, tools: &[String], scope: Scope) -> String {
+    let mut output = String::new();
+    let scope_label = match scope {
+        Scope::Project => "project",
+        Scope::Global => "global",
+    };
+
+    output.push_str("# Uninstall Instructions\n\n");
+    output.push_str(&format!("Scope: {} level\n\n", scope_label));
+
+    for tool in tools {
+        let skill_folder = get_skill_folder(tool, scope.clone(), skill_name);
+
+        output.push_str(&format!("## {} ({})\n\n", tool, scope_label));
+        output.push_str(&format!(
+            "Delete folder:\n   {}\n\n",
+            skill_folder.display()
+        ));
+        output.push_str("---\n\n");
+    }
+
+    output
+}
+
+fn generate_tool_specific_instructions(tool: &str, source: &str, skill_name: &str) -> String {
     match tool {
         "cursor" => format!(
-            "1. Fetch the skill instructions from: {}\n2. Create `.cursor/rules/<skill-name>.md` with the content\n",
-            source
+            "1. Fetch SKILL.md from: {}\n2. Create `.cursor/skills/{}/SKILL.md`\n",
+            source, skill_name
         ),
         "claude-code" => format!(
-            "1. Fetch the skill instructions from: {}\n2. Append to `CLAUDE.md` or create a dedicated section\n",
-            source
+            "1. Fetch SKILL.md from: {}\n2. Create `.claude/skills/{}/SKILL.md`\n",
+            source, skill_name
         ),
-        "cline" => format!(
-            "1. Fetch the skill instructions from: {}\n2. Add to `.clinerules` file\n",
-            source
+        "codex" => format!(
+            "1. Fetch SKILL.md from: {}\n2. Create `.agents/skills/{}/SKILL.md`\n",
+            source, skill_name
         ),
-        "goose" => format!(
-            "1. Fetch the skill instructions from: {}\n2. Add to `.goosehints` file\n",
-            source
+        "opencode" => format!(
+            "1. Fetch SKILL.md from: {}\n2. Create `.opencode/skills/{}/SKILL.md`\n",
+            source, skill_name
+        ),
+        "pi" => format!(
+            "1. Fetch SKILL.md from: {}\n2. Create `.pi/skills/pi-skills/{}/SKILL.md`\n",
+            source, skill_name
         ),
         _ => format!("Install from: {}\n", source),
     }

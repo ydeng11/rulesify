@@ -9,16 +9,20 @@ pub fn detect(path: &Path) -> Result<Vec<String>> {
         tools.insert("cursor");
     }
 
-    if path.join("CLAUDE.md").exists() {
+    if path.join("CLAUDE.md").exists() || path.join(".claude").exists() {
         tools.insert("claude-code");
     }
 
-    if path.join(".clinerules").exists() {
-        tools.insert("cline");
+    if path.join(".agents").exists() || path.join("AGENTS.md").exists() {
+        tools.insert("codex");
     }
 
-    if path.join(".goosehints").exists() {
-        tools.insert("goose");
+    if path.join(".opencode").exists() {
+        tools.insert("opencode");
+    }
+
+    if path.join(".pi").exists() {
+        tools.insert("pi");
     }
 
     Ok(tools.into_iter().map(|s| s.to_string()).collect())

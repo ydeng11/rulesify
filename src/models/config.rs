@@ -1,10 +1,25 @@
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+#[serde(rename_all = "lowercase")]
+pub enum Scope {
+    Project,
+    Global,
+}
+
+impl Default for Scope {
+    fn default() -> Self {
+        Scope::Project
+    }
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct InstalledSkill {
     pub added: String,
     pub source: String,
+    #[serde(default)]
+    pub scope: Scope,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -23,12 +38,13 @@ impl ProjectConfig {
         }
     }
 
-    pub fn add_skill(&mut self, id: &str, source: &str) {
+    pub fn add_skill(&mut self, id: &str, source: &str, scope: Scope) {
         self.installed_skills.insert(
             id.to_string(),
             InstalledSkill {
                 added: chrono::Local::now().format("%Y-%m-%d").to_string(),
                 source: source.to_string(),
+                scope,
             },
         );
     }

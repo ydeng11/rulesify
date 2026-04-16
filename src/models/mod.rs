@@ -8,6 +8,8 @@ pub mod skill;
 pub mod skill_metadata;
 
 #[cfg(test)]
+mod config_tests;
+#[cfg(test)]
 mod domain_tests;
 #[cfg(test)]
 mod install_action_tests;
@@ -18,7 +20,7 @@ mod skill_metadata_tests;
 #[cfg(test)]
 mod skill_tests;
 
-pub use config::ProjectConfig;
+pub use config::{InstalledSkill, ProjectConfig, Scope};
 pub use context::ProjectContext;
 pub use domain::Domain;
 pub use install_action::InstallAction;

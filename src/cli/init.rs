@@ -1,5 +1,5 @@
 use crate::installer::generate_instructions;
-use crate::models::{ProjectConfig, Registry};
+use crate::models::{ProjectConfig, Registry, Scope};
 use crate::registry::{fetch_registry, load_builtin, RegistryCache};
 use crate::scanner::scan_project;
 use crate::tui::{SkillSelector, ToolPicker};
@@ -57,7 +57,7 @@ pub async fn run(verbose: bool) -> Result<()> {
     let mut config = ProjectConfig::new();
     config.tools = tools;
     for (id, skill) in &selected {
-        config.add_skill(id, &skill.source_url);
+        config.add_skill(id, &skill.source_url, Scope::Project);
     }
 
     std::fs::write(".rulesify.toml", toml::to_string_pretty(&config)?)?;

@@ -17,6 +17,9 @@ pub enum RulesifyError {
     #[error("Config file error: {0}")]
     ConfigError(String),
 
+    #[error("Config not found. Run `rulesify init` first")]
+    ConfigNotFound,
+
     #[error("IO error: {0}")]
     IoError(#[from] std::io::Error),
 
