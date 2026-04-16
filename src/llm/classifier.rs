@@ -120,7 +120,10 @@ impl Classifier {
         let parsed: BatchResponse = serde_json::from_str(cleaned)
             .with_context(|| format!("Failed to parse LLM response:\n---\n{}\n---", cleaned))?;
 
-        log::info!("Parsed {} skill classifications from response", parsed.skills.len());
+        log::info!(
+            "Parsed {} skill classifications from response",
+            parsed.skills.len()
+        );
 
         for (skill_id, classification) in parsed.skills {
             let domain = Domain::from_str(&classification.domain).unwrap_or_else(|e| {

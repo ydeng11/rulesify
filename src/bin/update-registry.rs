@@ -12,7 +12,10 @@ use std::path::Path;
 #[command(name = "update-registry")]
 #[command(about = "Update skill registry from GitHub sources")]
 struct Args {
-    #[arg(long, help = "Force re-classification of all skills (ignore cached domain/tags)")]
+    #[arg(
+        long,
+        help = "Force re-classification of all skills (ignore cached domain/tags)"
+    )]
     force: bool,
 
     #[arg(short, long, help = "Enable verbose/debug logging")]
@@ -97,11 +100,9 @@ async fn main() -> Result<()> {
     let args = Args::parse();
 
     if args.verbose {
-        env_logger::Builder::from_env(env_logger::Env::default().default_filter_or("debug"))
-            .init();
+        env_logger::Builder::from_env(env_logger::Env::default().default_filter_or("debug")).init();
     } else {
-        env_logger::Builder::from_env(env_logger::Env::default().default_filter_or("info"))
-            .init();
+        env_logger::Builder::from_env(env_logger::Env::default().default_filter_or("info")).init();
     }
 
     log::info!("Starting registry update");
@@ -197,10 +198,7 @@ async fn main() -> Result<()> {
             );
             final_skills.insert(meta.skill_id.clone(), meta.to_skill(score));
         } else {
-            log::debug!(
-                "Skill {} needs classification (no cache)",
-                meta.skill_id
-            );
+            log::debug!("Skill {} needs classification (no cache)", meta.skill_id);
             skills_to_classify.push((meta.skill_id.clone(), meta.description.clone()));
             pending_skills.insert(meta.skill_id.clone(), (meta, score));
         }
@@ -227,7 +225,10 @@ async fn main() -> Result<()> {
         log::info!("Classifier initialized successfully");
 
         let classifications = classifier.classify(skills_to_classify.clone()).await?;
-        log::info!("Received {} classifications from LLM", classifications.len());
+        log::info!(
+            "Received {} classifications from LLM",
+            classifications.len()
+        );
 
         for (skill_id, classification) in classifications {
             log::debug!(
