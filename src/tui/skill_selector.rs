@@ -157,6 +157,101 @@ impl SkillSelectorState {
 
         f.render_widget(tabs, area);
     }
+
+    fn render_status_bar(&self, f: &mut ratatui::Frame, area: Rect) {
+        let sort_text = format!("Sort: {}", self.sort_mode.label());
+        let tags_text = if self.selected_tags.is_empty() {
+            "Tags: none".to_string()
+        } else {
+            format!(
+                "Tags: {}",
+                self.selected_tags
+                    .iter()
+                    .cloned()
+                    .collect::<Vec<_>>()
+                    .join(", ")
+            )
+        };
+        let text = format!("{} | {}", sort_text, tags_text);
+
+        let status = Paragraph::new(text).style(Style::default().fg(Color::Cyan));
+
+        f.render_widget(status, area);
+    }
+
+    fn render_help_bar(&self, f: &mut ratatui::Frame, area: Rect) {
+        let help_text = if self.show_tag_popup {
+            "↑↓ Nav | Space Toggle | Enter Apply | Esc Cancel"
+        } else {
+            "↑↓ Nav | Space Select | ←→ Domain | s Sort | t Tags | Enter Done | Esc Cancel"
+        };
+
+        let help = Paragraph::new(help_text).style(Style::default().fg(Color::DarkGray));
+
+        f.render_widget(help, area);
+    }
+
+    fn render_skill_list(&self, f: &mut ratatui::Frame, area: Rect) {
+        let items: Vec<ListItem> = self
+            .filtered_skills
+            .iter()
+            .enumerate()
+            .map(|(i, (_id, skill))| {
+                let marker = if self.selected_skill_indices.contains(&i) {
+                    "[x]"
+                } else {
+                    "[ ]"
+                };
+                let cursor = if i == self.current_skill_index {
+                    ">"
+                } else {
+                    " "
+                };
+                let score_text = skill
+                    .score
+                    .map(|s| format!("{:.0}", s))
+                    .unwrap_or_else(|| "-".to_string());
+                ListItem::new(format!(
+                    "{}{} {} - {} (★{} | {})",
+                    cursor, marker, skill.name, skill.description, skill.stars, score_text
+                ))
+            })
+            .collect();
+
+        let title = format!("Skills ({})", self.filtered_skills.len());
+        let list = List::new(items).block(Block::default().title(title).borders(Borders::ALL));
+
+        f.render_widget(list, area);
+    }
+
+    fn render_tag_popup(&self, f: &mut ratatui::Frame, area: Rect) {
+        let popup_area = Rect {
+            x: area.x + area.width / 4,
+            y: area.y + area.height / 4,
+            width: area.width / 2,
+            height: area.height / 2,
+        };
+
+        let items: Vec<ListItem> = self
+            .all_tags
+            .iter()
+            .enumerate()
+            .map(|(i, tag)| {
+                let marker = if self.tag_popup_selected.contains(&i) {
+                    "[x]"
+                } else {
+                    "[ ]"
+                };
+                let cursor = if i == self.tag_popup_index { ">" } else { " " };
+                ListItem::new(format!("{}{} {}", cursor, marker, tag))
+            })
+            .collect();
+
+        let list =
+            List::new(items).block(Block::default().title("Select Tags").borders(Borders::ALL));
+
+        f.render_widget(list, popup_area);
+    }
 }
 
 pub struct SkillSelector {
