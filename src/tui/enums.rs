@@ -30,8 +30,10 @@ impl SortMode {
             SortMode::NameDesc => "Name Z-A",
         }
     }
+}
 
-    pub fn default() -> Self {
+impl Default for SortMode {
+    fn default() -> Self {
         SortMode::StarsDesc
     }
 }
