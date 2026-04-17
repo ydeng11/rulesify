@@ -30,21 +30,15 @@ pub async fn run(verbose: bool) -> Result<()> {
 
     let registry = load_registry().await?;
 
-    let project_tags = context.to_tags();
-    let matching_skills = registry
-        .skills
-        .iter()
-        .filter(|(_, s)| project_tags.is_empty() || s.matches_tags(&project_tags))
-        .map(|(k, v)| (k.clone(), v.clone()))
-        .collect::<Vec<_>>();
-
-    if matching_skills.is_empty() {
-        println!("No skills match your project context. Try broader filters.");
+    if registry.skills.is_empty() {
+        println!("No skills available in registry.");
         return Ok(());
     }
 
+    let skills_to_show: Vec<_> = registry.skills.iter().map(|(k, v)| (k.clone(), v.clone())).collect();
+
     println!("\nSelect skills to install:");
-    let selected = SkillSelector::new(matching_skills).run()?;
+    let selected = SkillSelector::new(skills_to_show).run()?;
 
     if selected.is_empty() {
         println!("No skills selected. Exiting.");
