@@ -252,27 +252,145 @@ impl SkillSelectorState {
 
         f.render_widget(list, popup_area);
     }
+
+    fn render(&self, f: &mut ratatui::Frame) {
+        let chunks = Layout::default()
+            .direction(Direction::Vertical)
+            .constraints([
+                Constraint::Length(2),
+                Constraint::Length(1),
+                Constraint::Min(1),
+                Constraint::Length(1),
+            ])
+            .split(f.size());
+
+        self.render_domain_tabs(f, chunks[0]);
+        self.render_status_bar(f, chunks[1]);
+        self.render_skill_list(f, chunks[2]);
+        self.render_help_bar(f, chunks[3]);
+
+        if self.show_tag_popup {
+            self.render_tag_popup(f, f.size());
+        }
+    }
+
+    fn handle_key(&mut self, key: KeyCode) -> bool {
+        if self.show_tag_popup {
+            return self.handle_tag_popup_key(key);
+        }
+
+        match key {
+            KeyCode::Up => {
+                if self.current_skill_index > 0 {
+                    self.current_skill_index -= 1;
+                }
+            }
+            KeyCode::Down => {
+                if self.current_skill_index < self.filtered_skills.len().saturating_sub(1) {
+                    self.current_skill_index += 1;
+                }
+            }
+            KeyCode::Left => {
+                if self.domain_index > 0 {
+                    self.domain_index -= 1;
+                    self.apply_filters();
+                }
+            }
+            KeyCode::Right => {
+                if self.domain_index < self.domains.len().saturating_sub(1) {
+                    self.domain_index += 1;
+                    self.apply_filters();
+                }
+            }
+            KeyCode::Char(' ') => {
+                if self.filtered_skills.is_empty() {
+                    return false;
+                }
+                if self
+                    .selected_skill_indices
+                    .contains(&self.current_skill_index)
+                {
+                    self.selected_skill_indices
+                        .retain(|&i| i != self.current_skill_index);
+                } else {
+                    self.selected_skill_indices.push(self.current_skill_index);
+                }
+            }
+            KeyCode::Char('s') => {
+                self.sort_mode = self.sort_mode.cycle();
+                self.apply_filters();
+            }
+            KeyCode::Char('t') => {
+                self.show_tag_popup = true;
+                self.tag_popup_index = 0;
+                self.tag_popup_selected = self
+                    .selected_tags
+                    .iter()
+                    .filter_map(|t| self.all_tags.iter().position(|tag| tag == t))
+                    .collect();
+            }
+            KeyCode::Enter => return true,
+            KeyCode::Esc => {
+                self.selected_skill_indices.clear();
+                return true;
+            }
+            _ => {}
+        }
+        false
+    }
+
+    fn handle_tag_popup_key(&mut self, key: KeyCode) -> bool {
+        match key {
+            KeyCode::Up => {
+                if self.tag_popup_index > 0 {
+                    self.tag_popup_index -= 1;
+                }
+            }
+            KeyCode::Down => {
+                if self.tag_popup_index < self.all_tags.len().saturating_sub(1) {
+                    self.tag_popup_index += 1;
+                }
+            }
+            KeyCode::Char(' ') => {
+                if self.tag_popup_selected.contains(&self.tag_popup_index) {
+                    self.tag_popup_selected.remove(&self.tag_popup_index);
+                } else {
+                    self.tag_popup_selected.insert(self.tag_popup_index);
+                }
+            }
+            KeyCode::Enter => {
+                self.selected_tags = self
+                    .tag_popup_selected
+                    .iter()
+                    .map(|&i| self.all_tags[i].clone())
+                    .collect();
+                self.show_tag_popup = false;
+                self.apply_filters();
+            }
+            KeyCode::Esc => {
+                self.show_tag_popup = false;
+            }
+            _ => {}
+        }
+        false
+    }
 }
 
 pub struct SkillSelector {
     skills: Vec<(String, Skill)>,
-    selected_indices: Vec<usize>,
-    current_index: usize,
 }
 
 impl SkillSelector {
     pub fn new(skills: Vec<(String, Skill)>) -> Self {
-        Self {
-            skills,
-            selected_indices: vec![],
-            current_index: 0,
-        }
+        Self { skills }
     }
 
-    pub fn run(mut self) -> io::Result<Vec<(String, Skill)>> {
+    pub fn run(self) -> io::Result<Vec<(String, Skill)>> {
         if self.skills.is_empty() {
             return Ok(vec![]);
         }
+
+        let mut state = SkillSelectorState::new(self.skills);
 
         enable_raw_mode()?;
         let mut stdout = io::stdout();
@@ -282,34 +400,11 @@ impl SkillSelector {
         let mut terminal = Terminal::new(backend)?;
 
         loop {
-            terminal.draw(|f| self.render(f))?;
+            terminal.draw(|f| state.render(f))?;
 
             if let Event::Key(key) = event::read()? {
-                match key.code {
-                    KeyCode::Up => {
-                        if self.current_index > 0 {
-                            self.current_index -= 1;
-                        }
-                    }
-                    KeyCode::Down => {
-                        if self.current_index < self.skills.len() - 1 {
-                            self.current_index += 1;
-                        }
-                    }
-                    KeyCode::Char(' ') => {
-                        if self.selected_indices.contains(&self.current_index) {
-                            self.selected_indices.retain(|&i| i != self.current_index);
-                        } else {
-                            self.selected_indices.push(self.current_index);
-                        }
-                    }
-                    KeyCode::Enter => break,
-                    KeyCode::Esc => {
-                        disable_raw_mode()?;
-                        execute!(terminal.backend_mut(), LeaveAlternateScreen)?;
-                        return Ok(vec![]);
-                    }
-                    _ => {}
+                if state.handle_key(key.code) {
+                    break;
                 }
             }
         }
@@ -317,38 +412,10 @@ impl SkillSelector {
         disable_raw_mode()?;
         execute!(terminal.backend_mut(), LeaveAlternateScreen)?;
 
-        Ok(self
-            .selected_indices
+        Ok(state
+            .selected_skill_indices
             .into_iter()
-            .map(|i| self.skills[i].clone())
+            .map(|i| state.filtered_skills[i].clone())
             .collect())
-    }
-
-    fn render(&self, f: &mut ratatui::Frame) {
-        let items: Vec<ListItem> = self
-            .skills
-            .iter()
-            .enumerate()
-            .map(|(i, (_id, skill))| {
-                let marker = if self.selected_indices.contains(&i) {
-                    "[x]"
-                } else {
-                    "[ ]"
-                };
-                let cursor = if i == self.current_index { ">" } else { " " };
-                ListItem::new(format!(
-                    "{}{} {} - {} (★{})",
-                    cursor, marker, skill.name, skill.description, skill.stars
-                ))
-            })
-            .collect();
-
-        let list = List::new(items).block(
-            Block::default()
-                .title("Select Skills (↑↓ navigate, Space select, Enter confirm)")
-                .borders(Borders::ALL),
-        );
-
-        f.render_widget(list, f.size());
     }
 }
