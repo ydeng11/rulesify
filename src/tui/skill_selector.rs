@@ -1,4 +1,5 @@
 use crate::models::Skill;
+use crate::tui::SortMode;
 use crossterm::{
     event::{self, Event, KeyCode},
     execute,
@@ -6,10 +7,130 @@ use crossterm::{
 };
 use ratatui::{
     backend::CrosstermBackend,
-    widgets::{Block, Borders, List, ListItem},
+    layout::{Constraint, Direction, Layout, Rect},
+    style::{Color, Modifier, Style},
+    text::Span,
+    widgets::{Block, Borders, List, ListItem, Paragraph, Tabs},
     Terminal,
 };
+use std::collections::HashSet;
 use std::io;
+
+struct SkillSelectorState {
+    all_skills: Vec<(String, Skill)>,
+    filtered_skills: Vec<(String, Skill)>,
+    domains: Vec<String>,
+    domain_index: usize,
+    all_tags: Vec<String>,
+    selected_tags: HashSet<String>,
+    sort_mode: SortMode,
+    current_skill_index: usize,
+    selected_skill_indices: Vec<usize>,
+    show_tag_popup: bool,
+    tag_popup_index: usize,
+    tag_popup_selected: HashSet<usize>,
+}
+
+impl SkillSelectorState {
+    fn new(skills: Vec<(String, Skill)>) -> Self {
+        let domains = Self::extract_domains(&skills);
+        let all_tags = Self::extract_tags(&skills);
+        let filtered_skills = skills.clone();
+
+        Self {
+            all_skills: skills,
+            filtered_skills,
+            domains,
+            domain_index: 0,
+            all_tags,
+            selected_tags: HashSet::new(),
+            sort_mode: SortMode::default(),
+            current_skill_index: 0,
+            selected_skill_indices: vec![],
+            show_tag_popup: false,
+            tag_popup_index: 0,
+            tag_popup_selected: HashSet::new(),
+        }
+    }
+
+    fn extract_domains(skills: &[(String, Skill)]) -> Vec<String> {
+        let mut domains: Vec<String> = skills
+            .iter()
+            .map(|(_, s)| s.domain.clone())
+            .filter(|d| !d.is_empty())
+            .collect::<HashSet<_>>()
+            .into_iter()
+            .collect();
+        domains.sort();
+        domains.insert(0, "All".to_string());
+        domains
+    }
+
+    fn extract_tags(skills: &[(String, Skill)]) -> Vec<String> {
+        let mut tags: Vec<String> = skills
+            .iter()
+            .flat_map(|(_, s)| s.tags.iter().cloned())
+            .collect::<HashSet<_>>()
+            .into_iter()
+            .collect();
+        tags.sort();
+        tags
+    }
+
+    fn apply_filters(&mut self) {
+        let domain_filter = if self.domain_index == 0 {
+            None
+        } else {
+            Some(self.domains[self.domain_index].clone())
+        };
+
+        let filtered: Vec<(String, Skill)> = self
+            .all_skills
+            .iter()
+            .filter(|(_, skill)| {
+                if let Some(domain) = &domain_filter {
+                    skill.domain == *domain
+                } else {
+                    true
+                }
+            })
+            .filter(|(_, skill)| {
+                if self.selected_tags.is_empty() {
+                    true
+                } else {
+                    self.selected_tags.iter().all(|t| skill.tags.contains(t))
+                }
+            })
+            .cloned()
+            .collect();
+
+        self.filtered_skills = Self::apply_sort(filtered, self.sort_mode);
+        self.current_skill_index = 0;
+    }
+
+    fn apply_sort(skills: Vec<(String, Skill)>, mode: SortMode) -> Vec<(String, Skill)> {
+        let mut sorted = skills;
+        match mode {
+            SortMode::StarsDesc => sorted.sort_by(|a, b| b.1.stars.cmp(&a.1.stars)),
+            SortMode::StarsAsc => sorted.sort_by(|a, b| a.1.stars.cmp(&b.1.stars)),
+            SortMode::ScoreDesc => sorted.sort_by(|a, b| {
+                b.1.score
+                    .unwrap_or(0.0)
+                    .partial_cmp(&a.1.score.unwrap_or(0.0))
+                    .unwrap()
+            }),
+            SortMode::ScoreAsc => sorted.sort_by(|a, b| {
+                a.1.score
+                    .unwrap_or(0.0)
+                    .partial_cmp(&b.1.score.unwrap_or(0.0))
+                    .unwrap()
+            }),
+            SortMode::NameAsc => sorted.sort_by(|a, b| a.1.name.cmp(&b.1.name)),
+            SortMode::NameDesc => sorted.sort_by(|a, b| b.1.name.cmp(&a.1.name)),
+        }
+        sorted
+    }
+}
 
 pub struct SkillSelector {
     skills: Vec<(String, Skill)>,
