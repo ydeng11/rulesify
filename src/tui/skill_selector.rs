@@ -130,6 +130,33 @@ impl SkillSelectorState {
         }
         sorted
     }
+
+    fn render_domain_tabs(&self, f: &mut ratatui::Frame, area: Rect) {
+        let titles: Vec<Span> = self
+            .domains
+            .iter()
+            .enumerate()
+            .map(|(i, d)| {
+                if i == self.domain_index {
+                    Span::styled(
+                        d.clone(),
+                        Style::default()
+                            .fg(Color::Yellow)
+                            .add_modifier(Modifier::BOLD),
+                    )
+                } else {
+                    Span::styled(d.clone(), Style::default().fg(Color::Gray))
+                }
+            })
+            .collect();
+
+        let tabs = Tabs::new(titles)
+            .block(Block::default().borders(Borders::BOTTOM))
+            .divider(Span::raw(" | "))
+            .style(Style::default().fg(Color::White));
+
+        f.render_widget(tabs, area);
+    }
 }
 
 pub struct SkillSelector {
