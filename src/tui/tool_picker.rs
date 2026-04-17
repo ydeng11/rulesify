@@ -10,16 +10,18 @@ use ratatui::{
 };
 use std::io;
 
-const TOOLS: [&str; 4] = ["cursor", "claude-code", "cline", "goose"];
+const TOOLS: [&str; 5] = ["claude-code", "codex", "cursor", "opencode", "pi"];
 
 pub struct ToolPicker {
     selected: Vec<bool>,
+    cursor: usize,
 }
 
 impl ToolPicker {
     pub fn new() -> Self {
         Self {
-            selected: vec![false, false, false, false],
+            selected: vec![false; TOOLS.len()],
+            cursor: 0,
         }
     }
 
@@ -38,10 +40,19 @@ impl ToolPicker {
 
             if let Event::Key(key) = event::read()? {
                 match key.code {
-                    KeyCode::Char('1') => picker.selected[0] = !picker.selected[0],
-                    KeyCode::Char('2') => picker.selected[1] = !picker.selected[1],
-                    KeyCode::Char('3') => picker.selected[2] = !picker.selected[2],
-                    KeyCode::Char('4') => picker.selected[3] = !picker.selected[3],
+                    KeyCode::Up => {
+                        if picker.cursor > 0 {
+                            picker.cursor -= 1;
+                        }
+                    }
+                    KeyCode::Down => {
+                        if picker.cursor < TOOLS.len() - 1 {
+                            picker.cursor += 1;
+                        }
+                    }
+                    KeyCode::Char(' ') => {
+                        picker.selected[picker.cursor] = !picker.selected[picker.cursor];
+                    }
                     KeyCode::Enter => break,
                     KeyCode::Esc => {
                         disable_raw_mode()?;
@@ -70,13 +81,14 @@ impl ToolPicker {
             .zip(self.selected.iter())
             .map(|((i, t), s)| {
                 let symbol = if *s { "[x]" } else { "[ ]" };
-                ListItem::new(format!("{}. {} {}", i + 1, symbol, t))
+                let marker = if i == self.cursor { ">" } else { " " };
+                ListItem::new(format!("{} {} {}", marker, symbol, t))
             })
             .collect();
 
         let list = List::new(items).block(
             Block::default()
-                .title("Select AI Tools (1-4 to toggle, Enter to confirm)")
+                .title("Select AI Tools (↑↓ to move, Space to toggle, Enter to confirm)")
                 .borders(Borders::ALL),
         );
 
