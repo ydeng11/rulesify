@@ -19,7 +19,8 @@ Skills are pre-built workflows, methodologies, and instructions that enhance AI 
 - **LLM Classification**: Automatic domain and tag assignment for easy discovery
 - **Domain Filtering**: Find skills by category (development, testing, design, etc.)
 - **Tag Search**: Discover skills by capability tags
-- **Installation Instructions**: Clear guidance for skill installation
+- **Direct Installation**: Skills are downloaded and installed automatically (full folder copy)
+- **Multi-Tool Support**: Install to multiple AI tools simultaneously (Claude Code, Codex, Cursor, etc.)
 - **Curated Sources**: Skills from Anthropic, OpenAI, and community experts
 
 ## Skills Registry
@@ -113,13 +114,12 @@ rulesify skill add test-driven-development
 
 | Command | Description |
 |---------|-------------|
-| `rulesify skill list` | List all available skills |
-| `rulesify skill list --domain <domain>` | Filter by domain |
-| `rulesify skill list --tags <tags>` | Filter by tags (comma-separated) |
-| `rulesify skill show <skill-id>` | Show detailed skill information |
-| `rulesify skill add <skill-id>` | Install a skill |
-| `rulesify skill remove <skill-id>` | Remove an installed skill |
-| `rulesify skill update` | Refresh the local registry cache |
+| `rulesify init` | Interactive setup - select tools and skills |
+| `rulesify skill list` | List installed skills |
+| `rulesify skill add <skill-id>` | Download and install a skill (project level) |
+| `rulesify skill add <skill-id> --global` | Install a skill globally |
+| `rulesify skill remove <skill-id>` | Remove a skill (prompts for confirmation) |
+| `rulesify skill update` | Update installed skills to latest versions |
 
 ### Global Options
 
@@ -147,12 +147,20 @@ rulesify skill list --tags testing
 ### Install Skills
 
 ```bash
-# Install a simple skill (outputs instructions)
+# Initialize project with interactive selection
+rulesify init
+
+# Install a skill (downloads from GitHub, creates folders)
 rulesify skill add test-driven-development
 
-# View before installing
-rulesify skill show playwright
-rulesify skill add playwright
+# Install globally (available in all projects)
+rulesify skill add test-driven-development --global
+
+# Remove a skill (prompts for confirmation)
+rulesify skill remove test-driven-development
+
+# Update installed skills
+rulesify skill update
 ```
 
 ### Filter by Domain
@@ -227,14 +235,15 @@ rulesify/
 ### Testing
 
 ```bash
-cargo test        # Run all 38 tests
+cargo test        # Run all 62 tests
 cargo check       # Verify compilation
 cargo clippy      # Lint
 ```
 
 ### Test Coverage
 
-- **38 total tests** across all modules
+- **62 total tests** across all modules
+- **7 executor tests** (URL parsing, install/uninstall)
 - **10 domain tests** (enum parsing, validation)
 - **24 registry tests** (skills catalog, GitHub API)
 - **4 TUI tests** (interactive selection)
