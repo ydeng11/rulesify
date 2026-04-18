@@ -345,6 +345,20 @@ impl SkillSelectorState {
 
         let cols: usize = 3;
 
+        let max_tag_len = self
+            .all_tags
+            .iter()
+            .map(|(tag, _)| tag.len())
+            .max()
+            .unwrap_or(0);
+
+        let max_count_digits = self
+            .all_tags
+            .iter()
+            .map(|(_, count)| count.to_string().len())
+            .max()
+            .unwrap_or(1);
+
         let mut lines: Vec<Line> = Vec::new();
         let mut row_items: Vec<Span> = Vec::new();
 
@@ -366,7 +380,18 @@ impl SkillSelectorState {
                 Style::default().fg(Color::White)
             };
 
-            let item = Span::styled(format!("{}{} {}({})", cursor, marker, tag, count), style);
+            let item = Span::styled(
+                format!(
+                    "{}{} {:tag_len$}({:count_len$})",
+                    cursor,
+                    marker,
+                    tag,
+                    count,
+                    tag_len = max_tag_len,
+                    count_len = max_count_digits
+                ),
+                style,
+            );
 
             row_items.push(item);
 
