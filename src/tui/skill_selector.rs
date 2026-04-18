@@ -9,11 +9,11 @@ use ratatui::{
     backend::CrosstermBackend,
     layout::{Constraint, Direction, Layout, Rect},
     style::{Color, Modifier, Style},
-    text::Span,
-    widgets::{Block, Borders, List, ListItem, Paragraph, Tabs},
+    text::{Line, Span, Text},
+    widgets::{Block, Borders, List, ListItem, Paragraph, Tabs, Wrap},
     Terminal,
 };
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
 use std::io;
 
 struct SkillSelectorState {
@@ -21,7 +21,7 @@ struct SkillSelectorState {
     filtered_skills: Vec<(String, Skill)>,
     domains: Vec<String>,
     domain_index: usize,
-    all_tags: Vec<String>,
+    all_tags: Vec<(String, usize)>,
     selected_tags: HashSet<String>,
     sort_mode: SortMode,
     current_skill_index: usize,
@@ -34,7 +34,7 @@ struct SkillSelectorState {
 impl SkillSelectorState {
     fn new(skills: Vec<(String, Skill)>) -> Self {
         let domains = Self::extract_domains(&skills);
-        let all_tags = Self::extract_tags(&skills);
+        let all_tags = Self::extract_tags_with_counts(&skills);
         let filtered_skills = skills.clone();
 
         Self {
@@ -66,14 +66,15 @@ impl SkillSelectorState {
         domains
     }
 
-    fn extract_tags(skills: &[(String, Skill)]) -> Vec<String> {
-        let mut tags: Vec<String> = skills
-            .iter()
-            .flat_map(|(_, s)| s.tags.iter().cloned())
-            .collect::<HashSet<_>>()
-            .into_iter()
-            .collect();
-        tags.sort();
+    fn extract_tags_with_counts(skills: &[(String, Skill)]) -> Vec<(String, usize)> {
+        let mut tag_counts: HashMap<String, usize> = HashMap::new();
+        for (_, skill) in skills {
+            for tag in &skill.tags {
+                *tag_counts.entry(tag.clone()).or_insert(0) += 1;
+            }
+        }
+        let mut tags: Vec<(String, usize)> = tag_counts.into_iter().collect();
+        tags.sort_by(|a, b| a.0.cmp(&b.0));
         tags
     }
 
@@ -211,10 +212,24 @@ impl SkillSelectorState {
                     .score
                     .map(|s| format!("{:.0}", s))
                     .unwrap_or_else(|| "-".to_string());
-                ListItem::new(format!(
-                    "{}{} {} - {} (★{} | {})",
-                    cursor, marker, skill.name, skill.description, skill.stars, score_text
-                ))
+                let style = if i == self.current_skill_index {
+                    Style::default()
+                        .fg(Color::Yellow)
+                        .add_modifier(Modifier::BOLD)
+                } else {
+                    Style::default()
+                };
+                ListItem::new(Line::from(vec![
+                    Span::styled(format!("{}{} ", cursor, marker), style),
+                    Span::styled(skill.name.clone(), style),
+                    Span::styled(" ", Style::default()),
+                    Span::styled(
+                        format!("★{}", skill.stars),
+                        Style::default().fg(Color::Gray),
+                    ),
+                    Span::styled(" | ", Style::default().fg(Color::DarkGray)),
+                    Span::styled(score_text, Style::default().fg(Color::Cyan)),
+                ]))
             })
             .collect();
 
@@ -222,6 +237,100 @@ impl SkillSelectorState {
         let list = List::new(items).block(Block::default().title(title).borders(Borders::ALL));
 
         f.render_widget(list, area);
+    }
+
+    fn render_skill_details(&self, f: &mut ratatui::Frame, area: Rect) {
+        if self.filtered_skills.is_empty() {
+            let empty = Paragraph::new("No skills selected")
+                .block(Block::default().title("Details").borders(Borders::ALL));
+            f.render_widget(empty, area);
+            return;
+        }
+
+        let (_, skill) = &self.filtered_skills[self.current_skill_index];
+
+        let mut lines: Vec<Line> = vec![
+            Line::from(vec![
+                Span::styled("Name: ", Style::default().fg(Color::Cyan)),
+                Span::styled(
+                    skill.name.clone(),
+                    Style::default().add_modifier(Modifier::BOLD),
+                ),
+            ]),
+            Line::from(vec![
+                Span::styled("Score: ", Style::default().fg(Color::Cyan)),
+                Span::styled(
+                    skill
+                        .score
+                        .map(|s| format!("{:.0}", s))
+                        .unwrap_or_else(|| "-".to_string()),
+                    Style::default().fg(Color::Yellow),
+                ),
+                Span::styled("  Stars: ", Style::default().fg(Color::Cyan)),
+                Span::styled(
+                    format!("★{}", skill.stars),
+                    Style::default().fg(Color::Yellow),
+                ),
+            ]),
+            Line::from(vec![
+                Span::styled("Domain: ", Style::default().fg(Color::Cyan)),
+                Span::styled(skill.domain.clone(), Style::default().fg(Color::White)),
+            ]),
+            Line::from(""),
+            Line::from(Span::styled(
+                "Description:",
+                Style::default().fg(Color::Cyan),
+            )),
+        ];
+
+        let desc_lines = textwrap::wrap(&skill.description, area.width.saturating_sub(4) as usize);
+        for line in desc_lines {
+            lines.push(Line::from(Span::styled(
+                line,
+                Style::default().fg(Color::White),
+            )));
+        }
+
+        lines.push(Line::from(""));
+        lines.push(Line::from(Span::styled(
+            "Tags:",
+            Style::default().fg(Color::Cyan),
+        )));
+
+        if skill.tags.is_empty() {
+            lines.push(Line::from(Span::styled(
+                "  (none)",
+                Style::default().fg(Color::DarkGray),
+            )));
+        } else {
+            let tags_str = skill
+                .tags
+                .iter()
+                .map(|t| format!("  • {}", t))
+                .collect::<Vec<_>>();
+            for tag in tags_str {
+                lines.push(Line::from(Span::styled(
+                    tag,
+                    Style::default().fg(Color::White),
+                )));
+            }
+        }
+
+        lines.push(Line::from(""));
+        lines.push(Line::from(Span::styled(
+            "Source:",
+            Style::default().fg(Color::Cyan),
+        )));
+        lines.push(Line::from(Span::styled(
+            skill.source_url.clone(),
+            Style::default().fg(Color::DarkGray),
+        )));
+
+        let details = Paragraph::new(Text::from(lines))
+            .block(Block::default().title("Details").borders(Borders::ALL))
+            .wrap(Wrap { trim: false });
+
+        f.render_widget(details, area);
     }
 
     fn render_tag_popup(&self, f: &mut ratatui::Frame, area: Rect) {
@@ -232,23 +341,52 @@ impl SkillSelectorState {
             height: area.height / 2,
         };
 
-        let items: Vec<ListItem> = self
-            .all_tags
-            .iter()
-            .enumerate()
-            .map(|(i, tag)| {
-                let marker = if self.tag_popup_selected.contains(&i) {
-                    "[x]"
-                } else {
-                    "[ ]"
-                };
-                let cursor = if i == self.tag_popup_index { ">" } else { " " };
-                ListItem::new(format!("{}{} {}", cursor, marker, tag))
-            })
-            .collect();
+        let cols: usize = 3;
 
-        let list =
-            List::new(items).block(Block::default().title("Select Tags").borders(Borders::ALL));
+        let mut lines: Vec<Line> = Vec::new();
+        let mut row_items: Vec<Span> = Vec::new();
+
+        for (i, (tag, count)) in self.all_tags.iter().enumerate() {
+            let marker = if self.tag_popup_selected.contains(&i) {
+                "[x]"
+            } else {
+                "[ ]"
+            };
+            let cursor = if i == self.tag_popup_index { ">" } else { " " };
+
+            let style = if i == self.tag_popup_index {
+                Style::default()
+                    .fg(Color::Yellow)
+                    .add_modifier(Modifier::BOLD)
+            } else if self.tag_popup_selected.contains(&i) {
+                Style::default().fg(Color::Green)
+            } else {
+                Style::default().fg(Color::White)
+            };
+
+            let item = Span::styled(format!("{}{} {}({})", cursor, marker, tag, count), style);
+
+            row_items.push(item);
+
+            if row_items.len() >= cols || i == self.all_tags.len() - 1 {
+                let mut spans: Vec<Span> = Vec::new();
+                for (col_idx, item) in row_items.iter().enumerate() {
+                    spans.push(item.clone());
+                    if col_idx < row_items.len() - 1 {
+                        spans.push(Span::raw("  "));
+                    }
+                }
+                lines.push(Line::from(spans));
+                row_items = Vec::new();
+            }
+        }
+
+        let tags_text = Text::from(lines);
+        let list = Paragraph::new(tags_text).block(
+            Block::default()
+                .title("Select Tags (↑↓ Nav, Space Toggle)")
+                .borders(Borders::ALL),
+        );
 
         f.render_widget(list, popup_area);
     }
@@ -266,7 +404,14 @@ impl SkillSelectorState {
 
         self.render_domain_tabs(f, chunks[0]);
         self.render_status_bar(f, chunks[1]);
-        self.render_skill_list(f, chunks[2]);
+
+        let panels = Layout::default()
+            .direction(Direction::Horizontal)
+            .constraints([Constraint::Percentage(40), Constraint::Percentage(60)])
+            .split(chunks[2]);
+
+        self.render_skill_list(f, panels[0]);
+        self.render_skill_details(f, panels[1]);
         self.render_help_bar(f, chunks[3]);
 
         if self.show_tag_popup {
@@ -326,7 +471,7 @@ impl SkillSelectorState {
                 self.tag_popup_selected = self
                     .selected_tags
                     .iter()
-                    .filter_map(|t| self.all_tags.iter().position(|tag| tag == t))
+                    .filter_map(|t| self.all_tags.iter().position(|(tag, _)| tag == t))
                     .collect();
             }
             KeyCode::Enter => return true,
@@ -362,7 +507,7 @@ impl SkillSelectorState {
                 self.selected_tags = self
                     .tag_popup_selected
                     .iter()
-                    .map(|&i| self.all_tags[i].clone())
+                    .map(|&i| self.all_tags[i].0.clone())
                     .collect();
                 self.show_tag_popup = false;
                 self.apply_filters();

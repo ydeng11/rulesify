@@ -35,7 +35,11 @@ pub async fn run(verbose: bool) -> Result<()> {
         return Ok(());
     }
 
-    let skills_to_show: Vec<_> = registry.skills.iter().map(|(k, v)| (k.clone(), v.clone())).collect();
+    let skills_to_show: Vec<_> = registry
+        .skills
+        .iter()
+        .map(|(k, v)| (k.clone(), v.clone()))
+        .collect();
 
     println!("\nSelect skills to install:");
     let selected = SkillSelector::new(skills_to_show).run()?;
