@@ -12,7 +12,7 @@ mod tests {
     #[test]
     fn test_skill_exists() {
         let registry = load_builtin().unwrap();
-        assert!(registry.get_skill("docx").is_some());
+        assert!(registry.get_skill("minimax-docx").is_some());
     }
 
     #[test]

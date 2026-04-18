@@ -1,7 +1,9 @@
 use crate::cli::SkillCommands;
-use crate::installer::{generate_install_instructions, generate_uninstall_instructions};
+use crate::installer::{
+    install_skill, print_install_summary, print_uninstall_summary, prompt_confirm, uninstall_skill,
+};
 use crate::models::{ProjectConfig, Registry, Scope};
-use crate::registry::{fetch_registry, load_builtin, RegistryCache};
+use crate::registry::{fetch_registry, load_builtin, GitHubClient, RegistryCache};
 use crate::utils::{Result, RulesifyError};
 use std::path::Path;
 
@@ -61,16 +63,27 @@ async fn add_skill(id: String, global: bool, _verbose: bool) -> Result<()> {
     let content = std::fs::read_to_string(config_path)?;
     let mut config: ProjectConfig = toml::from_str(&content)?;
 
-    let instructions =
-        generate_install_instructions(&skill.name, &skill.source_url, &config.tools, scope.clone());
+    let client = GitHubClient::new();
 
-    config.add_skill(&id, &skill.source_url, scope);
+    println!("Installing '{}'...", skill.name);
 
-    std::fs::write(config_path, toml::to_string_pretty(&config)?)?;
+    let results = install_skill(skill, &config.tools, scope.clone(), &client).await?;
 
-    println!("Added skill: {}", skill.name);
-    println!("Source: {}", skill.source_url);
-    println!("\n{}", instructions);
+    print_install_summary(&results, &skill.name);
+
+    let success_count = results.iter().filter(|r| r.success).count();
+    if success_count > 0 {
+        config.add_skill(&id, &skill.source_url, &skill.commit_sha, scope);
+        std::fs::write(config_path, toml::to_string_pretty(&config)?)?;
+    }
+
+    if success_count == 0 {
+        return Err(RulesifyError::SkillParse(format!(
+            "Failed to install '{}' to any tool",
+            skill.name
+        ))
+        .into());
+    }
 
     Ok(())
 }
@@ -88,19 +101,30 @@ fn remove_skill(id: String, global: bool, _verbose: bool) -> Result<()> {
     }
 
     let content = std::fs::read_to_string(config_path)?;
+    let config: ProjectConfig = toml::from_str(&content)?;
+
+    if !config.installed_skills.contains_key(&id) {
+        return Err(RulesifyError::SkillNotFound(id.clone()).into());
+    }
+
+    let message = format!(
+        "Delete skill folders for '{}' (used by {} tools)?",
+        id,
+        config.tools.len()
+    );
+
+    if !prompt_confirm(&message) {
+        println!("Cancelled.");
+        return Ok(());
+    }
+
+    let results = uninstall_skill(&id, &config.tools, scope.clone());
+
+    print_uninstall_summary(&results, &id);
+
     let mut config: ProjectConfig = toml::from_str(&content)?;
-
-    let removed = config
-        .remove_skill(&id)
-        .ok_or_else(|| RulesifyError::SkillNotFound(id.clone()))?;
-
-    let instructions = generate_uninstall_instructions(&id, &config.tools, scope.clone());
-
+    config.remove_skill(&id);
     std::fs::write(config_path, toml::to_string_pretty(&config)?)?;
-
-    println!("Removed skill: {}", id);
-    println!("Added on: {}", removed.added);
-    println!("\n{}", instructions);
 
     Ok(())
 }
@@ -117,6 +141,60 @@ async fn update_registry(verbose: bool) -> Result<()> {
     if verbose {
         println!("Updated date: {}", registry.updated);
     }
+
+    let config_path = Path::new(".rulesify.toml");
+
+    if !config_path.exists() {
+        return Ok(());
+    }
+
+    let content = std::fs::read_to_string(config_path)?;
+    let mut config: ProjectConfig = toml::from_str(&content)?;
+
+    let mut updated_skills: Vec<(String, crate::models::Skill)> = vec![];
+
+    for (id, info) in config.installed_skills.iter() {
+        if let Some(skill) = registry.get_skill(id) {
+            if skill.commit_sha != info.commit_sha {
+                updated_skills.push((id.clone(), skill.clone()));
+            }
+        }
+    }
+
+    if updated_skills.is_empty() {
+        println!("No installed skills need updates.");
+        return Ok(());
+    }
+
+    println!("\n{} skills have updates:", updated_skills.len());
+
+    for (id, skill) in &updated_skills {
+        println!(
+            "  - {} (old: {}, new: {})",
+            id,
+            config.installed_skills.get(id).unwrap().commit_sha,
+            skill.commit_sha
+        );
+    }
+
+    let message = format!("Update {} skills?", updated_skills.len());
+
+    if !prompt_confirm(&message) {
+        println!("Cancelled.");
+        return Ok(());
+    }
+
+    let client = GitHubClient::new();
+
+    for (id, skill) in &updated_skills {
+        println!("\nUpdating '{}'...", skill.name);
+        let scope = config.installed_skills.get(id).unwrap().scope.clone();
+        let results = install_skill(skill, &config.tools, scope.clone(), &client).await?;
+        print_install_summary(&results, &skill.name);
+        config.update_skill_sha(id, &skill.commit_sha);
+    }
+
+    std::fs::write(config_path, toml::to_string_pretty(&config)?)?;
 
     Ok(())
 }

@@ -1,6 +1,8 @@
-use crate::installer::{generate_instructions, generate_uninstall_instructions_batch};
+use crate::installer::{
+    install_skill, print_install_summary, print_uninstall_summary, uninstall_skill,
+};
 use crate::models::{ProjectConfig, Registry, Scope};
-use crate::registry::{fetch_registry, load_builtin, RegistryCache};
+use crate::registry::{fetch_registry, load_builtin, GitHubClient, RegistryCache};
 use crate::scanner::scan_project;
 use crate::tui::{SelectionResult, SkillSelector, ToolPicker};
 use crate::utils::Result;
@@ -75,30 +77,31 @@ pub async fn run(verbose: bool) -> Result<()> {
         return Ok(());
     }
 
-    if !result.added.is_empty() {
-        let install_instructions = generate_instructions(&result.added, &tools);
-        println!("\n## Skills to Install:\n{}", install_instructions);
-    }
+    let client = GitHubClient::new();
+    let mut config = existing_config.unwrap_or(ProjectConfig::new());
+    config.tools = tools.clone();
 
     if !result.removed.is_empty() {
-        let uninstall_instructions =
-            generate_uninstall_instructions_batch(&result.removed, &tools, Scope::Project);
-        println!("\n## Skills to Remove:\n{}", uninstall_instructions);
+        println!("\nRemoving {} skills...", result.removed.len());
+        for id in &result.removed {
+            let results = uninstall_skill(id, &tools, Scope::Project);
+            print_uninstall_summary(&results, id);
+            config.remove_skill(id);
+        }
+    }
+
+    if !result.added.is_empty() {
+        println!("\nInstalling {} skills...", result.added.len());
+        for (id, skill) in &result.added {
+            println!("Installing '{}'...", skill.name);
+            let results = install_skill(skill, &tools, Scope::Project, &client).await?;
+            print_install_summary(&results, &skill.name);
+            config.add_skill(id, &skill.source_url, &skill.commit_sha, Scope::Project);
+        }
     }
 
     if result.added.is_empty() && result.removed.is_empty() {
         println!("\nNo changes to installed skills.");
-    }
-
-    let mut config = existing_config.unwrap_or(ProjectConfig::new());
-    config.tools = tools;
-
-    for id in &result.removed {
-        config.remove_skill(id);
-    }
-
-    for (id, skill) in &result.added {
-        config.add_skill(id, &skill.source_url, Scope::Project);
     }
 
     std::fs::write(config_path, toml::to_string_pretty(&config)?)?;
