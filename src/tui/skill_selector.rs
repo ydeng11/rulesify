@@ -27,6 +27,8 @@ struct SkillSelectorState {
     current_skill_index: usize,
     selected_skill_indices: Vec<usize>,
     show_tag_popup: bool,
+    tag_search_query: String,
+    tag_scroll_offset: usize,
     tag_popup_index: usize,
     tag_popup_selected: HashSet<usize>,
 }
@@ -48,6 +50,8 @@ impl SkillSelectorState {
             current_skill_index: 0,
             selected_skill_indices: vec![],
             show_tag_popup: false,
+            tag_search_query: String::new(),
+            tag_scroll_offset: 0,
             tag_popup_index: 0,
             tag_popup_selected: HashSet::new(),
         }
@@ -76,6 +80,21 @@ impl SkillSelectorState {
         let mut tags: Vec<(String, usize)> = tag_counts.into_iter().collect();
         tags.sort_by(|a, b| a.0.cmp(&b.0));
         tags
+    }
+
+    fn get_filtered_tags(&self) -> Vec<(String, usize)> {
+        if self.tag_search_query.is_empty() {
+            self.all_tags.clone()
+        } else {
+            self.all_tags
+                .iter()
+                .filter(|(tag, _)| {
+                    tag.to_lowercase()
+                        .contains(&self.tag_search_query.to_lowercase())
+                })
+                .cloned()
+                .collect()
+        }
     }
 
     fn apply_filters(&mut self) {
@@ -334,86 +353,158 @@ impl SkillSelectorState {
     }
 
     fn render_tag_popup(&self, f: &mut ratatui::Frame, area: Rect) {
+        let popup_width = area.width.saturating_sub(4);
+        let popup_height = area.height.saturating_sub(4);
         let popup_area = Rect {
-            x: area.x + area.width / 4,
-            y: area.y + area.height / 4,
-            width: area.width / 2,
-            height: area.height / 2,
+            x: area.x + 2,
+            y: area.y + 2,
+            width: popup_width,
+            height: popup_height,
         };
 
         f.render_widget(Clear, popup_area);
 
-        let cols: usize = 3;
+        let filtered_tags = self.get_filtered_tags();
 
-        let max_tag_len = self
-            .all_tags
+        if filtered_tags.is_empty() {
+            let empty_msg = Paragraph::new("No matching tags").block(
+                Block::default()
+                    .title(format!("Search: {}", self.tag_search_query))
+                    .borders(Borders::ALL)
+                    .style(Style::default().bg(Color::Black)),
+            );
+            f.render_widget(empty_msg, popup_area);
+            return;
+        }
+
+        let inner_width = popup_width.saturating_sub(2);
+        let search_bar_height = 2;
+        let help_bar_height = 1;
+        let available_height = popup_height.saturating_sub(search_bar_height + help_bar_height + 2);
+
+        let max_tag_len = filtered_tags
             .iter()
             .map(|(tag, _)| tag.len())
             .max()
             .unwrap_or(0);
-
-        let max_count_digits = self
-            .all_tags
+        let max_count_digits = filtered_tags
             .iter()
             .map(|(_, count)| count.to_string().len())
             .max()
             .unwrap_or(1);
 
+        let item_width = 4 + max_tag_len + 2 + max_count_digits + 1;
+        let cols = std::cmp::max(1, inner_width as usize / item_width);
+        let rows_per_page = available_height as usize;
+
         let mut lines: Vec<Line> = Vec::new();
-        let mut row_items: Vec<Span> = Vec::new();
 
-        for (i, (tag, count)) in self.all_tags.iter().enumerate() {
-            let marker = if self.tag_popup_selected.contains(&i) {
-                "[x]"
-            } else {
-                "[ ]"
-            };
-            let cursor = if i == self.tag_popup_index { ">" } else { " " };
-
-            let style = if i == self.tag_popup_index {
+        let search_line = Line::from(vec![
+            Span::styled("Search: ", Style::default().fg(Color::Cyan)),
+            Span::styled(
+                if self.tag_search_query.is_empty() {
+                    "(type to filter)"
+                } else {
+                    &self.tag_search_query
+                },
                 Style::default()
                     .fg(Color::Yellow)
-                    .add_modifier(Modifier::BOLD)
-            } else if self.tag_popup_selected.contains(&i) {
-                Style::default().fg(Color::Green)
-            } else {
-                Style::default().fg(Color::White)
-            };
+                    .add_modifier(Modifier::BOLD),
+            ),
+        ]);
+        lines.push(search_line);
+        lines.push(Line::from(""));
 
-            let item = Span::styled(
-                format!(
-                    "{}{} {:tag_len$}({:count_len$})",
-                    cursor,
-                    marker,
-                    tag,
-                    count,
-                    tag_len = max_tag_len,
-                    count_len = max_count_digits
-                ),
-                style,
-            );
+        let total_rows = (filtered_tags.len() + cols - 1) / cols;
+        let start_row = self.tag_scroll_offset;
+        let end_row = std::cmp::min(start_row + rows_per_page, total_rows);
 
-            row_items.push(item);
+        let mut row_items: Vec<Span> = Vec::new();
 
-            if row_items.len() >= cols || i == self.all_tags.len() - 1 {
-                let mut spans: Vec<Span> = Vec::new();
-                for (col_idx, item) in row_items.iter().enumerate() {
-                    spans.push(item.clone());
-                    if col_idx < row_items.len() - 1 {
-                        spans.push(Span::raw("  "));
-                    }
+        for row_idx in start_row..end_row {
+            row_items.clear();
+
+            for col_idx in 0..cols {
+                let flat_idx = row_idx * cols + col_idx;
+                if flat_idx >= filtered_tags.len() {
+                    break;
                 }
-                lines.push(Line::from(spans));
-                row_items = Vec::new();
+
+                let (tag, count) = &filtered_tags[flat_idx];
+                let original_idx = self
+                    .all_tags
+                    .iter()
+                    .position(|(t, _)| t == tag)
+                    .unwrap_or(flat_idx);
+
+                let is_selected = self.tag_popup_selected.contains(&original_idx);
+                let is_cursor = flat_idx == self.tag_popup_index;
+
+                let marker = if is_selected { "[x]" } else { "[ ]" };
+                let cursor = if is_cursor { ">" } else { " " };
+
+                let style = if is_cursor {
+                    Style::default()
+                        .fg(Color::Yellow)
+                        .add_modifier(Modifier::BOLD)
+                } else if is_selected {
+                    Style::default().fg(Color::Green)
+                } else {
+                    Style::default().fg(Color::White)
+                };
+
+                let item = Span::styled(
+                    format!(
+                        "{}{} {:tag_len$}({:count_len$})",
+                        cursor,
+                        marker,
+                        tag,
+                        count,
+                        tag_len = max_tag_len,
+                        count_len = max_count_digits
+                    ),
+                    style,
+                );
+
+                row_items.push(item);
+                if col_idx < cols - 1 {
+                    row_items.push(Span::raw("  "));
+                }
             }
+
+            lines.push(Line::from(row_items.clone()));
         }
 
+        if total_rows > rows_per_page {
+            let scroll_info = format!(
+                "  --- Row {}-{} of {} (scroll with ↑↓) ---",
+                start_row + 1,
+                end_row,
+                total_rows
+            );
+            lines.push(Line::from(Span::styled(
+                scroll_info,
+                Style::default().fg(Color::DarkGray),
+            )));
+        }
+
+        lines.push(Line::from(""));
+        lines.push(Line::from(Span::styled(
+            "↑↓ Nav | Space Toggle | Backspace Clear | Enter Apply | Esc Cancel",
+            Style::default().fg(Color::DarkGray),
+        )));
+
+        let title = format!(
+            "Select Tags ({}/{})",
+            filtered_tags.len(),
+            self.all_tags.len()
+        );
         let tags_text = Text::from(lines);
         let list = Paragraph::new(tags_text)
             .style(Style::default().bg(Color::Reset))
             .block(
                 Block::default()
-                    .title("Select Tags (↑↓ Nav, Space Toggle)")
+                    .title(title)
                     .borders(Borders::ALL)
                     .style(Style::default().bg(Color::Black)),
             );
@@ -497,6 +588,8 @@ impl SkillSelectorState {
             }
             KeyCode::Char('t') => {
                 self.show_tag_popup = true;
+                self.tag_search_query.clear();
+                self.tag_scroll_offset = 0;
                 self.tag_popup_index = 0;
                 self.tag_popup_selected = self
                     .selected_tags
@@ -515,23 +608,63 @@ impl SkillSelectorState {
     }
 
     fn handle_tag_popup_key(&mut self, key: KeyCode) -> bool {
+        let filtered_tags = self.get_filtered_tags();
+        let cols = self.calculate_cols();
+
         match key {
             KeyCode::Up => {
-                if self.tag_popup_index > 0 {
-                    self.tag_popup_index -= 1;
+                if self.tag_popup_index >= cols {
+                    self.tag_popup_index -= cols;
+                } else if self.tag_popup_index > 0 {
+                    self.tag_popup_index = 0;
                 }
+                self.update_scroll_offset(filtered_tags.len(), cols);
             }
             KeyCode::Down => {
-                if self.tag_popup_index < self.all_tags.len().saturating_sub(1) {
-                    self.tag_popup_index += 1;
+                let max_idx = filtered_tags.len().saturating_sub(1);
+                if self.tag_popup_index < max_idx {
+                    self.tag_popup_index = std::cmp::min(self.tag_popup_index + cols, max_idx);
+                    self.update_scroll_offset(filtered_tags.len(), cols);
                 }
             }
-            KeyCode::Char(' ') => {
-                if self.tag_popup_selected.contains(&self.tag_popup_index) {
-                    self.tag_popup_selected.remove(&self.tag_popup_index);
-                } else {
-                    self.tag_popup_selected.insert(self.tag_popup_index);
+            KeyCode::Left => {
+                if self.tag_popup_index > 0 {
+                    self.tag_popup_index -= 1;
+                    self.update_scroll_offset(filtered_tags.len(), cols);
                 }
+            }
+            KeyCode::Right => {
+                if self.tag_popup_index < filtered_tags.len().saturating_sub(1) {
+                    self.tag_popup_index += 1;
+                    self.update_scroll_offset(filtered_tags.len(), cols);
+                }
+            }
+            KeyCode::Char(c) => {
+                if c == ' ' && !filtered_tags.is_empty() {
+                    if self.tag_popup_index < filtered_tags.len() {
+                        let (tag, _) = &filtered_tags[self.tag_popup_index];
+                        let original_idx = self
+                            .all_tags
+                            .iter()
+                            .position(|(t, _)| t == tag)
+                            .unwrap_or(self.tag_popup_index);
+
+                        if self.tag_popup_selected.contains(&original_idx) {
+                            self.tag_popup_selected.remove(&original_idx);
+                        } else {
+                            self.tag_popup_selected.insert(original_idx);
+                        }
+                    }
+                } else if c != ' ' {
+                    self.tag_search_query.push(c);
+                    self.tag_popup_index = 0;
+                    self.tag_scroll_offset = 0;
+                }
+            }
+            KeyCode::Backspace => {
+                self.tag_search_query.pop();
+                self.tag_popup_index = 0;
+                self.tag_scroll_offset = 0;
             }
             KeyCode::Enter => {
                 self.selected_tags = self
@@ -540,14 +673,53 @@ impl SkillSelectorState {
                     .map(|&i| self.all_tags[i].0.clone())
                     .collect();
                 self.show_tag_popup = false;
+                self.tag_search_query.clear();
+                self.tag_scroll_offset = 0;
                 self.apply_filters();
             }
             KeyCode::Esc => {
                 self.show_tag_popup = false;
+                self.tag_search_query.clear();
+                self.tag_scroll_offset = 0;
             }
             _ => {}
         }
         false
+    }
+
+    fn calculate_cols(&self) -> usize {
+        let filtered_tags = self.get_filtered_tags();
+        let max_tag_len = filtered_tags
+            .iter()
+            .map(|(tag, _)| tag.len())
+            .max()
+            .unwrap_or(0);
+        let max_count_digits = filtered_tags
+            .iter()
+            .map(|(_, count)| count.to_string().len())
+            .max()
+            .unwrap_or(1);
+        let item_width = 4 + max_tag_len + 2 + max_count_digits + 1;
+        let estimated_width = 80;
+        std::cmp::max(1, estimated_width / item_width)
+    }
+
+    fn update_scroll_offset(&mut self, filtered_len: usize, cols: usize) {
+        if filtered_len == 0 || cols == 0 {
+            return;
+        }
+        let popup_height_estimate: usize = 20;
+        let search_bar_height: usize = 3;
+        let help_bar_height: usize = 1;
+        let rows_per_page =
+            popup_height_estimate.saturating_sub(search_bar_height + help_bar_height + 2);
+
+        let current_row = self.tag_popup_index / cols;
+        if current_row < self.tag_scroll_offset {
+            self.tag_scroll_offset = current_row;
+        } else if current_row >= self.tag_scroll_offset + rows_per_page {
+            self.tag_scroll_offset = current_row - rows_per_page + 1;
+        }
     }
 }
 
