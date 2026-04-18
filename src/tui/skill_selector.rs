@@ -29,6 +29,7 @@ struct SkillSelectorState {
     skill_search_query: String,
     skill_search_active: bool,
     skill_scroll_offset: usize,
+    skill_list_height: usize,
     show_tag_popup: bool,
     tag_search_query: String,
     tag_scroll_offset: usize,
@@ -56,6 +57,7 @@ impl SkillSelectorState {
             skill_search_query: String::new(),
             skill_search_active: false,
             skill_scroll_offset: 0,
+            skill_list_height: 15,
             show_tag_popup: false,
             tag_search_query: String::new(),
             tag_scroll_offset: 0,
@@ -232,7 +234,7 @@ impl SkillSelectorState {
         f.render_widget(help, area);
     }
 
-    fn render_skill_list(&self, f: &mut ratatui::Frame, area: Rect) {
+    fn render_skill_list(&mut self, f: &mut ratatui::Frame, area: Rect) {
         let mut lines: Vec<Line> = Vec::new();
 
         let search_indicator = if self.skill_search_active {
@@ -247,6 +249,7 @@ impl SkillSelectorState {
         lines.push(Line::from(""));
 
         let list_height = area.height.saturating_sub(5) as usize;
+        self.skill_list_height = list_height;
         let start_idx = self.skill_scroll_offset;
         let end_idx = std::cmp::min(start_idx + list_height, self.filtered_skills.len());
 
@@ -787,7 +790,7 @@ impl SkillSelectorState {
         if self.filtered_skills.is_empty() {
             return;
         }
-        let list_height: usize = 15;
+        let list_height = self.skill_list_height;
         if self.current_skill_index < self.skill_scroll_offset {
             self.skill_scroll_offset = self.current_skill_index;
         } else if self.current_skill_index >= self.skill_scroll_offset + list_height {
