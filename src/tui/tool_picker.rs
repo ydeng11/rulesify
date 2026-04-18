@@ -25,7 +25,22 @@ impl ToolPicker {
         }
     }
 
+    pub fn new_with_selected(selected_tools: Vec<String>) -> Self {
+        let selected = TOOLS
+            .iter()
+            .map(|t| selected_tools.contains(&t.to_string()))
+            .collect();
+        Self {
+            selected,
+            cursor: 0,
+        }
+    }
+
     pub fn run() -> io::Result<Vec<String>> {
+        Self::run_with_selected(vec![])
+    }
+
+    pub fn run_with_selected(selected_tools: Vec<String>) -> io::Result<Vec<String>> {
         enable_raw_mode()?;
         let mut stdout = io::stdout();
         execute!(stdout, EnterAlternateScreen)?;
@@ -33,7 +48,7 @@ impl ToolPicker {
         let backend = CrosstermBackend::new(stdout);
         let mut terminal = Terminal::new(backend)?;
 
-        let mut picker = Self::new();
+        let mut picker = Self::new_with_selected(selected_tools);
 
         loop {
             terminal.draw(|f| picker.render(f))?;

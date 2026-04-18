@@ -8,5 +8,6 @@ mod tool_paths_tests;
 
 pub use instructions::{
     generate_install_instructions, generate_instructions, generate_uninstall_instructions,
+    generate_uninstall_instructions_batch,
 };
 pub use tool_paths::{get_skill_folder, get_skill_path};

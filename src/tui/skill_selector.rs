@@ -16,9 +16,16 @@ use ratatui::{
 use std::collections::{HashMap, HashSet};
 use std::io;
 
+pub struct SelectionResult {
+    pub selected: Vec<(String, Skill)>,
+    pub added: Vec<(String, Skill)>,
+    pub removed: Vec<String>,
+}
+
 struct SkillSelectorState {
     all_skills: Vec<(String, Skill)>,
     filtered_skills: Vec<(String, Skill)>,
+    installed_ids: HashSet<String>,
     domains: Vec<String>,
     domain_index: usize,
     all_tags: Vec<(String, usize)>,
@@ -39,21 +46,29 @@ struct SkillSelectorState {
 }
 
 impl SkillSelectorState {
-    fn new(skills: Vec<(String, Skill)>) -> Self {
+    fn new(skills: Vec<(String, Skill)>, installed_ids: HashSet<String>) -> Self {
         let domains = Self::extract_domains(&skills);
         let all_tags = Self::extract_tags_with_counts(&skills);
         let filtered_skills = skills.clone();
 
+        let selected_skill_indices: Vec<usize> = filtered_skills
+            .iter()
+            .enumerate()
+            .filter(|(_, (id, _))| installed_ids.contains(id))
+            .map(|(i, _)| i)
+            .collect();
+
         Self {
             all_skills: skills,
             filtered_skills,
+            installed_ids,
             domains,
             domain_index: 0,
             all_tags,
             selected_tags: HashSet::new(),
             sort_mode: SortMode::default(),
             current_skill_index: 0,
-            selected_skill_indices: vec![],
+            selected_skill_indices,
             skill_search_query: String::new(),
             skill_search_active: false,
             skill_scroll_offset: 0,
@@ -254,17 +269,26 @@ impl SkillSelectorState {
         let end_idx = std::cmp::min(start_idx + list_height, self.filtered_skills.len());
 
         for i in start_idx..end_idx {
-            let (_, skill) = &self.filtered_skills[i];
+            let (skill_id, skill) = &self.filtered_skills[i];
+            let is_installed = self.installed_ids.contains(skill_id);
             let is_selected = self.selected_skill_indices.contains(&i);
             let is_cursor = i == self.current_skill_index;
 
-            let marker = if is_selected { "[x]" } else { "[ ]" };
+            let marker = if is_installed {
+                "[i]"
+            } else if is_selected {
+                "[x]"
+            } else {
+                "[ ]"
+            };
             let cursor = if is_cursor { ">" } else { " " };
 
             let style = if is_cursor {
                 Style::default()
                     .fg(Color::Yellow)
                     .add_modifier(Modifier::BOLD)
+            } else if is_installed {
+                Style::default().fg(Color::Blue)
             } else if is_selected {
                 Style::default().fg(Color::Green)
             } else {
@@ -801,19 +825,27 @@ impl SkillSelectorState {
 
 pub struct SkillSelector {
     skills: Vec<(String, Skill)>,
+    installed_ids: HashSet<String>,
 }
 
 impl SkillSelector {
-    pub fn new(skills: Vec<(String, Skill)>) -> Self {
-        Self { skills }
+    pub fn new(skills: Vec<(String, Skill)>, installed_ids: HashSet<String>) -> Self {
+        Self {
+            skills,
+            installed_ids,
+        }
     }
 
-    pub fn run(self) -> io::Result<Vec<(String, Skill)>> {
+    pub fn run(self) -> io::Result<SelectionResult> {
         if self.skills.is_empty() {
-            return Ok(vec![]);
+            return Ok(SelectionResult {
+                selected: vec![],
+                added: vec![],
+                removed: vec![],
+            });
         }
 
-        let mut state = SkillSelectorState::new(self.skills);
+        let mut state = SkillSelectorState::new(self.skills, self.installed_ids.clone());
 
         enable_raw_mode()?;
         let mut stdout = io::stdout();
@@ -835,10 +867,31 @@ impl SkillSelector {
         disable_raw_mode()?;
         execute!(terminal.backend_mut(), LeaveAlternateScreen)?;
 
-        Ok(state
+        let selected: Vec<(String, Skill)> = state
             .selected_skill_indices
             .into_iter()
             .map(|i| state.filtered_skills[i].clone())
-            .collect())
+            .collect();
+
+        let selected_ids: HashSet<String> = selected.iter().map(|(id, _)| id.clone()).collect();
+
+        let added: Vec<(String, Skill)> = selected
+            .iter()
+            .filter(|(id, _)| !state.installed_ids.contains(id))
+            .cloned()
+            .collect();
+
+        let removed: Vec<String> = state
+            .installed_ids
+            .iter()
+            .filter(|id| !selected_ids.contains(*id))
+            .cloned()
+            .collect();
+
+        Ok(SelectionResult {
+            selected,
+            added,
+            removed,
+        })
     }
 }

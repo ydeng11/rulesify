@@ -86,6 +86,39 @@ pub fn generate_uninstall_instructions(skill_name: &str, tools: &[String], scope
     output
 }
 
+pub fn generate_uninstall_instructions_batch(
+    skill_ids: &[String],
+    tools: &[String],
+    scope: Scope,
+) -> String {
+    let mut output = String::new();
+    let scope_label = match scope {
+        Scope::Project => "project",
+        Scope::Global => "global",
+    };
+
+    output.push_str("# Uninstall Instructions\n\n");
+    output.push_str(&format!("Scope: {} level\n\n", scope_label));
+
+    for skill_id in skill_ids {
+        output.push_str(&format!("## Skill: {}\n\n", skill_id));
+
+        for tool in tools {
+            let skill_folder = get_skill_folder(tool, scope.clone(), skill_id);
+
+            output.push_str(&format!("### {} ({})\n\n", tool, scope_label));
+            output.push_str(&format!(
+                "Delete folder:\n   {}\n\n",
+                skill_folder.display()
+            ));
+        }
+
+        output.push_str("---\n\n");
+    }
+
+    output
+}
+
 fn generate_tool_specific_instructions(tool: &str, source: &str, skill_name: &str) -> String {
     match tool {
         "cursor" => format!(
