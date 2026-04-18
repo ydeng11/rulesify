@@ -10,7 +10,7 @@ use ratatui::{
     layout::{Constraint, Direction, Layout, Rect},
     style::{Color, Modifier, Style},
     text::{Line, Span, Text},
-    widgets::{Block, Borders, List, ListItem, Paragraph, Tabs, Wrap},
+    widgets::{Block, Borders, Clear, List, ListItem, Paragraph, Tabs, Wrap},
     Terminal,
 };
 use std::collections::{HashMap, HashSet};
@@ -341,6 +341,8 @@ impl SkillSelectorState {
             height: area.height / 2,
         };
 
+        f.render_widget(Clear, popup_area);
+
         let cols: usize = 3;
 
         let mut lines: Vec<Line> = Vec::new();
@@ -382,11 +384,14 @@ impl SkillSelectorState {
         }
 
         let tags_text = Text::from(lines);
-        let list = Paragraph::new(tags_text).block(
-            Block::default()
-                .title("Select Tags (↑↓ Nav, Space Toggle)")
-                .borders(Borders::ALL),
-        );
+        let list = Paragraph::new(tags_text)
+            .style(Style::default().bg(Color::Reset))
+            .block(
+                Block::default()
+                    .title("Select Tags (↑↓ Nav, Space Toggle)")
+                    .borders(Borders::ALL)
+                    .style(Style::default().bg(Color::Black)),
+            );
 
         f.render_widget(list, popup_area);
     }
