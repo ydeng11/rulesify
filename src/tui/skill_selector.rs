@@ -10,7 +10,7 @@ use ratatui::{
     layout::{Constraint, Direction, Layout, Rect},
     style::{Color, Modifier, Style},
     text::{Line, Span, Text},
-    widgets::{Block, Borders, Clear, List, ListItem, Paragraph, Tabs, Wrap},
+    widgets::{Block, Borders, Clear, Paragraph, Tabs, Wrap},
     Terminal,
 };
 use std::collections::{HashMap, HashSet};
@@ -26,11 +26,15 @@ struct SkillSelectorState {
     sort_mode: SortMode,
     current_skill_index: usize,
     selected_skill_indices: Vec<usize>,
+    skill_search_query: String,
+    skill_search_active: bool,
+    skill_scroll_offset: usize,
     show_tag_popup: bool,
     tag_search_query: String,
     tag_scroll_offset: usize,
     tag_popup_index: usize,
     tag_popup_selected: HashSet<usize>,
+    tag_popup_rows_per_page: usize,
 }
 
 impl SkillSelectorState {
@@ -49,11 +53,15 @@ impl SkillSelectorState {
             sort_mode: SortMode::default(),
             current_skill_index: 0,
             selected_skill_indices: vec![],
+            skill_search_query: String::new(),
+            skill_search_active: false,
+            skill_scroll_offset: 0,
             show_tag_popup: false,
             tag_search_query: String::new(),
             tag_scroll_offset: 0,
             tag_popup_index: 0,
             tag_popup_selected: HashSet::new(),
+            tag_popup_rows_per_page: 20,
         }
     }
 
@@ -121,11 +129,22 @@ impl SkillSelectorState {
                     self.selected_tags.iter().all(|t| skill.tags.contains(t))
                 }
             })
+            .filter(|(_, skill)| {
+                if self.skill_search_query.is_empty() {
+                    true
+                } else {
+                    skill
+                        .name
+                        .to_lowercase()
+                        .contains(&self.skill_search_query.to_lowercase())
+                }
+            })
             .cloned()
             .collect();
 
         self.filtered_skills = Self::apply_sort(filtered, self.sort_mode);
         self.current_skill_index = 0;
+        self.skill_scroll_offset = 0;
     }
 
     fn apply_sort(skills: Vec<(String, Skill)>, mode: SortMode) -> Vec<(String, Skill)> {
@@ -202,8 +221,10 @@ impl SkillSelectorState {
     fn render_help_bar(&self, f: &mut ratatui::Frame, area: Rect) {
         let help_text = if self.show_tag_popup {
             "↑↓ Nav | Space Toggle | Enter Apply | Esc Cancel"
+        } else if self.skill_search_active {
+            "Type to search | Backspace Delete | Enter Done | Esc Cancel Search"
         } else {
-            "↑↓ Nav | Space Select | ←→ Domain | s Sort | t Tags | Enter Done | Esc Cancel"
+            "↑↓ Nav | Space Select | ←→ Domain | s Sort | t Tags | / Search | Enter Done | Esc Cancel"
         };
 
         let help = Paragraph::new(help_text).style(Style::default().fg(Color::DarkGray));
@@ -212,48 +233,75 @@ impl SkillSelectorState {
     }
 
     fn render_skill_list(&self, f: &mut ratatui::Frame, area: Rect) {
-        let items: Vec<ListItem> = self
-            .filtered_skills
-            .iter()
-            .enumerate()
-            .map(|(i, (_id, skill))| {
-                let marker = if self.selected_skill_indices.contains(&i) {
-                    "[x]"
-                } else {
-                    "[ ]"
-                };
-                let cursor = if i == self.current_skill_index {
-                    ">"
-                } else {
-                    " "
-                };
-                let score_text = skill
-                    .score
-                    .map(|s| format!("{:.0}", s))
-                    .unwrap_or_else(|| "-".to_string());
-                let style = if i == self.current_skill_index {
-                    Style::default()
-                        .fg(Color::Yellow)
-                        .add_modifier(Modifier::BOLD)
-                } else {
-                    Style::default()
-                };
-                ListItem::new(Line::from(vec![
-                    Span::styled(format!("{}{} ", cursor, marker), style),
-                    Span::styled(skill.name.clone(), style),
-                    Span::styled(" ", Style::default()),
-                    Span::styled(
-                        format!("★{}", skill.stars),
-                        Style::default().fg(Color::Gray),
-                    ),
-                    Span::styled(" | ", Style::default().fg(Color::DarkGray)),
-                    Span::styled(score_text, Style::default().fg(Color::Cyan)),
-                ]))
-            })
-            .collect();
+        let mut lines: Vec<Line> = Vec::new();
+
+        let search_indicator = if self.skill_search_active {
+            format!("Search: {}", self.skill_search_query)
+        } else {
+            "Press / to search".to_string()
+        };
+        lines.push(Line::from(vec![Span::styled(
+            search_indicator,
+            Style::default().fg(Color::Cyan),
+        )]));
+        lines.push(Line::from(""));
+
+        let list_height = area.height.saturating_sub(5) as usize;
+        let start_idx = self.skill_scroll_offset;
+        let end_idx = std::cmp::min(start_idx + list_height, self.filtered_skills.len());
+
+        for i in start_idx..end_idx {
+            let (_, skill) = &self.filtered_skills[i];
+            let is_selected = self.selected_skill_indices.contains(&i);
+            let is_cursor = i == self.current_skill_index;
+
+            let marker = if is_selected { "[x]" } else { "[ ]" };
+            let cursor = if is_cursor { ">" } else { " " };
+
+            let style = if is_cursor {
+                Style::default()
+                    .fg(Color::Yellow)
+                    .add_modifier(Modifier::BOLD)
+            } else if is_selected {
+                Style::default().fg(Color::Green)
+            } else {
+                Style::default().fg(Color::White)
+            };
+
+            let score_text = skill
+                .score
+                .map(|s| format!("{:.0}", s))
+                .unwrap_or_else(|| "-".to_string());
+
+            lines.push(Line::from(vec![
+                Span::styled(format!("{}{} ", cursor, marker), style),
+                Span::styled(skill.name.clone(), style),
+                Span::raw(" "),
+                Span::styled(
+                    format!("★{}", skill.stars),
+                    Style::default().fg(Color::Gray),
+                ),
+                Span::styled(" | ", Style::default().fg(Color::DarkGray)),
+                Span::styled(score_text, Style::default().fg(Color::Cyan)),
+            ]));
+        }
+
+        if self.filtered_skills.len() > list_height {
+            lines.push(Line::from(""));
+            lines.push(Line::from(Span::styled(
+                format!(
+                    "--- {}-{} of {} ---",
+                    start_idx + 1,
+                    end_idx,
+                    self.filtered_skills.len()
+                ),
+                Style::default().fg(Color::DarkGray),
+            )));
+        }
 
         let title = format!("Skills ({})", self.filtered_skills.len());
-        let list = List::new(items).block(Block::default().title(title).borders(Borders::ALL));
+        let text = Text::from(lines);
+        let list = Paragraph::new(text).block(Block::default().title(title).borders(Borders::ALL));
 
         f.render_widget(list, area);
     }
@@ -352,12 +400,14 @@ impl SkillSelectorState {
         f.render_widget(details, area);
     }
 
-    fn render_tag_popup(&self, f: &mut ratatui::Frame, area: Rect) {
-        let popup_width = area.width.saturating_sub(4);
-        let popup_height = area.height.saturating_sub(4);
+    fn render_tag_popup(&mut self, f: &mut ratatui::Frame, area: Rect) {
+        let popup_width = (area.width * 3 / 4).min(100);
+        let popup_height = (area.height * 3 / 4).min(30);
+        let popup_x = (area.width - popup_width) / 2;
+        let popup_y = (area.height - popup_height) / 2;
         let popup_area = Rect {
-            x: area.x + 2,
-            y: area.y + 2,
+            x: area.x + popup_x,
+            y: area.y + popup_y,
             width: popup_width,
             height: popup_height,
         };
@@ -377,7 +427,6 @@ impl SkillSelectorState {
             return;
         }
 
-        let inner_width = popup_width.saturating_sub(2);
         let search_bar_height = 2;
         let help_bar_height = 1;
         let available_height = popup_height.saturating_sub(search_bar_height + help_bar_height + 2);
@@ -393,9 +442,9 @@ impl SkillSelectorState {
             .max()
             .unwrap_or(1);
 
-        let item_width = 4 + max_tag_len + 2 + max_count_digits + 1;
-        let cols = std::cmp::max(1, inner_width as usize / item_width);
+        let cols: usize = 3;
         let rows_per_page = available_height as usize;
+        self.tag_popup_rows_per_page = rows_per_page;
 
         let mut lines: Vec<Line> = Vec::new();
 
@@ -512,7 +561,7 @@ impl SkillSelectorState {
         f.render_widget(list, popup_area);
     }
 
-    fn render(&self, f: &mut ratatui::Frame) {
+    fn render(&mut self, f: &mut ratatui::Frame) {
         let chunks = Layout::default()
             .direction(Direction::Vertical)
             .constraints([
@@ -545,15 +594,40 @@ impl SkillSelectorState {
             return self.handle_tag_popup_key(key);
         }
 
+        if self.skill_search_active {
+            match key {
+                KeyCode::Char(c) => {
+                    self.skill_search_query.push(c);
+                    self.apply_filters();
+                }
+                KeyCode::Backspace => {
+                    self.skill_search_query.pop();
+                    self.apply_filters();
+                }
+                KeyCode::Esc => {
+                    self.skill_search_active = false;
+                    self.skill_search_query.clear();
+                    self.apply_filters();
+                }
+                KeyCode::Enter => {
+                    self.skill_search_active = false;
+                }
+                _ => {}
+            }
+            return false;
+        }
+
         match key {
             KeyCode::Up => {
                 if self.current_skill_index > 0 {
                     self.current_skill_index -= 1;
+                    self.update_skill_scroll_offset();
                 }
             }
             KeyCode::Down => {
                 if self.current_skill_index < self.filtered_skills.len().saturating_sub(1) {
                     self.current_skill_index += 1;
+                    self.update_skill_scroll_offset();
                 }
             }
             KeyCode::Left => {
@@ -567,6 +641,10 @@ impl SkillSelectorState {
                     self.domain_index += 1;
                     self.apply_filters();
                 }
+            }
+            KeyCode::Char('/') => {
+                self.skill_search_active = true;
+                self.skill_search_query.clear();
             }
             KeyCode::Char(' ') => {
                 if self.filtered_skills.is_empty() {
@@ -688,37 +766,32 @@ impl SkillSelectorState {
     }
 
     fn calculate_cols(&self) -> usize {
-        let filtered_tags = self.get_filtered_tags();
-        let max_tag_len = filtered_tags
-            .iter()
-            .map(|(tag, _)| tag.len())
-            .max()
-            .unwrap_or(0);
-        let max_count_digits = filtered_tags
-            .iter()
-            .map(|(_, count)| count.to_string().len())
-            .max()
-            .unwrap_or(1);
-        let item_width = 4 + max_tag_len + 2 + max_count_digits + 1;
-        let estimated_width = 80;
-        std::cmp::max(1, estimated_width / item_width)
+        3
     }
 
     fn update_scroll_offset(&mut self, filtered_len: usize, cols: usize) {
         if filtered_len == 0 || cols == 0 {
             return;
         }
-        let popup_height_estimate: usize = 20;
-        let search_bar_height: usize = 3;
-        let help_bar_height: usize = 1;
-        let rows_per_page =
-            popup_height_estimate.saturating_sub(search_bar_height + help_bar_height + 2);
+        let rows_per_page = self.tag_popup_rows_per_page;
 
         let current_row = self.tag_popup_index / cols;
         if current_row < self.tag_scroll_offset {
             self.tag_scroll_offset = current_row;
         } else if current_row >= self.tag_scroll_offset + rows_per_page {
             self.tag_scroll_offset = current_row - rows_per_page + 1;
+        }
+    }
+
+    fn update_skill_scroll_offset(&mut self) {
+        if self.filtered_skills.is_empty() {
+            return;
+        }
+        let list_height: usize = 15;
+        if self.current_skill_index < self.skill_scroll_offset {
+            self.skill_scroll_offset = self.current_skill_index;
+        } else if self.current_skill_index >= self.skill_scroll_offset + list_height {
+            self.skill_scroll_offset = self.current_skill_index - list_height + 1;
         }
     }
 }
