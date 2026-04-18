@@ -68,10 +68,22 @@ tags = ["testing", "tdd", "best-practices"]
 
 ## Installation
 
-### One-liner (Recommended)
+### Homebrew (macOS)
 
 ```bash
-curl -sSL https://github.com/ihelio/rulesify/releases/latest/download/install.sh | bash
+brew tap ydeng11/rulesify
+brew install rulesify
+```
+
+Or install directly:
+```bash
+brew install ydeng11/rulesify/rulesify
+```
+
+### One-liner (Linux/macOS)
+
+```bash
+curl -sSL https://github.com/ydeng11/rulesify/releases/latest/download/install.sh | bash
 ```
 
 After installation, restart your shell or run:
@@ -81,7 +93,7 @@ export PATH="$HOME/.local/bin:$PATH"
 
 ### Manual Installation
 
-1. Download the latest binary from [GitHub Releases](https://github.com/ihelio/rulesify/releases)
+1. Download the latest binary from [GitHub Releases](https://github.com/ydeng11/rulesify/releases)
 2. Install to `~/.local/bin`:
    ```bash
    mkdir -p ~/.local/bin
