@@ -111,7 +111,7 @@ pub async fn run(verbose: bool) -> Result<()> {
 }
 
 async fn load_registry() -> Result<Registry> {
-    let cache = RegistryCache::new();
+    let cache = RegistryCache::new(Path::new("."));
 
     if let Ok(registry) = fetch_registry().await {
         cache.save(&registry)?;

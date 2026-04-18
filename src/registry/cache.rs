@@ -1,20 +1,16 @@
 use crate::models::Registry;
 use crate::utils::Result;
 use std::fs;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 pub struct RegistryCache {
     cache_path: PathBuf,
 }
 
 impl RegistryCache {
-    pub fn new() -> Self {
-        let cache_dir = dirs::cache_dir()
-            .unwrap_or_else(|| PathBuf::from("."))
-            .join("rulesify");
-
+    pub fn new(project_path: &Path) -> Self {
         Self {
-            cache_path: cache_dir.join("registry.toml"),
+            cache_path: project_path.join(".rulesify").join("registry.toml"),
         }
     }
 

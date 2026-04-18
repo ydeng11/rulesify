@@ -133,7 +133,7 @@ async fn update_registry(verbose: bool) -> Result<()> {
     println!("Updating registry cache...");
 
     let registry = fetch_registry().await?;
-    let cache = RegistryCache::new();
+    let cache = RegistryCache::new(Path::new("."));
     cache.save(&registry)?;
 
     println!("Registry updated ({} skills)", registry.skills.len());
@@ -200,7 +200,7 @@ async fn update_registry(verbose: bool) -> Result<()> {
 }
 
 async fn load_registry() -> Result<Registry> {
-    let cache = RegistryCache::new();
+    let cache = RegistryCache::new(Path::new("."));
 
     if let Ok(registry) = fetch_registry().await {
         cache.save(&registry)?;
