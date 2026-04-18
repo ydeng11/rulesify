@@ -18,6 +18,7 @@ impl Default for Scope {
 pub struct InstalledSkill {
     pub added: String,
     pub source: String,
+    pub commit_sha: String,
     #[serde(default)]
     pub scope: Scope,
 }
@@ -38,15 +39,22 @@ impl ProjectConfig {
         }
     }
 
-    pub fn add_skill(&mut self, id: &str, source: &str, scope: Scope) {
+    pub fn add_skill(&mut self, id: &str, source: &str, commit_sha: &str, scope: Scope) {
         self.installed_skills.insert(
             id.to_string(),
             InstalledSkill {
                 added: chrono::Local::now().format("%Y-%m-%d").to_string(),
                 source: source.to_string(),
+                commit_sha: commit_sha.to_string(),
                 scope,
             },
         );
+    }
+
+    pub fn update_skill_sha(&mut self, id: &str, commit_sha: &str) {
+        if let Some(skill) = self.installed_skills.get_mut(id) {
+            skill.commit_sha = commit_sha.to_string();
+        }
     }
 
     pub fn remove_skill(&mut self, id: &str) -> Option<InstalledSkill> {

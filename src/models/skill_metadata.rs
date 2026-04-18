@@ -9,6 +9,7 @@ pub struct SkillMetadata {
     pub source_repo: String,
     pub source_folder: String,
     pub source_url: String,
+    pub commit_sha: String,
     #[serde(default)]
     pub tags: Vec<String>,
     pub stars: u32,
@@ -27,6 +28,7 @@ impl SkillMetadata {
             description: self.description.clone(),
             source_url: self.source_url.clone(),
             stars: self.stars,
+            commit_sha: self.commit_sha.clone(),
             context_size: self.context_size,
             domain: self.domain.clone(),
             last_updated: self.last_updated.clone(),

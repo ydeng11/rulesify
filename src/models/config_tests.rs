@@ -34,6 +34,7 @@ mod tests {
         let skill = InstalledSkill {
             added: "2026-04-16".to_string(),
             source: "https://example.com".to_string(),
+            commit_sha: "abc123".to_string(),
             scope: Scope::Global,
         };
 
@@ -44,8 +45,13 @@ mod tests {
     #[test]
     fn test_config_add_skill_with_scope() {
         let mut config = ProjectConfig::new();
-        config.add_skill("my-skill", "https://example.com", Scope::Project);
-        config.add_skill("global-skill", "https://example.com", Scope::Global);
+        config.add_skill("my-skill", "https://example.com", "abc123", Scope::Project);
+        config.add_skill(
+            "global-skill",
+            "https://example.com",
+            "def456",
+            Scope::Global,
+        );
 
         assert_eq!(config.installed_skills.len(), 2);
         assert_eq!(config.installed_skills["my-skill"].scope, Scope::Project);
@@ -55,8 +61,8 @@ mod tests {
     #[test]
     fn test_config_serialization_with_scope() {
         let mut config = ProjectConfig::new();
-        config.add_skill("project-skill", "https://...", Scope::Project);
-        config.add_skill("global-skill", "https://...", Scope::Global);
+        config.add_skill("project-skill", "https://...", "abc123", Scope::Project);
+        config.add_skill("global-skill", "https://...", "def456", Scope::Global);
 
         let toml = toml::to_string_pretty(&config).unwrap();
         assert!(toml.contains("scope = \"project\""));
@@ -78,6 +84,7 @@ tools = []
 [installed_skills.old-skill]
 added = "2026-04-16"
 source = "https://example.com"
+commit_sha = "legacy123"
 "#;
 
         let config: ProjectConfig = toml::from_str(toml_str).unwrap();

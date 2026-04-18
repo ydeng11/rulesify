@@ -9,6 +9,7 @@ mod tests {
             description: "Test driven development".to_string(),
             source_url: "https://github.com/mattpocock/skills/tree/main/tdd".to_string(),
             stars: 1500,
+            commit_sha: "abc123def".to_string(),
             context_size: 2400,
             domain: "development".to_string(),
             last_updated: "2026-04-10".to_string(),

@@ -8,6 +8,8 @@ pub struct Skill {
     pub source_url: String,
     pub stars: u32,
     #[serde(default)]
+    pub commit_sha: String,
+    #[serde(default)]
     pub context_size: u32,
     #[serde(default)]
     pub domain: String,

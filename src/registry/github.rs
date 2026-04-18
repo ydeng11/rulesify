@@ -65,6 +65,11 @@ pub struct Contributor {
     pub contributions: u32,
 }
 
+#[derive(Debug, Clone, Deserialize)]
+pub struct CommitRef {
+    pub sha: String,
+}
+
 pub struct GitHubClient {
     http: reqwest::Client,
     pub token: Option<String>,
@@ -264,6 +269,37 @@ impl GitHubClient {
         resp.json::<Vec<Contributor>>()
             .await
             .map_err(|e| RulesifyError::GitHubApi(e.to_string()).into())
+    }
+
+    pub async fn fetch_commit_for_path(
+        &self,
+        owner: &str,
+        repo: &str,
+        path: &str,
+    ) -> Result<String> {
+        let url = format!(
+            "https://api.github.com/repos/{}/{}/commits?path={}&per_page=1",
+            owner, repo, path
+        );
+        let resp = self
+            .request(&url)
+            .send()
+            .await
+            .map_err(|e| RulesifyError::GitHubApi(e.to_string()))?;
+
+        if !resp.status().is_success() {
+            return Err(RulesifyError::GitHubApi(format!("HTTP {}", resp.status())).into());
+        }
+
+        let commits: Vec<CommitRef> = resp
+            .json()
+            .await
+            .map_err(|e| RulesifyError::GitHubApi(e.to_string()))?;
+
+        Ok(commits
+            .first()
+            .map(|c| c.sha.clone())
+            .ok_or_else(|| RulesifyError::GitHubApi("No commits found for path".into()))?)
     }
 
     pub async fn fetch_repo_metrics(&self, owner: &str, repo: &str) -> Result<RepoMetrics> {

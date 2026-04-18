@@ -10,6 +10,7 @@ mod tests {
             description: format!("{} description for testing purposes", id),
             source_url: format!("https://github.com/test/skills/tree/main/{}", id),
             stars: 100,
+            commit_sha: "abc123".into(),
             context_size: 500,
             domain: "test".into(),
             last_updated: "2026-04-10".into(),

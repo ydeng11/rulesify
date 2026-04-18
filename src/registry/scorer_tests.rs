@@ -12,6 +12,7 @@ mod tests {
             source_repo: "anthropics/skills".into(),
             source_folder: "test/SKILL.md".into(),
             source_url: "https://github.com/anthropics/skills/tree/main/test".into(),
+            commit_sha: "abc123".into(),
             tags: vec!["test".into()],
             stars: 5000,
             context_size: 1000,

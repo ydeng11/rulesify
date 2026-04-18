@@ -10,13 +10,15 @@ jobs:
     runs-on: ubuntu-latest
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+      OPENROUTER_MODEL: ${{ vars.OPENROUTER_MODEL }}
     
     steps:
       - uses: actions/checkout@v4
       
       - uses: actions-rust-lang/setup-rust-toolchain@v1
       
-      - run: cargo run --bin update-registry
+      - run: cargo run --bin update-registry -- --force --verbose
       
       - id: changes
         run: |

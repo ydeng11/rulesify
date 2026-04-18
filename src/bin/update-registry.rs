@@ -43,6 +43,10 @@ async fn fetch_skill(
         folder
     );
 
+    let commit_sha = client
+        .fetch_commit_for_path(source.owner(), source.repo(), &folder)
+        .await?;
+
     Ok(SkillMetadata {
         skill_id,
         name: parsed.name,
@@ -50,6 +54,7 @@ async fn fetch_skill(
         source_repo: source.full_name(),
         source_folder: folder.clone(),
         source_url,
+        commit_sha,
         tags: parsed.tags,
         stars: repo_metrics.stars,
         context_size,
