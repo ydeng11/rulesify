@@ -59,6 +59,7 @@ rulesify/
 │   │   ├── install_action.rs  # Install types (copy/command)
 │   │   ├── context.rs      # ProjectContext (languages, frameworks, tools)
 │   │   ├── config.rs       # ProjectConfig (installed skills tracking)
+│   │   ├── global_config.rs   # GlobalConfig (per-tool global skills tracking)
 │   │   └── *_tests.rs      # Unit tests
 │   ├── registry/
 │   │   ├── mod.rs          # Registry module exports
@@ -120,6 +121,7 @@ rulesify/
 │   │   ├── registry.rs     # Registry struct (HashMap of skills)
 │   │   ├── context.rs      # ProjectContext (languages, frameworks, tools)
 │   │   ├── config.rs       # ProjectConfig (installed skills tracking)
+│   │   ├── global_config.rs   # GlobalConfig (per-tool global skills tracking)
 │   │   └── *_tests.rs      # Unit tests
 │   ├── registry/
 │   │   ├── mod.rs          # Registry module exports
@@ -219,17 +221,17 @@ RUST_LOG=debug cargo run --bin update-registry
 ### CLI Commands
 
 ```bash
-# Interactive setup
+# Interactive setup (project-level only, shows global skills with [g] tag)
 rulesify init
 
-# List installed skills (shows scope)
+# List installed skills (shows both global and project)
 rulesify skill list
 rulesify -v skill list  # verbose shows source URLs
 
 # Add skill from registry (project level)
 rulesify skill add test-driven-development
 
-# Add skill globally
+# Add skill globally (per-tool tracking)
 rulesify skill add test-driven-development --global
 
 # Remove installed skill (project level)
@@ -238,9 +240,11 @@ rulesify skill remove test-driven-development
 # Remove skill from global
 rulesify skill remove test-driven-development --global
 
-# Update registry cache
+# Update registry cache and installed skills
 rulesify skill update
 ```
+
+**Note:** Global skills are tracked per-tool in `~/.config/rulesify/.registry.toml`. If a skill is installed globally, installing it project-level will skip with info message.
 
 ---
 
@@ -262,12 +266,18 @@ rulesify skill update
 
 ## Skill Install/Uninstall Flow
 
-1. `rulesify init` → Creates `.rulesify.toml` with selected tools
-2. `rulesify skill add <id>` → Generates tool-specific install instructions
-3. `rulesify skill remove <id>` → Generates tool-specific uninstall instructions
-4. AI agent executes the instructions (copy/delete files)
+1. `rulesify init` → Creates `.rulesify.toml` with selected tools (project-level only)
+2. `rulesify skill add <id>` → Installs skill to project, skips if already global
+3. `rulesify skill add <id> --global` → Installs skill globally for each tool
+4. `rulesify skill remove <id>` → Removes skill from project
+5. `rulesify skill remove <id> --global` → Removes skill from global config
+6. AI agent executes the instructions (copy/delete files)
 
 **No auto-installation** - rulesify provides paths, AI agent performs file operations.
+
+**Duplication Prevention:**
+- Global skills shown with `[g]` tag in init selector
+- If skill already global, project-level install skips with info message
 
 ---
 
@@ -361,11 +371,12 @@ rulesify skill update
    - Compiled into binary with `include_str!`
    - Fallback when network unavailable
    
-2. **Config** (`~/.rulesify/config.yaml`):
-   - User settings (future)
+2. **Global config** (`~/.config/rulesify/.registry.toml`):
+   - Per-tool tracking of globally installed skills
+   - Structure: `{ tool: { skill_id: InstalledSkill } }`
    
 3. **Project config** (`./.rulesify.toml`):
-   - Installed skills tracking
+   - Installed skills tracking (project-level)
    - Selected AI tools
 
 ---
@@ -378,6 +389,7 @@ rulesify skill update
 | `registry.toml` | Skill registry | Medium (add skills) |
 | `src/cli/mod.rs` | CLI structure | Low (new commands) |
 | `src/models/config.rs` | ProjectConfig, InstalledSkill, Scope enum | Medium |
+| `src/models/global_config.rs` | GlobalConfig (per-tool global tracking) | Medium |
 | `src/installer/tool_paths.rs` | Tool-specific skill paths | Low |
 | `src/installer/instructions.rs` | Install/uninstall instruction generators | Medium |
 | `src/utils/error.rs` | Error types | Low |
@@ -403,14 +415,16 @@ rulesify skill update
 3. **Install actions** - skills have `install_action` (copy vs command types)
 4. **Scope support** - skills can be installed at project or global level
 5. **Tool-specific paths** - each AI tool has its own skill directory structure
-6. **Separation of concerns**:
+6. **Global tracking per-tool** - global skills tracked separately for each AI tool
+7. **Duplication prevention** - installing a global skill project-level skips with info message
+8. **Separation of concerns**:
    - Scanner: detects context (languages, frameworks, tools)
    - Registry: provides skill metadata + install instructions
-   - TUI: interactive selection
+   - TUI: interactive selection (shows [g] for global, [i] for installed)
    - Installer: generates instructions (AI executes them)
-7. **No auto-installation** - rulesify outputs install command, AI agent executes
-8. **Terminal UI** - ratatui for interactive selection (arrow keys, space, enter)
-9. **GitHub Actions** - weekly automation updates registry from source repos
+9. **No auto-installation** - rulesify outputs install command, AI agent executes
+10. **Terminal UI** - ratatui for interactive selection (arrow keys, space, enter)
+11. **GitHub Actions** - weekly automation updates registry from source repos
 
 ### Registry Data Flow
 
@@ -439,4 +453,4 @@ cargo clippy   # Optional but recommended
 
 ---
 
-*Last updated: 2026-04-16*
+*Last updated: 2026-04-19*

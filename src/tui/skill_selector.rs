@@ -26,6 +26,7 @@ struct SkillSelectorState {
     all_skills: Vec<(String, Skill)>,
     filtered_skills: Vec<(String, Skill)>,
     installed_ids: HashSet<String>,
+    global_ids: HashSet<String>,
     domains: Vec<String>,
     domain_index: usize,
     all_tags: Vec<(String, usize)>,
@@ -46,7 +47,11 @@ struct SkillSelectorState {
 }
 
 impl SkillSelectorState {
-    fn new(skills: Vec<(String, Skill)>, installed_ids: HashSet<String>) -> Self {
+    fn new(
+        skills: Vec<(String, Skill)>,
+        installed_ids: HashSet<String>,
+        global_ids: HashSet<String>,
+    ) -> Self {
         let domains = Self::extract_domains(&skills);
         let all_tags = Self::extract_tags_with_counts(&skills);
         let filtered_skills = skills.clone();
@@ -62,6 +67,7 @@ impl SkillSelectorState {
             all_skills: skills,
             filtered_skills,
             installed_ids,
+            global_ids,
             domains,
             domain_index: 0,
             all_tags,
@@ -270,11 +276,14 @@ impl SkillSelectorState {
 
         for i in start_idx..end_idx {
             let (skill_id, skill) = &self.filtered_skills[i];
+            let is_global = self.global_ids.contains(skill_id);
             let is_installed = self.installed_ids.contains(skill_id);
             let is_selected = self.selected_skill_indices.contains(&i);
             let is_cursor = i == self.current_skill_index;
 
-            let marker = if is_installed {
+            let marker = if is_global {
+                "[g]"
+            } else if is_installed {
                 "[i]"
             } else if is_selected {
                 "[x]"
@@ -287,6 +296,8 @@ impl SkillSelectorState {
                 Style::default()
                     .fg(Color::Yellow)
                     .add_modifier(Modifier::BOLD)
+            } else if is_global {
+                Style::default().fg(Color::Magenta)
             } else if is_installed {
                 Style::default().fg(Color::Blue)
             } else if is_selected {
@@ -826,13 +837,19 @@ impl SkillSelectorState {
 pub struct SkillSelector {
     skills: Vec<(String, Skill)>,
     installed_ids: HashSet<String>,
+    global_ids: HashSet<String>,
 }
 
 impl SkillSelector {
-    pub fn new(skills: Vec<(String, Skill)>, installed_ids: HashSet<String>) -> Self {
+    pub fn new(
+        skills: Vec<(String, Skill)>,
+        installed_ids: HashSet<String>,
+        global_ids: HashSet<String>,
+    ) -> Self {
         Self {
             skills,
             installed_ids,
+            global_ids,
         }
     }
 
@@ -845,7 +862,11 @@ impl SkillSelector {
             });
         }
 
-        let mut state = SkillSelectorState::new(self.skills, self.installed_ids.clone());
+        let mut state = SkillSelectorState::new(
+            self.skills,
+            self.installed_ids.clone(),
+            self.global_ids.clone(),
+        );
 
         enable_raw_mode()?;
         let mut stdout = io::stdout();
@@ -877,7 +898,7 @@ impl SkillSelector {
 
         let added: Vec<(String, Skill)> = selected
             .iter()
-            .filter(|(id, _)| !state.installed_ids.contains(id))
+            .filter(|(id, _)| !state.installed_ids.contains(id) && !state.global_ids.contains(id))
             .cloned()
             .collect();
 

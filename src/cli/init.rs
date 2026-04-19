@@ -1,7 +1,7 @@
 use crate::installer::{
     install_skill, print_install_summary, print_uninstall_summary, uninstall_skill,
 };
-use crate::models::{ProjectConfig, Registry, Scope};
+use crate::models::{GlobalConfig, ProjectConfig, Registry, Scope};
 use crate::registry::{fetch_registry, load_builtin, GitHubClient, RegistryCache};
 use crate::scanner::scan_project;
 use crate::tui::{SelectionResult, SkillSelector, ToolPicker};
@@ -23,6 +23,8 @@ pub async fn run(verbose: bool) -> Result<()> {
         println!("Frameworks: {:?}", context.frameworks);
         println!("Existing tools: {:?}", context.existing_tools);
     }
+
+    let global_config = GlobalConfig::load();
 
     let existing_config = if config_path.exists() {
         let content = std::fs::read_to_string(config_path)?;
@@ -58,10 +60,20 @@ pub async fn run(verbose: bool) -> Result<()> {
         return Ok(());
     }
 
-    let installed_ids: HashSet<String> = existing_config
+    let project_installed_ids: HashSet<String> = existing_config
         .as_ref()
         .map(|c| c.installed_skills.keys().cloned().collect())
         .unwrap_or_default();
+
+    let global_installed_ids: HashSet<String> = tools
+        .iter()
+        .flat_map(|tool| {
+            global_config
+                .list_skills_for_tool(tool)
+                .into_iter()
+                .map(|(id, _)| id)
+        })
+        .collect();
 
     let skills_to_show: Vec<_> = registry
         .skills
@@ -69,8 +81,9 @@ pub async fn run(verbose: bool) -> Result<()> {
         .map(|(k, v)| (k.clone(), v.clone()))
         .collect();
 
-    println!("\nSelect skills ([i] = already installed, [x] = newly selected):");
-    let result: SelectionResult = SkillSelector::new(skills_to_show, installed_ids).run()?;
+    println!("\nSelect skills ([g] = global, [i] = installed, [x] = newly selected):");
+    let result: SelectionResult =
+        SkillSelector::new(skills_to_show, project_installed_ids, global_installed_ids).run()?;
 
     if result.selected.is_empty() {
         println!("No skills selected. Exiting.");
@@ -93,6 +106,16 @@ pub async fn run(verbose: bool) -> Result<()> {
     if !result.added.is_empty() {
         println!("\nInstalling {} skills...", result.added.len());
         for (id, skill) in &result.added {
+            if global_config.is_skill_installed_globally(id) {
+                let tools_for_skill = global_config.get_tools_for_skill(id);
+                println!(
+                    "'{}' is already installed globally for: {}, skipping.",
+                    skill.name,
+                    tools_for_skill.join(", ")
+                );
+                continue;
+            }
+
             println!("Installing '{}'...", skill.name);
             let results = install_skill(skill, &tools, Scope::Project, &client).await?;
             print_install_summary(&results, &skill.name);
