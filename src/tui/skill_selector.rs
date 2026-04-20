@@ -35,7 +35,7 @@ struct SkillSelectorState {
     selected_tags: HashSet<String>,
     sort_mode: SortMode,
     current_skill_index: usize,
-    selected_skill_indices: Vec<usize>,
+    selected_skill_ids: HashSet<String>,
     skill_search_query: String,
     skill_search_active: bool,
     skill_scroll_offset: usize,
@@ -58,11 +58,10 @@ impl SkillSelectorState {
         let all_tags = Self::extract_tags_with_counts(&skills);
         let filtered_skills = skills.clone();
 
-        let selected_skill_indices: Vec<usize> = filtered_skills
+        let selected_skill_ids: HashSet<String> = filtered_skills
             .iter()
-            .enumerate()
-            .filter(|(_, (id, _))| installed_ids.contains(id))
-            .map(|(i, _)| i)
+            .filter(|(id, _)| installed_ids.contains(id))
+            .map(|(id, _)| id.clone())
             .collect();
 
         Self {
@@ -78,7 +77,7 @@ impl SkillSelectorState {
             selected_tags: HashSet::new(),
             sort_mode: SortMode::default(),
             current_skill_index: 0,
-            selected_skill_indices,
+            selected_skill_ids,
             skill_search_query: String::new(),
             skill_search_active: false,
             skill_scroll_offset: 0,
@@ -343,7 +342,7 @@ impl SkillSelectorState {
             let (skill_id, skill) = &self.filtered_skills[i];
             let is_global = self.global_ids.contains(skill_id);
             let is_installed = self.installed_ids.contains(skill_id);
-            let is_selected = self.selected_skill_indices.contains(&i);
+            let is_selected = self.selected_skill_ids.contains(skill_id);
             let is_cursor = i == self.current_skill_index;
 
             let marker = if is_global {
@@ -755,14 +754,11 @@ impl SkillSelectorState {
                 if self.filtered_skills.is_empty() {
                     return false;
                 }
-                if self
-                    .selected_skill_indices
-                    .contains(&self.current_skill_index)
-                {
-                    self.selected_skill_indices
-                        .retain(|&i| i != self.current_skill_index);
+                let (skill_id, _) = &self.filtered_skills[self.current_skill_index];
+                if self.selected_skill_ids.contains(skill_id) {
+                    self.selected_skill_ids.remove(skill_id);
                 } else {
-                    self.selected_skill_indices.push(self.current_skill_index);
+                    self.selected_skill_ids.insert(skill_id.clone());
                 }
             }
             KeyCode::Char('s') => {
@@ -782,7 +778,7 @@ impl SkillSelectorState {
             }
             KeyCode::Enter => return true,
             KeyCode::Esc => {
-                self.selected_skill_indices.clear();
+                self.selected_skill_ids.clear();
                 return true;
             }
             _ => {}
@@ -977,9 +973,15 @@ impl SkillSelector {
         execute!(terminal.backend_mut(), LeaveAlternateScreen)?;
 
         let selected: Vec<(String, Skill)> = state
-            .selected_skill_indices
-            .into_iter()
-            .map(|i| state.filtered_skills[i].clone())
+            .selected_skill_ids
+            .iter()
+            .filter_map(|id| {
+                state
+                    .all_skills
+                    .iter()
+                    .find(|(s_id, _)| s_id == id)
+                    .cloned()
+            })
             .collect();
 
         let selected_ids: HashSet<String> = selected.iter().map(|(id, _)| id.clone()).collect();
