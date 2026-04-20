@@ -4,37 +4,25 @@ use std::str::FromStr;
 #[test]
 fn test_domain_as_str() {
     assert_eq!(
-        Domain::PlanningAndWorkflows.as_str(),
-        "planning-and-workflows"
+        Domain::PlanningAndOrchestration.as_str(),
+        "planning-and-orchestration"
     );
     assert_eq!(Domain::Development.as_str(), "development");
-    assert_eq!(Domain::DesignAndMedia.as_str(), "design-and-media");
+    assert_eq!(Domain::Design.as_str(), "design");
     assert_eq!(Domain::Documentation.as_str(), "documentation");
-    assert_eq!(Domain::DataAndResearch.as_str(), "data-and-research");
-    assert_eq!(
-        Domain::TestingAndDebugging.as_str(),
-        "testing-and-debugging"
-    );
-    assert_eq!(
-        Domain::DeploymentAndInfrastructure.as_str(),
-        "deployment-and-infrastructure"
-    );
-    assert_eq!(
-        Domain::IntegrationsAndTools.as_str(),
-        "integrations-and-tools"
-    );
-    assert_eq!(
-        Domain::CollaborationAndCommunication.as_str(),
-        "collaboration-and-communication"
-    );
-    assert_eq!(Domain::SecurityAndPrivacy.as_str(), "security-and-privacy");
+    assert_eq!(Domain::Data.as_str(), "data");
+    assert_eq!(Domain::Testing.as_str(), "testing");
+    assert_eq!(Domain::Deployment.as_str(), "deployment");
+    assert_eq!(Domain::Integrations.as_str(), "integrations");
+    assert_eq!(Domain::Collaboration.as_str(), "collaboration");
+    assert_eq!(Domain::Security.as_str(), "security");
 }
 
 #[test]
 fn test_domain_display() {
     assert_eq!(
-        format!("{}", Domain::PlanningAndWorkflows),
-        "planning-and-workflows"
+        format!("{}", Domain::PlanningAndOrchestration),
+        "planning-and-orchestration"
     );
     assert_eq!(format!("{}", Domain::Development), "development");
 }
@@ -42,17 +30,14 @@ fn test_domain_display() {
 #[test]
 fn test_domain_from_str_valid() {
     assert_eq!(
-        Domain::from_str("planning-and-workflows").unwrap(),
-        Domain::PlanningAndWorkflows
+        Domain::from_str("planning-and-orchestration").unwrap(),
+        Domain::PlanningAndOrchestration
     );
     assert_eq!(
         Domain::from_str("development").unwrap(),
         Domain::Development
     );
-    assert_eq!(
-        Domain::from_str("design-and-media").unwrap(),
-        Domain::DesignAndMedia
-    );
+    assert_eq!(Domain::from_str("design").unwrap(), Domain::Design);
 }
 
 #[test]
@@ -91,13 +76,13 @@ fn test_domain_default() {
 
 #[test]
 fn test_domain_serialization() {
-    let domain = Domain::DeploymentAndInfrastructure;
+    let domain = Domain::Deployment;
     let json = serde_json::to_string(&domain).unwrap();
-    assert_eq!(json, "\"deployment-and-infrastructure\"");
+    assert_eq!(json, "\"deployment\"");
 }
 
 #[test]
 fn test_domain_deserialization() {
-    let domain: Domain = serde_json::from_str("\"deployment-and-infrastructure\"").unwrap();
-    assert_eq!(domain, Domain::DeploymentAndInfrastructure);
+    let domain: Domain = serde_json::from_str("\"deployment\"").unwrap();
+    assert_eq!(domain, Domain::Deployment);
 }

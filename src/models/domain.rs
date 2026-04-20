@@ -5,46 +5,46 @@ use std::str::FromStr;
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq)]
 #[serde(rename_all = "kebab-case")]
 pub enum Domain {
-    PlanningAndWorkflows,
+    PlanningAndOrchestration,
     Development,
-    DesignAndMedia,
+    Design,
     Documentation,
-    DataAndResearch,
-    TestingAndDebugging,
-    DeploymentAndInfrastructure,
-    IntegrationsAndTools,
-    CollaborationAndCommunication,
-    SecurityAndPrivacy,
+    Data,
+    Testing,
+    Deployment,
+    Integrations,
+    Collaboration,
+    Security,
 }
 
 impl Domain {
     pub fn as_str(&self) -> &'static str {
         match self {
-            Domain::PlanningAndWorkflows => "planning-and-workflows",
+            Domain::PlanningAndOrchestration => "planning-and-orchestration",
             Domain::Development => "development",
-            Domain::DesignAndMedia => "design-and-media",
+            Domain::Design => "design",
             Domain::Documentation => "documentation",
-            Domain::DataAndResearch => "data-and-research",
-            Domain::TestingAndDebugging => "testing-and-debugging",
-            Domain::DeploymentAndInfrastructure => "deployment-and-infrastructure",
-            Domain::IntegrationsAndTools => "integrations-and-tools",
-            Domain::CollaborationAndCommunication => "collaboration-and-communication",
-            Domain::SecurityAndPrivacy => "security-and-privacy",
+            Domain::Data => "data",
+            Domain::Testing => "testing",
+            Domain::Deployment => "deployment",
+            Domain::Integrations => "integrations",
+            Domain::Collaboration => "collaboration",
+            Domain::Security => "security",
         }
     }
 
     pub fn all() -> Vec<Self> {
         vec![
-            Domain::PlanningAndWorkflows,
+            Domain::PlanningAndOrchestration,
             Domain::Development,
-            Domain::DesignAndMedia,
+            Domain::Design,
             Domain::Documentation,
-            Domain::DataAndResearch,
-            Domain::TestingAndDebugging,
-            Domain::DeploymentAndInfrastructure,
-            Domain::IntegrationsAndTools,
-            Domain::CollaborationAndCommunication,
-            Domain::SecurityAndPrivacy,
+            Domain::Data,
+            Domain::Testing,
+            Domain::Deployment,
+            Domain::Integrations,
+            Domain::Collaboration,
+            Domain::Security,
         ]
     }
 
@@ -72,16 +72,16 @@ impl FromStr for Domain {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s.trim().to_lowercase().as_str() {
-            "planning-and-workflows" => Ok(Domain::PlanningAndWorkflows),
+            "planning-and-orchestration" => Ok(Domain::PlanningAndOrchestration),
             "development" => Ok(Domain::Development),
-            "design-and-media" => Ok(Domain::DesignAndMedia),
+            "design" => Ok(Domain::Design),
             "documentation" => Ok(Domain::Documentation),
-            "data-and-research" => Ok(Domain::DataAndResearch),
-            "testing-and-debugging" => Ok(Domain::TestingAndDebugging),
-            "deployment-and-infrastructure" => Ok(Domain::DeploymentAndInfrastructure),
-            "integrations-and-tools" => Ok(Domain::IntegrationsAndTools),
-            "collaboration-and-communication" => Ok(Domain::CollaborationAndCommunication),
-            "security-and-privacy" => Ok(Domain::SecurityAndPrivacy),
+            "data" => Ok(Domain::Data),
+            "testing" => Ok(Domain::Testing),
+            "deployment" => Ok(Domain::Deployment),
+            "integrations" => Ok(Domain::Integrations),
+            "collaboration" => Ok(Domain::Collaboration),
+            "security" => Ok(Domain::Security),
             _ => Err(format!("Invalid domain: {}", s)),
         }
     }
