@@ -1,19 +1,129 @@
 version = 1
-updated = "2026-04-18"
+updated = "2026-04-20"
+
+[skills.slack-gif-creator]
+name = "slack-gif-creator"
+description = 'Knowledge and utilities for creating animated GIFs optimized for Slack. Provides constraints, validation tools, and animation concepts. Use when users request animated GIFs for Slack like "make me a GIF of X doing Y for Slack."'
+source_url = "https://github.com/anthropics/skills/tree/main/skills/slack-gif-creator"
+stars = 120616
+commit_sha = "00756142ab04c82a447693cf373c4e0c554d1005"
+context_size = 1960
+domain = "design"
+last_updated = "2026-04-20"
+tags = [
+    "gif-creation",
+    "slack-optimization",
+    "animation-tools",
+]
+score = 82.80000305175781
+
+[skills.slack-gif-creator.install_action]
+type = "copy"
+
+[skills.slack-gif-creator.install_action.value]
+folder = "skills/slack-gif-creator"
+
+[skills.cli-creator]
+name = "cli-creator"
+description = "Build a composable CLI for Codex from API docs, an OpenAPI spec, existing curl examples, an SDK, a web app, an admin tool, or a local script. Use when the user wants Codex to create a command-line tool that can run from any repo, expose composable read/write commands, return stable JSON, manage auth, and pair with a companion skill."
+source_url = "https://github.com/openai/skills/tree/main/skills/.curated/cli-creator"
+stars = 17116
+commit_sha = "0ed2046f287a92b5f4bcace213dcb3cc5f094cb9"
+context_size = 2625
+domain = "development"
+last_updated = "2026-04-20"
+tags = [
+    "cli-tools",
+    "api-integration",
+    "command-line",
+]
+score = 86.0
+
+[skills.cli-creator.install_action]
+type = "copy"
+
+[skills.cli-creator.install_action.value]
+folder = "skills/.curated/cli-creator"
+
+[skills.xlsx]
+name = "xlsx"
+description = 'Use this skill any time a spreadsheet file is the primary input or output. This means any task where the user wants to: open, read, edit, or fix an existing .xlsx, .xlsm, .csv, or .tsv file (e.g., adding columns, computing formulas, formatting, charting, cleaning messy data); create a new spreadsheet from scratch or from other data sources; or convert between tabular file formats. Trigger especially when the user references a spreadsheet file by name or path — even casually (like "the xlsx in my downloads") — and wants something done to it or produced from it. Also trigger for cleaning or restructuring messy tabular data files (malformed rows, misplaced headers, junk data) into proper spreadsheets. The deliverable must be a spreadsheet file. Do NOT trigger when the primary deliverable is a Word document, HTML report, standalone Python script, database pipeline, or Google Sheets API integration, even if tabular data is involved.'
+source_url = "https://github.com/anthropics/skills/tree/main/skills/xlsx"
+stars = 120616
+commit_sha = "1ed29a03dc852d30fa6ef2ca53a67dc2c2c2c563"
+context_size = 2865
+domain = "data"
+last_updated = "2026-04-20"
+tags = [
+    "spreadsheet-management",
+    "data-cleaning",
+    "file-conversion",
+]
+score = 82.80000305175781
+
+[skills.xlsx.install_action]
+type = "copy"
+
+[skills.xlsx.install_action.value]
+folder = "skills/xlsx"
+
+[skills.brand-guidelines]
+name = "brand-guidelines"
+description = "Applies Anthropic's official brand colors and typography to any sort of artifact that may benefit from having Anthropic's look-and-feel. Use it when brand colors or style guidelines, visual formatting, or company design standards apply."
+source_url = "https://github.com/anthropics/skills/tree/main/skills/brand-guidelines"
+stars = 120616
+commit_sha = "ef740771ac901e03fbca3ce4e1c453a96010f30a"
+context_size = 558
+domain = "design"
+last_updated = "2026-04-20"
+tags = [
+    "branding",
+    "visual-identity",
+    "style-guide",
+]
+score = 82.80000305175781
+
+[skills.brand-guidelines.install_action]
+type = "copy"
+
+[skills.brand-guidelines.install_action.value]
+folder = "skills/brand-guidelines"
+
+[skills.mcp-builder]
+name = "mcp-builder"
+description = "Guide for creating high-quality MCP (Model Context Protocol) servers that enable LLMs to interact with external services through well-designed tools. Use when building MCP servers to integrate external APIs or services, whether in Python (FastMCP) or Node/TypeScript (MCP SDK)."
+source_url = "https://github.com/anthropics/skills/tree/main/skills/mcp-builder"
+stars = 120616
+commit_sha = "ef740771ac901e03fbca3ce4e1c453a96010f30a"
+context_size = 2273
+domain = "development"
+last_updated = "2026-04-20"
+tags = [
+    "mcp",
+    "api-integration",
+    "llm-interaction",
+]
+score = 82.80000305175781
+
+[skills.mcp-builder.install_action]
+type = "copy"
+
+[skills.mcp-builder.install_action.value]
+folder = "skills/mcp-builder"
 
 [skills.chatgpt-apps]
 name = "chatgpt-apps"
 description = "Build, scaffold, refactor, and troubleshoot ChatGPT Apps SDK applications that combine an MCP server and widget UI. Use when Codex needs to design tools, register UI resources, wire the MCP Apps bridge or ChatGPT compatibility APIs, apply Apps SDK metadata or CSP or domain settings, or produce a docs-aligned project scaffold. Prefer a docs-first workflow by invoking the openai-docs skill or OpenAI developer docs MCP tools before generating code."
 source_url = "https://github.com/openai/skills/tree/main/skills/.curated/chatgpt-apps"
-stars = 17034
+stars = 17116
 commit_sha = "14f4eb1410aca89371166bc7e7a567435f3ace05"
 context_size = 4906
 domain = "development"
-last_updated = "2026-04-18"
+last_updated = "2026-04-20"
 tags = [
-    "sdk-development",
-    "app-scaffolding",
-    "troubleshooting",
+    "chatgpt",
+    "sdk",
+    "tool-development",
 ]
 score = 86.0
 
@@ -23,153 +133,261 @@ type = "copy"
 [skills.chatgpt-apps.install_action.value]
 folder = "skills/.curated/chatgpt-apps"
 
-[skills.design-an-interface]
-name = "design-an-interface"
-description = 'Generate multiple radically different interface designs for a module using parallel sub-agents. Use when user wants to design an API, explore interface options, compare module shapes, or mentions "design it twice".'
-source_url = "https://github.com/mattpocock/skills/tree/main/design-an-interface"
-stars = 16086
-commit_sha = "74dbf0d00c07cd0fb394cf02bd609e5bc9b42fad"
-context_size = 841
-domain = "design-and-media"
-last_updated = "2026-04-18"
+[skills.webapp-testing]
+name = "webapp-testing"
+description = "Toolkit for interacting with and testing local web applications using Playwright. Supports verifying frontend functionality, debugging UI behavior, capturing browser screenshots, and viewing browser logs."
+source_url = "https://github.com/anthropics/skills/tree/main/skills/webapp-testing"
+stars = 120616
+commit_sha = "ef740771ac901e03fbca3ce4e1c453a96010f30a"
+context_size = 978
+domain = "testing"
+last_updated = "2026-04-20"
 tags = [
-    "interface-design",
-    "api-design",
-    "creative-exploration",
+    "ui-testing",
+    "playwright",
+    "debugging",
 ]
-score = 95.60975646972656
+score = 82.80000305175781
 
-[skills.design-an-interface.install_action]
+[skills.webapp-testing.install_action]
 type = "copy"
 
-[skills.design-an-interface.install_action.value]
-folder = "design-an-interface"
+[skills.webapp-testing.install_action.value]
+folder = "skills/webapp-testing"
 
-[skills.grill-me]
-name = "grill-me"
-description = 'Interview the user relentlessly about a plan or design until reaching shared understanding, resolving each branch of the decision tree. Use when user wants to stress-test a plan, get grilled on their design, or mentions "grill me".'
-source_url = "https://github.com/mattpocock/skills/tree/main/grill-me"
-stars = 16086
-commit_sha = "a6bdfd9fed6c17d21b306aeb7ff6a0de8b72ef3c"
-context_size = 158
-domain = "collaboration-and-communication"
-last_updated = "2026-04-18"
-tags = [
-    "interrogative-feedback",
-    "decision-tree",
-    "shared-understanding",
-]
-score = 95.60975646972656
-
-[skills.grill-me.install_action]
-type = "copy"
-
-[skills.grill-me.install_action.value]
-folder = "grill-me"
-
-[skills.migrate-to-shoehorn]
-name = "migrate-to-shoehorn"
-description = "Migrate test files from `as` type assertions to @total-typescript/shoehorn. Use when user mentions shoehorn, wants to replace `as` in tests, or needs partial test data."
-source_url = "https://github.com/mattpocock/skills/tree/main/migrate-to-shoehorn"
-stars = 16086
-commit_sha = "c90b246c926a940bb4b74c90bf39f75b2e414319"
-context_size = 698
+[skills.aspnet-core]
+name = "aspnet-core"
+description = "Build, review, refactor, or architect ASP.NET Core web applications using current official guidance for .NET web development. Use when working on Blazor Web Apps, Razor Pages, MVC, Minimal APIs, controller-based Web APIs, SignalR, gRPC, middleware, dependency injection, configuration, authentication, authorization, testing, performance, deployment, or ASP.NET Core upgrades."
+source_url = "https://github.com/openai/skills/tree/main/skills/.curated/aspnet-core"
+stars = 17116
+commit_sha = "c207989386b30063bcecaf6b1977d761b244732e"
+context_size = 1386
 domain = "development"
-last_updated = "2026-04-18"
+last_updated = "2026-04-20"
 tags = [
-    "test-migration",
-    "typescript",
-    "code-upgrade",
-]
-score = 95.60975646972656
-
-[skills.migrate-to-shoehorn.install_action]
-type = "copy"
-
-[skills.migrate-to-shoehorn.install_action.value]
-folder = "migrate-to-shoehorn"
-
-[skills.git-guardrails-claude-code]
-name = "git-guardrails-claude-code"
-description = "Set up Claude Code hooks to block dangerous git commands (push, reset --hard, clean, branch -D, etc.) before they execute. Use when user wants to prevent destructive git operations, add git safety hooks, or block git push/reset in Claude Code."
-source_url = "https://github.com/mattpocock/skills/tree/main/git-guardrails-claude-code"
-stars = 16086
-commit_sha = "b81729c6adec4fe7727da92020a5cb5358b2edd6"
-context_size = 578
-domain = "security-and-privacy"
-last_updated = "2026-04-18"
-tags = [
-    "git-safety",
-    "prevent-destructive-operations",
-    "code-integrity",
-]
-score = 95.60975646972656
-
-[skills.git-guardrails-claude-code.install_action]
-type = "copy"
-
-[skills.git-guardrails-claude-code.install_action.value]
-folder = "git-guardrails-claude-code"
-
-[skills.minimax-pdf]
-name = "minimax-pdf"
-description = """
-Use this skill when visual quality and design identity matter for a PDF. CREATE (generate from scratch): "make a PDF", "generate a report", "write a proposal", "create a resume", "beautiful PDF", "professional document", "cover page", "polished PDF", "client-ready document". FILL (complete form fields): "fill in the form", "fill out this PDF", "complete the form fields", "write values into PDF", "what fields does this PDF have". REFORMAT (apply design to an existing doc): "reformat this document", "apply our style", "convert this Markdown/text to PDF", "make this doc look good", "re-style this PDF". This skill uses a token-based design system: color, typography, and spacing are derived from the document type and flow through every page. The output is print-ready. Prefer this skill when appearance matters, not just when any PDF output is needed.
-"""
-source_url = "https://github.com/MiniMax-AI/skills/tree/main/skills/minimax-pdf"
-stars = 10791
-commit_sha = "4006c2661305ed221f957a08e1d3429cb525de67"
-context_size = 2156
-domain = "documentation"
-last_updated = "2026-04-18"
-tags = [
-    "pdf",
-    "design",
-    "formatting",
-]
-score = 90.0
-
-[skills.minimax-pdf.install_action]
-type = "copy"
-
-[skills.minimax-pdf.install_action.value]
-folder = "skills/minimax-pdf"
-
-[skills.develop-web-game]
-name = "develop-web-game"
-description = "Use when Codex is building or iterating on a web game (HTML/JS) and needs a reliable development + testing loop: implement small changes, run a Playwright-based test script with short input bursts and intentional pauses, inspect screenshots/text, and review console errors with render_game_to_text."
-source_url = "https://github.com/openai/skills/tree/main/skills/.curated/develop-web-game"
-stars = 17034
-commit_sha = "77963424cd7687fd52e5fcfdd3f08d826ab9b1ab"
-context_size = 2308
-domain = "development"
-last_updated = "2026-04-18"
-tags = [
-    "game-development",
-    "testing-loop",
-    "html-js",
+    "web-development",
+    "aspnet",
+    "backend",
 ]
 score = 86.0
 
-[skills.develop-web-game.install_action]
+[skills.aspnet-core.install_action]
 type = "copy"
 
-[skills.develop-web-game.install_action.value]
-folder = "skills/.curated/develop-web-game"
+[skills.aspnet-core.install_action.value]
+folder = "skills/.curated/aspnet-core"
+
+[skills.docx]
+name = "docx"
+description = "Use this skill whenever the user wants to create, read, edit, or manipulate Word documents (.docx files). Triggers include: any mention of 'Word doc', 'word document', '.docx', or requests to produce professional documents with formatting like tables of contents, headings, page numbers, or letterheads. Also use when extracting or reorganizing content from .docx files, inserting or replacing images in documents, performing find-and-replace in Word files, working with tracked changes or comments, or converting content into a polished Word document. If the user asks for a 'report', 'memo', 'letter', 'template', or similar deliverable as a Word or .docx file, use this skill. Do NOT use for PDFs, spreadsheets, Google Docs, or general coding tasks unrelated to document generation."
+source_url = "https://github.com/anthropics/skills/tree/main/skills/docx"
+stars = 120616
+commit_sha = "3d59511518591fa82e6cfcf0438d68dd5dad3e76"
+context_size = 5021
+domain = "documentation"
+last_updated = "2026-04-20"
+tags = [
+    "word-processing",
+    "document-editing",
+    "formatting",
+]
+score = 82.80000305175781
+
+[skills.docx.install_action]
+type = "copy"
+
+[skills.docx.install_action.value]
+folder = "skills/docx"
+
+[skills.figma-code-connect-components]
+name = "figma-code-connect-components"
+description = 'Connects Figma design components to code components using Code Connect mapping tools. Use when user says "code connect", "connect this component to code", "map this component", "link component to code", "create code connect mapping", or wants to establish mappings between Figma designs and code implementations. For canvas writes via `use_figma`, use `figma-use`.'
+source_url = "https://github.com/openai/skills/tree/main/skills/.curated/figma-code-connect-components"
+stars = 17116
+commit_sha = "736f600bf6ecbc000c04f1d2710b990899f28903"
+context_size = 4190
+domain = "design"
+last_updated = "2026-04-20"
+tags = [
+    "figma",
+    "component-mapping",
+    "design-code-integration",
+]
+score = 86.0
+
+[skills.figma-code-connect-components.install_action]
+type = "copy"
+
+[skills.figma-code-connect-components.install_action.value]
+folder = "skills/.curated/figma-code-connect-components"
+
+[skills.skill-creator]
+name = "skill-creator"
+description = "Create new skills, modify and improve existing skills, and measure skill performance. Use when users want to create a skill from scratch, edit, or optimize an existing skill, run evals to test a skill, benchmark skill performance with variance analysis, or optimize a skill's description for better triggering accuracy."
+source_url = "https://github.com/anthropics/skills/tree/main/skills/skill-creator"
+stars = 120616
+commit_sha = "b0cbd3df1533b396d281a6886d5132f623393a9c"
+context_size = 8292
+domain = "development"
+last_updated = "2026-04-20"
+tags = [
+    "skill-creation",
+    "performance-evaluation",
+    "optimization",
+]
+score = 82.80000305175781
+
+[skills.skill-creator.install_action]
+type = "copy"
+
+[skills.skill-creator.install_action.value]
+folder = "skills/skill-creator"
+
+[skills.pdf]
+name = "pdf"
+description = "Use this skill whenever the user wants to do anything with PDF files. This includes reading or extracting text/tables from PDFs, combining or merging multiple PDFs into one, splitting PDFs apart, rotating pages, adding watermarks, creating new PDFs, filling PDF forms, encrypting/decrypting PDFs, extracting images, and OCR on scanned PDFs to make them searchable. If the user mentions a .pdf file or asks to produce one, use this skill."
+source_url = "https://github.com/anthropics/skills/tree/main/skills/pdf"
+stars = 120616
+commit_sha = "1ed29a03dc852d30fa6ef2ca53a67dc2c2c2c563"
+context_size = 2018
+domain = "documentation"
+last_updated = "2026-04-20"
+tags = [
+    "pdf-management",
+    "text-extraction",
+    "file-operations",
+]
+score = 82.80000305175781
+
+[skills.pdf.install_action]
+type = "copy"
+
+[skills.pdf.install_action.value]
+folder = "skills/pdf"
+
+[skills.canvas-design]
+name = "canvas-design"
+description = "Create beautiful visual art in .png and .pdf documents using design philosophy. You should use this skill when the user asks to create a poster, piece of art, design, or other static piece. Create original visual designs, never copying existing artists' work to avoid copyright violations."
+source_url = "https://github.com/anthropics/skills/tree/main/skills/canvas-design"
+stars = 120616
+commit_sha = "ef740771ac901e03fbca3ce4e1c453a96010f30a"
+context_size = 2984
+domain = "design"
+last_updated = "2026-04-20"
+tags = [
+    "visual-art",
+    "graphic-design",
+    "original-design",
+]
+score = 82.80000305175781
+
+[skills.canvas-design.install_action]
+type = "copy"
+
+[skills.canvas-design.install_action.value]
+folder = "skills/canvas-design"
+
+[skills.pptx]
+name = "pptx"
+description = 'Use this skill any time a .pptx file is involved in any way — as input, output, or both. This includes: creating slide decks, pitch decks, or presentations; reading, parsing, or extracting text from any .pptx file (even if the extracted content will be used elsewhere, like in an email or summary); editing, modifying, or updating existing presentations; combining or splitting slide files; working with templates, layouts, speaker notes, or comments. Trigger whenever the user mentions "deck," "slides," "presentation," or references a .pptx filename, regardless of what they plan to do with the content afterward. If a .pptx file needs to be opened, created, or touched, use this skill.'
+source_url = "https://github.com/anthropics/skills/tree/main/skills/pptx"
+stars = 120616
+commit_sha = "1ed29a03dc852d30fa6ef2ca53a67dc2c2c2c563"
+context_size = 2295
+domain = "documentation"
+last_updated = "2026-04-20"
+tags = [
+    "presentation",
+    "slide-decks",
+    "editing",
+]
+score = 82.80000305175781
+
+[skills.pptx.install_action]
+type = "copy"
+
+[skills.pptx.install_action.value]
+folder = "skills/pptx"
+
+[skills.claude-api]
+name = "claude-api"
+description = "Build, debug, and optimize Claude API / Anthropic SDK apps. Apps built with this skill should include prompt caching. Also handles migrating existing Claude API code between Claude model versions (4.5 → 4.6, 4.6 → 4.7, retired-model replacements). TRIGGER when: code imports `anthropic`/`@anthropic-ai/sdk`; user asks for the Claude API, Anthropic SDK, or Managed Agents; user adds/modifies/tunes a Claude feature (caching, thinking, compaction, tool use, batch, files, citations, memory) or model (Opus/Sonnet/Haiku) in a file; questions about prompt caching / cache hit rate in an Anthropic SDK project. SKIP: file imports `openai`/other-provider SDK, filename like `*-openai.py`/`*-generic.py`, provider-neutral code, general programming/ML."
+source_url = "https://github.com/anthropics/skills/tree/main/skills/claude-api"
+stars = 120616
+commit_sha = "2c7ec5e78b8e5d43ea02e90bb8826f6b9f147b0c"
+context_size = 8246
+domain = "development"
+last_updated = "2026-04-20"
+tags = [
+    "api",
+    "sdk",
+    "optimization",
+]
+score = 82.80000305175781
+
+[skills.claude-api.install_action]
+type = "copy"
+
+[skills.claude-api.install_action.value]
+folder = "skills/claude-api"
+
+[skills.web-artifacts-builder]
+name = "web-artifacts-builder"
+description = "Suite of tools for creating elaborate, multi-component claude.ai HTML artifacts using modern frontend web technologies (React, Tailwind CSS, shadcn/ui). Use for complex artifacts requiring state management, routing, or shadcn/ui components - not for simple single-file HTML/JSX artifacts."
+source_url = "https://github.com/anthropics/skills/tree/main/skills/web-artifacts-builder"
+stars = 120616
+commit_sha = "ef740771ac901e03fbca3ce4e1c453a96010f30a"
+context_size = 771
+domain = "development"
+last_updated = "2026-04-20"
+tags = [
+    "html-creation",
+    "frontend-development",
+    "multi-component",
+]
+score = 82.80000305175781
+
+[skills.web-artifacts-builder.install_action]
+type = "copy"
+
+[skills.web-artifacts-builder.install_action.value]
+folder = "skills/web-artifacts-builder"
+
+[skills.figma-create-design-system-rules]
+name = "figma-create-design-system-rules"
+description = """Generates custom design system rules for the user's codebase. Use when user says "create design system rules", "generate rules for my project", "set up design rules", "customize design system guidelines", or wants to establish project-specific conventions for Figma-to-code workflows. Requires Figma MCP server connection."""
+source_url = "https://github.com/openai/skills/tree/main/skills/.curated/figma-create-design-system-rules"
+stars = 17116
+commit_sha = "736f600bf6ecbc000c04f1d2710b990899f28903"
+context_size = 4555
+domain = "design"
+last_updated = "2026-04-20"
+tags = [
+    "design-system",
+    "rules-creation",
+    "figma",
+]
+score = 86.0
+
+[skills.figma-create-design-system-rules.install_action]
+type = "copy"
+
+[skills.figma-create-design-system-rules.install_action.value]
+folder = "skills/.curated/figma-create-design-system-rules"
 
 [skills.doc]
 name = "doc"
 description = "Use when the task involves reading, creating, or editing `.docx` documents, especially when formatting or layout fidelity matters; prefer `python-docx` plus the bundled `scripts/render_docx.py` for visual checks."
 source_url = "https://github.com/openai/skills/tree/main/skills/.curated/doc"
-stars = 17034
+stars = 17116
 commit_sha = "77963424cd7687fd52e5fcfdd3f08d826ab9b1ab"
 context_size = 747
 domain = "documentation"
-last_updated = "2026-04-18"
+last_updated = "2026-04-20"
 tags = [
-    "docx-editing",
+    "document-management",
+    "editing",
     "formatting",
-    "layout",
 ]
 score = 86.0
 
@@ -179,268 +397,40 @@ type = "copy"
 [skills.doc.install_action.value]
 folder = "skills/.curated/doc"
 
-[skills.to-issues]
-name = "to-issues"
-description = "Break a plan, spec, or PRD into independently-grabbable GitHub issues using tracer-bullet vertical slices. Use when user wants to convert a plan into issues, create implementation tickets, or break down work into issues."
-source_url = "https://github.com/mattpocock/skills/tree/main/to-issues"
-stars = 16086
-commit_sha = "aaf3050857a8d00c710c382c87a29b81341370aa"
-context_size = 684
-domain = "planning-and-workflows"
-last_updated = "2026-04-18"
+[skills.figma-create-new-file]
+name = "figma-create-new-file"
+description = "Create a new blank Figma file. Use when the user wants to create a new Figma design or FigJam file, or when you need a new file before calling use_figma. Handles plan resolution via whoami if needed. Usage — /figma-create-new-file [editorType] [fileName] (e.g. /figma-create-new-file figjam My Whiteboard)"
+source_url = "https://github.com/openai/skills/tree/main/skills/.curated/figma-create-new-file"
+stars = 17116
+commit_sha = "736f600bf6ecbc000c04f1d2710b990899f28903"
+context_size = 682
+domain = "design"
+last_updated = "2026-04-20"
 tags = [
-    "issue-creation",
-    "work-breakdown",
-    "implementation-tickets",
+    "figma",
+    "file-creation",
+    "design",
 ]
-score = 95.60975646972656
+score = 86.0
 
-[skills.to-issues.install_action]
+[skills.figma-create-new-file.install_action]
 type = "copy"
 
-[skills.to-issues.install_action.value]
-folder = "to-issues"
-
-[skills.scaffold-exercises]
-name = "scaffold-exercises"
-description = "Create exercise directory structures with sections, problems, solutions, and explainers that pass linting. Use when user wants to scaffold exercises, create exercise stubs, or set up a new course section."
-source_url = "https://github.com/mattpocock/skills/tree/main/scaffold-exercises"
-stars = 16086
-commit_sha = "d1beb4fe61574b3325ed96cd0d9a31966d31a02a"
-context_size = 897
-domain = "development"
-last_updated = "2026-04-18"
-tags = [
-    "exercise-creation",
-    "course-setup",
-    "linting-compliance",
-]
-score = 95.60975646972656
-
-[skills.scaffold-exercises.install_action]
-type = "copy"
-
-[skills.scaffold-exercises.install_action.value]
-folder = "scaffold-exercises"
-
-[skills.shader-dev]
-name = "shader-dev"
-description = "Comprehensive GLSL shader techniques for creating stunning visual effects — ray marching, SDF modeling, fluid simulation, particle systems, procedural generation, lighting, post-processing, and more."
-source_url = "https://github.com/MiniMax-AI/skills/tree/main/skills/shader-dev"
-stars = 10791
-commit_sha = "17068048939180000e6864a53cb88e1c9cd5b68b"
-context_size = 4221
-domain = "development"
-last_updated = "2026-04-18"
-tags = [
-    "shader-programming",
-    "visual-effects",
-    "glsl",
-]
-score = 90.0
-
-[skills.shader-dev.install_action]
-type = "copy"
-
-[skills.shader-dev.install_action.value]
-folder = "skills/shader-dev"
-
-[skills.flutter-dev]
-name = "flutter-dev"
-description = """
-Flutter cross-platform development guide covering widget patterns, Riverpod/Bloc state management, GoRouter navigation, performance optimization, and platform-specific implementations. Includes const optimization, responsive layouts, testing strategies, and DevTools profiling.
-Use when: building Flutter apps, implementing state management (Riverpod/Bloc), setting up GoRouter navigation, creating custom widgets, optimizing performance, writing widget tests, cross-platform development.
-"""
-source_url = "https://github.com/MiniMax-AI/skills/tree/main/skills/flutter-dev"
-stars = 10791
-commit_sha = "2995582a5effe9000023f190aa7147a5116cd05c"
-context_size = 1277
-domain = "development"
-last_updated = "2026-04-18"
-tags = [
-    "flutter",
-    "cross-platform",
-    "state-management",
-]
-score = 90.0
-
-[skills.flutter-dev.install_action]
-type = "copy"
-
-[skills.flutter-dev.install_action.value]
-folder = "skills/flutter-dev"
-
-[skills.edit-article]
-name = "edit-article"
-description = "Edit and improve articles by restructuring sections, improving clarity, and tightening prose. Use when user wants to edit, revise, or improve an article draft."
-source_url = "https://github.com/mattpocock/skills/tree/main/edit-article"
-stars = 16086
-commit_sha = "d1beb4fe61574b3325ed96cd0d9a31966d31a02a"
-context_size = 180
-domain = "documentation"
-last_updated = "2026-04-18"
-tags = [
-    "content-editing",
-    "clarity-improvement",
-    "structural-revision",
-]
-score = 95.60975646972656
-
-[skills.edit-article.install_action]
-type = "copy"
-
-[skills.edit-article.install_action.value]
-folder = "edit-article"
-
-[skills.ios-application-dev]
-name = "ios-application-dev"
-description = """
-iOS application development guide covering UIKit, SnapKit, and SwiftUI. Includes touch targets, safe areas, navigation patterns, Dynamic Type, Dark Mode, accessibility, collection views, common UI components, and SwiftUI design guidelines. For detailed references on specific topics, see the reference files.
-Use when: developing iOS apps, implementing UI, reviewing iOS code, working with UIKit/SnapKit/SwiftUI layouts, building iPhone interfaces, Swift mobile development, Apple HIG compliance, iOS accessibility implementation.
-"""
-source_url = "https://github.com/MiniMax-AI/skills/tree/main/skills/ios-application-dev"
-stars = 10791
-commit_sha = "815a0523248b27ce610ceb6cfc0358f9533e776a"
-context_size = 1801
-domain = "development"
-last_updated = "2026-04-18"
-tags = [
-    "ios",
-    "swift",
-    "ui-design",
-]
-score = 90.0
-
-[skills.ios-application-dev.install_action]
-type = "copy"
-
-[skills.ios-application-dev.install_action.value]
-folder = "skills/ios-application-dev"
-
-[skills.improve-codebase-architecture]
-name = "improve-codebase-architecture"
-description = "Explore a codebase to find opportunities for architectural improvement, focusing on making the codebase more testable by deepening shallow modules. Use when user wants to improve architecture, find refactoring opportunities, consolidate tightly-coupled modules, or make a codebase more AI-navigable."
-source_url = "https://github.com/mattpocock/skills/tree/main/improve-codebase-architecture"
-stars = 16086
-commit_sha = "d1beb4fe61574b3325ed96cd0d9a31966d31a02a"
-context_size = 1028
-domain = "development"
-last_updated = "2026-04-18"
-tags = [
-    "architectural-improvement",
-    "refactoring-opportunities",
-    "code-optimization",
-]
-score = 95.60975646972656
-
-[skills.improve-codebase-architecture.install_action]
-type = "copy"
-
-[skills.improve-codebase-architecture.install_action.value]
-folder = "improve-codebase-architecture"
-
-[skills.write-a-skill]
-name = "write-a-skill"
-description = "Create new agent skills with proper structure, progressive disclosure, and bundled resources. Use when user wants to create, write, or build a new skill."
-source_url = "https://github.com/mattpocock/skills/tree/main/write-a-skill"
-stars = 16086
-commit_sha = "985d8fce764dae479e7b77b632429abe38891ee8"
-context_size = 764
-domain = "development"
-last_updated = "2026-04-18"
-tags = [
-    "skill-creation",
-    "structure-design",
-    "resource-bundling",
-]
-score = 95.60975646972656
-
-[skills.write-a-skill.install_action]
-type = "copy"
-
-[skills.write-a-skill.install_action.value]
-folder = "write-a-skill"
-
-[skills.pptx-plugin]
-name = "slide-making-skill"
-description = "Implement single-slide PowerPoint pages with PptxGenJS. Use when writing or fixing slide JS files: dimensions, positioning, text/image/chart APIs, styling rules, and export expectations for native .pptx output."
-source_url = "https://github.com/MiniMax-AI/skills/tree/main/plugins/pptx-plugin/skills/slide-making-skill"
-stars = 10791
-commit_sha = "6154dd369918dff47bb0167794a995ceb38bc98a"
-context_size = 1815
-domain = "design-and-media"
-last_updated = "2026-04-18"
-tags = [
-    "powerpoint",
-    "presentation",
-    "js",
-]
-score = 90.0
-
-[skills.pptx-plugin.install_action]
-type = "copy"
-
-[skills.pptx-plugin.install_action.value]
-folder = "plugins/pptx-plugin/skills/slide-making-skill"
-
-[skills.to-prd]
-name = "to-prd"
-description = "Turn the current conversation context into a PRD and submit it as a GitHub issue. Use when user wants to create a PRD from the current context."
-source_url = "https://github.com/mattpocock/skills/tree/main/to-prd"
-stars = 16086
-commit_sha = "aaf3050857a8d00c710c382c87a29b81341370aa"
-context_size = 615
-domain = "documentation"
-last_updated = "2026-04-18"
-tags = [
-    "prd-creation",
-    "context-transformation",
-    "issue-submission",
-]
-score = 95.60975646972656
-
-[skills.to-prd.install_action]
-type = "copy"
-
-[skills.to-prd.install_action.value]
-folder = "to-prd"
-
-[skills.minimax-docx]
-name = "minimax-docx"
-description = """
-Professional DOCX document creation, editing, and formatting using OpenXML SDK (.NET). Three pipelines: (A) create new documents from scratch, (B) fill/edit content in existing documents, (C) apply template formatting with XSD validation gate-check. MUST use this skill whenever the user wants to produce, modify, or format a Word document — including when they say "write a report", "draft a proposal", "make a contract", "fill in this form", "reformat to match this template", or any task whose final output is a .docx file. Even if the user doesn't mention "docx" explicitly, if the task implies a printable/formal document, use this skill.
-"""
-source_url = "https://github.com/MiniMax-AI/skills/tree/main/skills/minimax-docx"
-stars = 10791
-commit_sha = "ce4855d12931f58514c21ba22b76b8e36a4b1668"
-context_size = 3954
-domain = "documentation"
-last_updated = "2026-04-18"
-tags = [
-    "docx",
-    "editing",
-    "formatting",
-]
-score = 90.0
-
-[skills.minimax-docx.install_action]
-type = "copy"
-
-[skills.minimax-docx.install_action.value]
-folder = "skills/minimax-docx"
+[skills.figma-create-new-file.install_action.value]
+folder = "skills/.curated/figma-create-new-file"
 
 [skills.cloudflare-deploy]
 name = "cloudflare-deploy"
 description = "Deploy applications and infrastructure to Cloudflare using Workers, Pages, and related platform services. Use when the user asks to deploy, host, publish, or set up a project on Cloudflare."
 source_url = "https://github.com/openai/skills/tree/main/skills/.curated/cloudflare-deploy"
-stars = 17034
+stars = 17116
 commit_sha = "bf9e226541ec801750547acfa8cf761b7c878f27"
 context_size = 1844
-domain = "deployment-and-infrastructure"
-last_updated = "2026-04-18"
+domain = "deployment"
+last_updated = "2026-04-20"
 tags = [
-    "cloud-deployment",
-    "workers",
+    "cloudflare",
+    "deployment",
     "infrastructure",
 ]
 score = 86.0
@@ -451,1465 +441,134 @@ type = "copy"
 [skills.cloudflare-deploy.install_action.value]
 folder = "skills/.curated/cloudflare-deploy"
 
-[skills.minimax-music-playlist]
-name = "minimax-music-playlist"
-description = """
-Generate personalized music playlists by analyzing the user's music taste and generation feedback history. Triggers on any request involving playlist generation, music taste profiling, or personalized music recommendations. Supports multilingual triggers — match equivalent phrases in any language.
-"""
-source_url = "https://github.com/MiniMax-AI/skills/tree/main/skills/minimax-music-playlist"
-stars = 10791
-commit_sha = "62870bece6d63c2e2fbd92f6c03ae26c4ee5cf8f"
-context_size = 3205
-domain = "data-and-research"
-last_updated = "2026-04-18"
+[skills.doc-coauthoring]
+name = "doc-coauthoring"
+description = "Guide users through a structured workflow for co-authoring documentation. Use when user wants to write documentation, proposals, technical specs, decision docs, or similar structured content. This workflow helps users efficiently transfer context, refine content through iteration, and verify the doc works for readers. Trigger when user mentions writing docs, creating proposals, drafting specs, or similar documentation tasks."
+source_url = "https://github.com/anthropics/skills/tree/main/skills/doc-coauthoring"
+stars = 120616
+commit_sha = "00756142ab04c82a447693cf373c4e0c554d1005"
+context_size = 3953
+domain = "documentation"
+last_updated = "2026-04-20"
 tags = [
-    "playlist",
-    "music",
-    "personalization",
+    "collaboration",
+    "structured-content",
+    "iteration",
 ]
-score = 90.0
+score = 82.80000305175781
 
-[skills.minimax-music-playlist.install_action]
+[skills.doc-coauthoring.install_action]
 type = "copy"
 
-[skills.minimax-music-playlist.install_action.value]
-folder = "skills/minimax-music-playlist"
+[skills.doc-coauthoring.install_action.value]
+folder = "skills/doc-coauthoring"
 
-[skills.fullstack-dev]
-name = "fullstack-dev"
-description = """
-Full-stack backend architecture and frontend-backend integration guide.
-TRIGGER when: building a full-stack app, creating REST API with frontend, scaffolding backend service,
-building todo app, building CRUD app, building real-time app, building chat app,
-Express + React, Next.js API, Node.js backend, Python backend, Go backend,
-designing service layers, implementing error handling, managing config/auth,
-setting up API clients, implementing auth flows, handling file uploads,
-adding real-time features (SSE/WebSocket), hardening for production.
-DO NOT TRIGGER when: pure frontend UI work, pure CSS/styling, database schema only.
-"""
-source_url = "https://github.com/MiniMax-AI/skills/tree/main/skills/fullstack-dev"
-stars = 10791
-commit_sha = "d35bfead71c1c749dc6e1f8c35e97e2e0f086cb1"
-context_size = 8702
-domain = "development"
-last_updated = "2026-04-18"
+[skills.algorithmic-art]
+name = "algorithmic-art"
+description = "Creating algorithmic art using p5.js with seeded randomness and interactive parameter exploration. Use this when users request creating art using code, generative art, algorithmic art, flow fields, or particle systems. Create original algorithmic art rather than copying existing artists' work to avoid copyright violations."
+source_url = "https://github.com/anthropics/skills/tree/main/skills/algorithmic-art"
+stars = 120616
+commit_sha = "ef740771ac901e03fbca3ce4e1c453a96010f30a"
+context_size = 4942
+domain = "design"
+last_updated = "2026-04-20"
 tags = [
-    "fullstack",
-    "api",
-    "integration",
+    "algorithmic-art",
+    "generative-art",
+    "interactive-design",
 ]
-score = 90.0
+score = 82.80000305175781
 
-[skills.fullstack-dev.install_action]
+[skills.algorithmic-art.install_action]
 type = "copy"
 
-[skills.fullstack-dev.install_action.value]
-folder = "skills/fullstack-dev"
+[skills.algorithmic-art.install_action.value]
+folder = "skills/algorithmic-art"
 
-[skills.minimax-music-gen]
-name = "minimax-music-gen"
-description = """
-Use when user wants to generate music, songs, or audio tracks. Triggers on any request involving music creation, song writing, lyrics generation, audio production, or covers. Also triggers when user provides lyrics and wants them turned into a song, or describes a mood/scene and wants background music. Supports multilingual triggers — match equivalent phrases in any language. Do NOT use for music playback of existing files, music theory questions, or music recommendation without generation.
-"""
-source_url = "https://github.com/MiniMax-AI/skills/tree/main/skills/minimax-music-gen"
-stars = 10791
-commit_sha = "a7bb7f2278ab00b623146a2a72d64555115f1478"
-context_size = 3514
-domain = "design-and-media"
-last_updated = "2026-04-18"
-tags = [
-    "music",
-    "generation",
-    "audio-production",
-]
-score = 90.0
-
-[skills.minimax-music-gen.install_action]
-type = "copy"
-
-[skills.minimax-music-gen.install_action.value]
-folder = "skills/minimax-music-gen"
-
-[skills.zoom-out]
-name = "zoom-out"
-description = "Tell the agent to zoom out and give broader context or a higher-level perspective. Use when you're unfamiliar with a section of code or need to understand how it fits into the bigger picture."
-source_url = "https://github.com/mattpocock/skills/tree/main/zoom-out"
-stars = 16086
-commit_sha = "ab45d5e6e1733b7ae27a0795f2a86418c2d451a0"
-context_size = 95
-domain = "planning-and-workflows"
-last_updated = "2026-04-18"
-tags = [
-    "context",
-    "overview",
-    "perspective",
-]
-score = 95.60975646972656
-
-[skills.zoom-out.install_action]
-type = "copy"
-
-[skills.zoom-out.install_action.value]
-folder = "zoom-out"
-
-[skills.cli-creator]
-name = "cli-creator"
-description = "Build a composable CLI for Codex from API docs, an OpenAPI spec, existing curl examples, an SDK, a web app, an admin tool, or a local script. Use when the user wants Codex to create a command-line tool that can run from any repo, expose composable read/write commands, return stable JSON, manage auth, and pair with a companion skill."
-source_url = "https://github.com/openai/skills/tree/main/skills/.curated/cli-creator"
-stars = 17034
-commit_sha = "0ed2046f287a92b5f4bcace213dcb3cc5f094cb9"
-context_size = 2625
-domain = "development"
-last_updated = "2026-04-18"
-tags = [
-    "cli-tool",
-    "api-integration",
-    "composable-commands",
-]
-score = 86.0
-
-[skills.cli-creator.install_action]
-type = "copy"
-
-[skills.cli-creator.install_action.value]
-folder = "skills/.curated/cli-creator"
-
-[skills.buddy-sings]
-name = "buddy-sings"
-description = """
-Use when user wants their Claude Code pet (/buddy) to sing a song. Triggers on any request that combines the concept of their Claude Code buddy, pet, or companion with singing or music. Supports multilingual triggers — match equivalent phrases in any language.
-"""
-source_url = "https://github.com/MiniMax-AI/skills/tree/main/skills/buddy-sings"
-stars = 10791
-commit_sha = "a7bb7f2278ab00b623146a2a72d64555115f1478"
-context_size = 4095
-domain = "collaboration-and-communication"
-last_updated = "2026-04-18"
-tags = [
-    "singing",
-    "music",
-    "multilingual",
-]
-score = 90.0
-
-[skills.buddy-sings.install_action]
-type = "copy"
-
-[skills.buddy-sings.install_action.value]
-folder = "skills/buddy-sings"
-
-[skills.request-refactor-plan]
-name = "request-refactor-plan"
-description = "Create a detailed refactor plan with tiny commits via user interview, then file it as a GitHub issue. Use when user wants to plan a refactor, create a refactoring RFC, or break a refactor into safe incremental steps."
-source_url = "https://github.com/mattpocock/skills/tree/main/request-refactor-plan"
-stars = 16086
-commit_sha = "d1beb4fe61574b3325ed96cd0d9a31966d31a02a"
-context_size = 677
-domain = "planning-and-workflows"
-last_updated = "2026-04-18"
-tags = [
-    "refactor-planning",
-    "incremental-steps",
-    "issue-filing",
-]
-score = 95.60975646972656
-
-[skills.request-refactor-plan.install_action]
-type = "copy"
-
-[skills.request-refactor-plan.install_action.value]
-folder = "request-refactor-plan"
-
-[skills.tdd]
-name = "tdd"
-description = 'Test-driven development with red-green-refactor loop. Use when user wants to build features or fix bugs using TDD, mentions "red-green-refactor", wants integration tests, or asks for test-first development.'
-source_url = "https://github.com/mattpocock/skills/tree/main/tdd"
-stars = 16086
-commit_sha = "b2039ab896a01ebcc539704f69974f7bcdfb1226"
-context_size = 1052
-domain = "testing-and-debugging"
-last_updated = "2026-04-18"
-tags = [
-    "test-driven-development",
-    "red-green-refactor",
-    "feature-building",
-]
-score = 95.60975646972656
-
-[skills.tdd.install_action]
-type = "copy"
-
-[skills.tdd.install_action.value]
-folder = "tdd"
-
-[skills.vision-analysis]
-name = "vision-analysis"
-description = """
-Analyze, describe, and extract information from images using the MiniMax vision MCP tool. Use when: user shares an image file path or URL (any message containing .jpg, .jpeg, .png, .gif, .webp, .bmp, or .svg file extension) or uses any of these words/phrases near an image: "analyze", "analyse", "describe", "explain", "understand", "look at", "review", "extract text", "OCR", "what is in", "what's in", "read this image", "see this image", "tell me about", "explain this", "interpret this", in connection with an image, screenshot, diagram, chart, mockup, wireframe, or photo. Also triggers for: UI mockup review, wireframe analysis, design critique, data extraction from charts, object detection, person/animal/activity identification. Triggers: any message with an image file extension (jpg, jpeg, png, gif, webp, bmp, svg), or any request to analyze/describ/understand/review/extract text from an image, screenshot, diagram, chart, photo, mockup, or wireframe.
-"""
-source_url = "https://github.com/MiniMax-AI/skills/tree/main/skills/vision-analysis"
-stars = 10791
-commit_sha = "6d8beb6ade70bc5c0a77eec28f4a51a1a767fb70"
-context_size = 1356
-domain = "data-and-research"
-last_updated = "2026-04-18"
-tags = [
-    "image-analysis",
-    "object-detection",
-    "data-extraction",
-]
-score = 90.0
-
-[skills.vision-analysis.install_action]
-type = "copy"
-
-[skills.vision-analysis.install_action.value]
-folder = "skills/vision-analysis"
-
-[skills.skills]
-name = "pr-review"
-description = """
-Review pull requests for the MiniMax Skills repository. Use when reviewing PRs, validating new skill submissions, or checking existing skills for compliance. Run the validation script first for hard checks, then apply quality guidelines for content review. Triggers: PR review, pull request, validate skill, check skill.
-"""
-source_url = "https://github.com/MiniMax-AI/skills/tree/main/.claude/skills/pr-review"
-stars = 10791
-commit_sha = "dd8ddcd099a484c40f70ca132f3266c43dfb8557"
-context_size = 619
-domain = "collaboration-and-communication"
-last_updated = "2026-04-18"
-tags = [
-    "review",
-    "pull-request",
-    "validation",
-]
-score = 90.0
-
-[skills.skills.install_action]
-type = "copy"
-
-[skills.skills.install_action.value]
-folder = ".claude/skills/pr-review"
-
-[skills.android-native-dev]
-name = "android-native-dev"
-description = "Android native application development and UI design guide. Covers Material Design 3, Kotlin/Compose development, project configuration, accessibility, and build troubleshooting. Read this before Android native application development."
-source_url = "https://github.com/MiniMax-AI/skills/tree/main/skills/android-native-dev"
-stars = 10791
-commit_sha = "fb18ac5aa161002e5f5fbdd14d7ce65da1cdb270"
-context_size = 7155
-domain = "development"
-last_updated = "2026-04-18"
-tags = [
-    "android",
-    "kotlin",
-    "ui-design",
-]
-score = 90.0
-
-[skills.android-native-dev.install_action]
-type = "copy"
-
-[skills.android-native-dev.install_action.value]
-folder = "skills/android-native-dev"
-
-[skills.ubiquitous-language]
-name = "ubiquitous-language"
-description = 'Extract a DDD-style ubiquitous language glossary from the current conversation, flagging ambiguities and proposing canonical terms. Saves to UBIQUITOUS_LANGUAGE.md. Use when user wants to define domain terms, build a glossary, harden terminology, create a ubiquitous language, or mentions "domain model" or "DDD".'
-source_url = "https://github.com/mattpocock/skills/tree/main/ubiquitous-language"
-stars = 16086
-commit_sha = "eebfb3c99aa955d4928192fab5de247d36633502"
-context_size = 1214
-domain = "data-and-research"
-last_updated = "2026-04-18"
-tags = [
-    "domain-glossary",
-    "terminology-definition",
-    "language-hardened",
-]
-score = 95.60975646972656
-
-[skills.ubiquitous-language.install_action]
-type = "copy"
-
-[skills.ubiquitous-language.install_action.value]
-folder = "ubiquitous-language"
-
-[skills.minimax-xlsx]
-name = "minimax-xlsx"
-description = "Open, create, read, analyze, edit, or validate Excel/spreadsheet files (.xlsx, .xlsm, .csv, .tsv). Use when the user asks to create, build, modify, analyze, read, validate, or format any Excel spreadsheet, financial model, pivot table, or tabular data file. Covers: creating new xlsx from scratch, reading and analyzing existing files, editing existing xlsx with zero format loss, formula recalculation and validation, and applying professional financial formatting standards. Triggers on 'spreadsheet', 'Excel', '.xlsx', '.csv', 'pivot table', 'financial model', 'formula', or any request to produce tabular data in Excel format."
-source_url = "https://github.com/MiniMax-AI/skills/tree/main/skills/minimax-xlsx"
-stars = 10791
-commit_sha = "e674758f8780c1bf0f40175d8d9188af45d9546c"
-context_size = 2099
-domain = "data-and-research"
-last_updated = "2026-04-18"
-tags = [
-    "excel",
-    "spreadsheet",
-    "data-analysis",
-]
-score = 90.0
-
-[skills.minimax-xlsx.install_action]
-type = "copy"
-
-[skills.minimax-xlsx.install_action.value]
-folder = "skills/minimax-xlsx"
-
-[skills.frontend-dev]
-name = "frontend-dev"
-description = """
-Full-stack frontend development combining premium UI design, cinematic animations,
-AI-generated media assets, persuasive copywriting, and visual art. Builds complete,
-visually striking web pages with real media, advanced motion, and compelling copy.
-Use when: building landing pages, marketing sites, product pages, dashboards,
-generating media assets (image/video/audio/music), writing conversion copy,
-creating generative art, or implementing cinematic scroll animations.
-"""
-source_url = "https://github.com/MiniMax-AI/skills/tree/main/skills/frontend-dev"
-stars = 10791
-commit_sha = "34c6cf05d7a2b68076bafa00e6f360bc9506bba6"
-context_size = 5142
-domain = "development"
-last_updated = "2026-04-18"
+[skills.frontend-design]
+name = "frontend-design"
+description = "Create distinctive, production-grade frontend interfaces with high design quality. Use this skill when the user asks to build web components, pages, artifacts, posters, or applications (examples include websites, landing pages, dashboards, React components, HTML/CSS layouts, or when styling/beautifying any web UI). Generates creative, polished code and UI design that avoids generic AI aesthetics."
+source_url = "https://github.com/anthropics/skills/tree/main/skills/frontend-design"
+stars = 120616
+commit_sha = "00756142ab04c82a447693cf373c4e0c554d1005"
+context_size = 1110
+domain = "design"
+last_updated = "2026-04-20"
 tags = [
     "frontend",
     "ui-design",
-    "animations",
+    "web-components",
 ]
-score = 90.0
+score = 82.80000305175781
 
-[skills.frontend-dev.install_action]
+[skills.frontend-design.install_action]
 type = "copy"
 
-[skills.frontend-dev.install_action.value]
-folder = "skills/frontend-dev"
+[skills.frontend-design.install_action.value]
+folder = "skills/frontend-design"
 
-[skills.minimax-multimodal-toolkit]
-name = "mmx-cli"
-description = "Use mmx to generate text, images, video, speech, and music via the MiniMax AI platform. Use when the user wants to create media content, chat with MiniMax models, perform web search, or manage MiniMax API resources from the terminal."
-source_url = "https://github.com/MiniMax-AI/skills/tree/main/skills/minimax-multimodal-toolkit"
-stars = 10791
-commit_sha = "e0fdeefe7b1e36a7d5b4c06c22a4371ad31f101c"
-context_size = 2740
-domain = "data-and-research"
-last_updated = "2026-04-18"
+[skills.theme-factory]
+name = "theme-factory"
+description = "Toolkit for styling artifacts with a theme. These artifacts can be slides, docs, reportings, HTML landing pages, etc. There are 10 pre-set themes with colors/fonts that you can apply to any artifact that has been creating, or can generate a new theme on-the-fly."
+source_url = "https://github.com/anthropics/skills/tree/main/skills/theme-factory"
+stars = 120616
+commit_sha = "ef740771ac901e03fbca3ce4e1c453a96010f30a"
+context_size = 781
+domain = "design"
+last_updated = "2026-04-20"
 tags = [
-    "media",
-    "generation",
-    "api",
+    "styling",
+    "theming",
+    "artifact-customization",
 ]
-score = 90.0
+score = 82.80000305175781
 
-[skills.minimax-multimodal-toolkit.install_action]
+[skills.theme-factory.install_action]
 type = "copy"
 
-[skills.minimax-multimodal-toolkit.install_action.value]
-folder = "skills/minimax-multimodal-toolkit"
+[skills.theme-factory.install_action.value]
+folder = "skills/theme-factory"
 
-[skills.react-native-dev]
-name = "react-native-dev"
-description = """
-React Native and Expo development guide covering components, styling, animations, navigation,
-state management, forms, networking, performance optimization, testing, native capabilities,
-and engineering (project structure, deployment, SDK upgrades, CI/CD).
-Use when: building React Native or Expo apps, implementing animations or native UI, managing
-state, fetching data, writing tests, optimizing performance, deploying to App Store/Play Store,
-setting up CI/CD, upgrading Expo SDK, or configuring Tailwind/NativeWind.
-"""
-source_url = "https://github.com/MiniMax-AI/skills/tree/main/skills/react-native-dev"
-stars = 10791
-commit_sha = "7a04b5ecf1da03bf225471e8a09202363e7f1d95"
-context_size = 1791
+[skills.develop-web-game]
+name = "develop-web-game"
+description = "Use when Codex is building or iterating on a web game (HTML/JS) and needs a reliable development + testing loop: implement small changes, run a Playwright-based test script with short input bursts and intentional pauses, inspect screenshots/text, and review console errors with render_game_to_text."
+source_url = "https://github.com/openai/skills/tree/main/skills/.curated/develop-web-game"
+stars = 17116
+commit_sha = "77963424cd7687fd52e5fcfdd3f08d826ab9b1ab"
+context_size = 2308
 domain = "development"
-last_updated = "2026-04-18"
+last_updated = "2026-04-20"
 tags = [
-    "react-native",
-    "expo",
-    "mobile-development",
-]
-score = 90.0
-
-[skills.react-native-dev.install_action]
-type = "copy"
-
-[skills.react-native-dev.install_action.value]
-folder = "skills/react-native-dev"
-
-[skills.gif-sticker-maker]
-name = "gif-sticker-maker"
-description = """
-Convert photos (people, pets, objects, logos) into 4 animated GIF stickers with captions.
-Use when: user wants to create cartoon stickers, GIF expressions, emoji packs, animated avatars,
-or convert photos to Funko Pop / Pop Mart blind box style animations.
-Triggers: sticker, GIF, cartoon, emoji, expression pack, avatar animation.
-"""
-source_url = "https://github.com/MiniMax-AI/skills/tree/main/skills/gif-sticker-maker"
-stars = 10791
-commit_sha = "34c6cf05d7a2b68076bafa00e6f360bc9506bba6"
-context_size = 1251
-domain = "design-and-media"
-last_updated = "2026-04-18"
-tags = [
-    "gif",
-    "stickers",
-    "animations",
-]
-score = 90.0
-
-[skills.gif-sticker-maker.install_action]
-type = "copy"
-
-[skills.gif-sticker-maker.install_action.value]
-folder = "skills/gif-sticker-maker"
-
-[skills.aspnet-core]
-name = "aspnet-core"
-description = "Build, review, refactor, or architect ASP.NET Core web applications using current official guidance for .NET web development. Use when working on Blazor Web Apps, Razor Pages, MVC, Minimal APIs, controller-based Web APIs, SignalR, gRPC, middleware, dependency injection, configuration, authentication, authorization, testing, performance, deployment, or ASP.NET Core upgrades."
-source_url = "https://github.com/openai/skills/tree/main/skills/.curated/aspnet-core"
-stars = 17034
-commit_sha = "c207989386b30063bcecaf6b1977d761b244732e"
-context_size = 1386
-domain = "development"
-last_updated = "2026-04-18"
-tags = [
-    "web-development",
-    "dotnet",
-    "mvc",
+    "web-game",
+    "testing",
+    "development-loop",
 ]
 score = 86.0
 
-[skills.aspnet-core.install_action]
+[skills.develop-web-game.install_action]
 type = "copy"
 
-[skills.aspnet-core.install_action.value]
-folder = "skills/.curated/aspnet-core"
+[skills.develop-web-game.install_action.value]
+folder = "skills/.curated/develop-web-game"
 
-[skills.caveman]
-name = "caveman"
-description = 'Ultra-compressed communication mode. Cuts token usage ~75% by dropping filler, articles, and pleasantries while keeping full technical accuracy. Use when user says "caveman mode", "talk like caveman", "use caveman", "less tokens", "be brief", or invokes /caveman.'
-source_url = "https://github.com/mattpocock/skills/tree/main/caveman"
-stars = 16086
-commit_sha = "ab45d5e6e1733b7ae27a0795f2a86418c2d451a0"
-context_size = 479
-domain = "collaboration-and-communication"
-last_updated = "2026-04-18"
-tags = [
-    "compressed-communication",
-    "token-efficiency",
-    "technical-accuracy",
-]
-score = 95.60975646972656
-
-[skills.caveman.install_action]
-type = "copy"
-
-[skills.caveman.install_action.value]
-folder = "caveman"
-
-[skills.obsidian-vault]
-name = "obsidian-vault"
-description = "Search, create, and manage notes in the Obsidian vault with wikilinks and index notes. Use when user wants to find, create, or organize notes in Obsidian."
-source_url = "https://github.com/mattpocock/skills/tree/main/obsidian-vault"
-stars = 16086
-commit_sha = "d1beb4fe61574b3325ed96cd0d9a31966d31a02a"
+[skills.internal-comms]
+name = "internal-comms"
+description = "A set of resources to help me write all kinds of internal communications, using the formats that my company likes to use. Claude should use this skill whenever asked to write some sort of internal communications (status reports, leadership updates, 3P updates, company newsletters, FAQs, incident reports, project updates, etc.)."
+source_url = "https://github.com/anthropics/skills/tree/main/skills/internal-comms"
+stars = 120616
+commit_sha = "ef740771ac901e03fbca3ce4e1c453a96010f30a"
 context_size = 377
-domain = "data-and-research"
-last_updated = "2026-04-18"
+domain = "collaboration"
+last_updated = "2026-04-20"
 tags = [
-    "note-management",
-    "wikilinks",
-    "organization",
+    "communication",
+    "internal-messages",
+    "reporting",
 ]
-score = 95.60975646972656
+score = 82.80000305175781
 
-[skills.obsidian-vault.install_action]
+[skills.internal-comms.install_action]
 type = "copy"
 
-[skills.obsidian-vault.install_action.value]
-folder = "obsidian-vault"
-
-[skills.triage-issue]
-name = "triage-issue"
-description = 'Triage a bug or issue by exploring the codebase to find root cause, then create a GitHub issue with a TDD-based fix plan. Use when user reports a bug, wants to file an issue, mentions "triage", or wants to investigate and plan a fix for a problem.'
-source_url = "https://github.com/mattpocock/skills/tree/main/triage-issue"
-stars = 16086
-commit_sha = "d1beb4fe61574b3325ed96cd0d9a31966d31a02a"
-context_size = 945
-domain = "testing-and-debugging"
-last_updated = "2026-04-18"
-tags = [
-    "bug-triage",
-    "root-cause-analysis",
-    "fix-planning",
-]
-score = 95.60975646972656
-
-[skills.triage-issue.install_action]
-type = "copy"
-
-[skills.triage-issue.install_action.value]
-folder = "triage-issue"
-
-[skills.pptx-generator]
-name = "pptx-generator"
-description = "Generate, edit, and read PowerPoint presentations. Create from scratch with PptxGenJS (cover, TOC, content, section divider, summary slides), edit existing PPTX via XML workflows, or extract text with markitdown. Triggers: PPT, PPTX, PowerPoint, presentation, slide, deck, slides."
-source_url = "https://github.com/MiniMax-AI/skills/tree/main/skills/pptx-generator"
-stars = 10791
-commit_sha = "4006c2661305ed221f957a08e1d3429cb525de67"
-context_size = 1982
-domain = "design-and-media"
-last_updated = "2026-04-18"
-tags = [
-    "presentation",
-    "pptx-editing",
-    "slide-creation",
-]
-score = 90.0
-
-[skills.pptx-generator.install_action]
-type = "copy"
-
-[skills.pptx-generator.install_action.value]
-folder = "skills/pptx-generator"
-
-[skills.setup-pre-commit]
-name = "setup-pre-commit"
-description = "Set up Husky pre-commit hooks with lint-staged (Prettier), type checking, and tests in the current repo. Use when user wants to add pre-commit hooks, set up Husky, configure lint-staged, or add commit-time formatting/typechecking/testing."
-source_url = "https://github.com/mattpocock/skills/tree/main/setup-pre-commit"
-stars = 16086
-commit_sha = "4458b65ffca31dc80f975a179a4e9cfe43e1fa49"
-context_size = 565
-domain = "deployment-and-infrastructure"
-last_updated = "2026-04-18"
-tags = [
-    "git-hooks",
-    "commit-validation",
-    "code-quality",
-]
-score = 95.60975646972656
-
-[skills.setup-pre-commit.install_action]
-type = "copy"
-
-[skills.setup-pre-commit.install_action.value]
-folder = "setup-pre-commit"
-
-[skills.github-triage]
-name = "github-triage"
-description = "Triage GitHub issues through a label-based state machine with interactive grilling sessions. Use when user wants to triage issues, review incoming bugs or feature requests, prepare issues for an AFK agent, or manage issue workflow."
-source_url = "https://github.com/mattpocock/skills/tree/main/github-triage"
-stars = 16086
-commit_sha = "ab45d5e6e1733b7ae27a0795f2a86418c2d451a0"
-context_size = 2507
-domain = "collaboration-and-communication"
-last_updated = "2026-04-18"
-tags = [
-    "issue-triage",
-    "label-management",
-    "workflow-optimization",
-]
-score = 95.60975646972656
-
-[skills.github-triage.install_action]
-type = "copy"
-
-[skills.github-triage.install_action.value]
-folder = "github-triage"
-
-[skills.domain-model]
-name = "domain-model"
-description = "Grilling session that challenges your plan against the existing domain model, sharpens terminology, and updates documentation (CONTEXT.md, ADRs) inline as decisions crystallise. Use when user wants to stress-test a plan against their project's language and documented decisions."
-source_url = "https://github.com/mattpocock/skills/tree/main/domain-model"
-stars = 16086
-commit_sha = "ab45d5e6e1733b7ae27a0795f2a86418c2d451a0"
-context_size = 850
-domain = "documentation"
-last_updated = "2026-04-18"
-tags = [
-    "terminology-refinement",
-    "documentation-update",
-    "stress-test",
-]
-score = 95.60975646972656
-
-[skills.domain-model.install_action]
-type = "copy"
-
-[skills.domain-model.install_action.value]
-folder = "domain-model"
-
-[skills.qa]
-name = "qa"
-description = 'Interactive QA session where user reports bugs or issues conversationally, and the agent files GitHub issues. Explores the codebase in the background for context and domain language. Use when user wants to report bugs, do QA, file issues conversationally, or mentions "QA session".'
-source_url = "https://github.com/mattpocock/skills/tree/main/qa"
-stars = 16086
-commit_sha = "6a87ed07b027d3485dcc77fddff628b62d4e4a9b"
-context_size = 1241
-domain = "testing-and-debugging"
-last_updated = "2026-04-18"
-tags = [
-    "bug-reporting",
-    "interactive-qa",
-    "issue-filing",
-]
-score = 95.60975646972656
-
-[skills.qa.install_action]
-type = "copy"
-
-[skills.qa.install_action.value]
-folder = "qa"
-
-# Superpowers - 15 skills
-[skills.test-driven-development]
-name = "test-driven-development"
-description = "Enforces TDD workflows - write tests first, watch them fail, write minimal code to pass."
-source_url = "https://github.com/obra/superpowers/tree/main/skills/test-driven-development"
-stars = 20000
-commit_sha = ""
-context_size = 500
-domain = "development"
-last_updated = "2026-04-19"
-tags = ["tdd", "testing", "quality"]
-score = 95.0
-
-[skills.test-driven-development.install_action]
-type = "copy"
-
-[skills.test-driven-development.install_action.value]
-folder = "skills/test-driven-development"
-
-[skills.systematic-debugging]
-name = "systematic-debugging"
-description = "Root-cause analysis instead of guessing fixes. Forces structured investigation of bugs."
-source_url = "https://github.com/obra/superpowers/tree/main/skills/systematic-debugging"
-stars = 20000
-commit_sha = ""
-context_size = 800
-domain = "development"
-last_updated = "2026-04-19"
-tags = ["debugging", "investigation", "quality"]
-score = 95.0
-
-[skills.systematic-debugging.install_action]
-type = "copy"
-
-[skills.systematic-debugging.install_action.value]
-folder = "skills/systematic-debugging"
-
-[skills.brainstorming]
-name = "brainstorming"
-description = "Transform rough ideas into structured designs. Explores requirements before implementation."
-source_url = "https://github.com/obra/superpowers/tree/main/skills/brainstorming"
-stars = 20000
-commit_sha = ""
-context_size = 600
-domain = "development"
-last_updated = "2026-04-19"
-tags = ["planning", "design", "ideation"]
-score = 95.0
-
-[skills.brainstorming.install_action]
-type = "copy"
-
-[skills.brainstorming.install_action.value]
-folder = "skills/brainstorming"
-
-[skills.using-git-worktrees]
-name = "using-git-worktrees"
-description = "Isolated git worktrees for parallel development. Work on multiple branches simultaneously."
-source_url = "https://github.com/obra/superpowers/tree/main/skills/using-git-worktrees"
-stars = 20000
-commit_sha = ""
-context_size = 400
-domain = "development"
-last_updated = "2026-04-19"
-tags = ["git", "workflow", "parallel"]
-score = 95.0
-
-[skills.using-git-worktrees.install_action]
-type = "copy"
-
-[skills.using-git-worktrees.install_action.value]
-folder = "skills/using-git-worktrees"
-
-[skills.finishing-a-development-branch]
-name = "finishing-a-development-branch"
-description = "Merge, cleanup, and integrate completed work. Streamlines the branch completion workflow."
-source_url = "https://github.com/obra/superpowers/tree/main/skills/finishing-a-development-branch"
-stars = 20000
-commit_sha = ""
-context_size = 300
-domain = "development"
-last_updated = "2026-04-19"
-tags = ["git", "merge", "cleanup"]
-score = 95.0
-
-[skills.finishing-a-development-branch.install_action]
-type = "copy"
-
-[skills.finishing-a-development-branch.install_action.value]
-folder = "skills/finishing-a-development-branch"
-
-[skills.executing-plans]
-name = "executing-plans"
-description = "Execute multi-step implementation plans with review checkpoints."
-source_url = "https://github.com/obra/superpowers/tree/main/skills/executing-plans"
-stars = 20000
-commit_sha = ""
-context_size = 400
-domain = "development"
-last_updated = "2026-04-19"
-tags = ["execution", "planning", "workflow"]
-score = 95.0
-
-[skills.executing-plans.install_action]
-type = "copy"
-
-[skills.executing-plans.install_action.value]
-folder = "skills/executing-plans"
-
-[skills.requesting-code-review]
-name = "requesting-code-review"
-description = "Request structured code review with specific review criteria."
-source_url = "https://github.com/obra/superpowers/tree/main/skills/requesting-code-review"
-stars = 20000
-commit_sha = ""
-context_size = 400
-domain = "development"
-last_updated = "2026-04-19"
-tags = ["review", "quality", "feedback"]
-score = 95.0
-
-[skills.requesting-code-review.install_action]
-type = "copy"
-
-[skills.requesting-code-review.install_action.value]
-folder = "skills/requesting-code-review"
-
-[skills.receiving-code-review]
-name = "receiving-code-review"
-description = "Handle and implement code review feedback with verification before blind implementation."
-source_url = "https://github.com/obra/superpowers/tree/main/skills/receiving-code-review"
-stars = 20000
-commit_sha = ""
-context_size = 400
-domain = "development"
-last_updated = "2026-04-19"
-tags = ["review", "feedback", "quality"]
-score = 95.0
-
-[skills.receiving-code-review.install_action]
-type = "copy"
-
-[skills.receiving-code-review.install_action.value]
-folder = "skills/receiving-code-review"
-
-[skills.subagent-driven-development]
-name = "subagent-driven-development"
-description = "Parallel subagent execution for independent tasks. Spawn agents for isolated work."
-source_url = "https://github.com/obra/superpowers/tree/main/skills/subagent-driven-development"
-stars = 20000
-commit_sha = ""
-context_size = 500
-domain = "development"
-last_updated = "2026-04-19"
-tags = ["agents", "parallel", "execution"]
-score = 95.0
-
-[skills.subagent-driven-development.install_action]
-type = "copy"
-
-[skills.subagent-driven-development.install_action.value]
-folder = "skills/subagent-driven-development"
-
-[skills.dispatching-parallel-agents]
-name = "dispatching-parallel-agents"
-description = "Spawn parallel agents for independent work without shared state."
-source_url = "https://github.com/obra/superpowers/tree/main/skills/dispatching-parallel-agents"
-stars = 20000
-commit_sha = ""
-context_size = 400
-domain = "development"
-last_updated = "2026-04-19"
-tags = ["agents", "parallel", "dispatch"]
-score = 95.0
-
-[skills.dispatching-parallel-agents.install_action]
-type = "copy"
-
-[skills.dispatching-parallel-agents.install_action.value]
-folder = "skills/dispatching-parallel-agents"
-
-[skills.verification-before-completion]
-name = "verification-before-completion"
-description = "Verify work passes tests before claiming complete. Evidence before assertions."
-source_url = "https://github.com/obra/superpowers/tree/main/skills/verification-before-completion"
-stars = 20000
-commit_sha = ""
-context_size = 300
-domain = "development"
-last_updated = "2026-04-19"
-tags = ["testing", "verification", "quality"]
-score = 95.0
-
-[skills.verification-before-completion.install_action]
-type = "copy"
-
-[skills.verification-before-completion.install_action.value]
-folder = "skills/verification-before-completion"
-
-[skills.writing-plans]
-name = "writing-plans"
-description = "Write structured implementation plans before touching code."
-source_url = "https://github.com/obra/superpowers/tree/main/skills/writing-plans"
-stars = 20000
-commit_sha = ""
-context_size = 400
-domain = "development"
-last_updated = "2026-04-19"
-tags = ["planning", "documentation", "workflow"]
-score = 95.0
-
-[skills.writing-plans.install_action]
-type = "copy"
-
-[skills.writing-plans.install_action.value]
-folder = "skills/writing-plans"
-
-[skills.using-superpowers]
-name = "using-superpowers"
-description = "Guide to discovering and using skills. Establishes skill invocation patterns."
-source_url = "https://github.com/obra/superpowers/tree/main/skills/using-superpowers"
-stars = 20000
-commit_sha = ""
-context_size = 400
-domain = "development"
-last_updated = "2026-04-19"
-tags = ["meta", "skills", "discovery"]
-score = 95.0
-
-[skills.using-superpowers.install_action]
-type = "copy"
-
-[skills.using-superpowers.install_action.value]
-folder = "skills/using-superpowers"
-
-[skills.find-skills]
-name = "find-skills"
-description = "Discover and install agent skills. Helps users find skills for specific tasks."
-source_url = "https://github.com/obra/superpowers/tree/main/skills/find-skills"
-stars = 20000
-commit_sha = ""
-context_size = 300
-domain = "development"
-last_updated = "2026-04-19"
-tags = ["discovery", "skills", "installation"]
-score = 95.0
-
-[skills.find-skills.install_action]
-type = "copy"
-
-[skills.find-skills.install_action.value]
-folder = "skills/find-skills"
-
-# Superpowers Lab - 4 experimental skills
-[skills.finding-duplicate-functions]
-name = "finding-duplicate-functions"
-description = "Detect semantic code duplication in codebases. Find redundant implementations."
-source_url = "https://github.com/obra/superpowers-lab/tree/main/skills/finding-duplicate-functions"
-stars = 291
-commit_sha = ""
-context_size = 400
-domain = "development"
-last_updated = "2026-04-19"
-tags = ["experimental", "analysis", "duplication"]
-score = 90.0
-
-[skills.finding-duplicate-functions.install_action]
-type = "copy"
-
-[skills.finding-duplicate-functions.install_action.value]
-folder = "skills/finding-duplicate-functions"
-
-[skills.mcp-cli]
-name = "mcp-cli"
-description = "MCP server CLI management. Configure and manage MCP servers."
-source_url = "https://github.com/obra/superpowers-lab/tree/main/skills/mcp-cli"
-stars = 291
-commit_sha = ""
-context_size = 300
-domain = "development"
-last_updated = "2026-04-19"
-tags = ["experimental", "mcp", "cli"]
-score = 90.0
-
-[skills.mcp-cli.install_action]
-type = "copy"
-
-[skills.mcp-cli.install_action.value]
-folder = "skills/mcp-cli"
-
-[skills.tmux-interactive]
-name = "tmux-interactive"
-description = "Tmux interactive command execution for terminal workflows."
-source_url = "https://github.com/obra/superpowers-lab/tree/main/skills/tmux-interactive"
-stars = 291
-commit_sha = ""
-context_size = 300
-domain = "development"
-last_updated = "2026-04-19"
-tags = ["experimental", "terminal", "tmux"]
-score = 90.0
-
-[skills.tmux-interactive.install_action]
-type = "copy"
-
-[skills.tmux-interactive.install_action.value]
-folder = "skills/tmux-interactive"
-
-[skills.windows-vm]
-name = "windows-vm"
-description = "Windows VM management for cross-platform testing."
-source_url = "https://github.com/obra/superpowers-lab/tree/main/skills/windows-vm"
-stars = 291
-commit_sha = ""
-context_size = 300
-domain = "development"
-last_updated = "2026-04-19"
-tags = ["experimental", "vm", "windows"]
-score = 90.0
-
-[skills.windows-vm.install_action]
-type = "copy"
-
-[skills.windows-vm.install_action.value]
-folder = "skills/windows-vm"
-
-# Impeccable - 18 skills
-[skills.impeccable]
-name = "impeccable"
-description = "Frontend design vocabulary with 7 reference files. Create distinctive, production-grade interfaces."
-source_url = "https://github.com/pbakaus/impeccable/tree/main/.agents/skills/impeccable"
-stars = 20000
-commit_sha = ""
-context_size = 1500
-domain = "design-and-media"
-last_updated = "2026-04-19"
-tags = ["design", "frontend", "ux"]
-score = 95.0
-
-[skills.impeccable.install_action]
-type = "copy"
-
-[skills.impeccable.install_action.value]
-folder = ".agents/skills/impeccable"
-
-[skills.audit]
-name = "audit"
-description = "Run technical quality checks: accessibility, performance, responsive design."
-source_url = "https://github.com/pbakaus/impeccable/tree/main/.agents/skills/audit"
-stars = 20000
-commit_sha = ""
-context_size = 300
-domain = "design-and-media"
-last_updated = "2026-04-19"
-tags = ["design", "quality", "audit"]
-score = 95.0
-
-[skills.audit.install_action]
-type = "copy"
-
-[skills.audit.install_action.value]
-folder = ".agents/skills/audit"
-
-[skills.polish]
-name = "polish"
-description = "Final pass, design system alignment, and shipping readiness."
-source_url = "https://github.com/pbakaus/impeccable/tree/main/.agents/skills/polish"
-stars = 20000
-commit_sha = ""
-context_size = 300
-domain = "design-and-media"
-last_updated = "2026-04-19"
-tags = ["design", "refinement", "polish"]
-score = 95.0
-
-[skills.polish.install_action]
-type = "copy"
-
-[skills.polish.install_action.value]
-folder = ".agents/skills/polish"
-
-[skills.critique]
-name = "critique"
-description = "UX design review with heuristics scoring and cognitive load analysis."
-source_url = "https://github.com/pbakaus/impeccable/tree/main/.agents/skills/critique"
-stars = 20000
-commit_sha = ""
-context_size = 400
-domain = "design-and-media"
-last_updated = "2026-04-19"
-tags = ["design", "review", "ux"]
-score = 95.0
-
-[skills.critique.install_action]
-type = "copy"
-
-[skills.critique.install_action.value]
-folder = ".agents/skills/critique"
-
-[skills.distill]
-name = "distill"
-description = "Strip design to essence. Remove complexity and visual noise."
-source_url = "https://github.com/pbakaus/impeccable/tree/main/.agents/skills/distill"
-stars = 20000
-commit_sha = ""
-context_size = 200
-domain = "design-and-media"
-last_updated = "2026-04-19"
-tags = ["design", "minimalism", "simplification"]
-score = 95.0
-
-[skills.distill.install_action]
-type = "copy"
-
-[skills.distill.install_action.value]
-folder = ".agents/skills/distill"
-
-[skills.clarify]
-name = "clarify"
-description = "Improve UX copy clarity. Better button labels, error messages, empty states."
-source_url = "https://github.com/pbakaus/impeccable/tree/main/.agents/skills/clarify"
-stars = 20000
-commit_sha = ""
-context_size = 200
-domain = "design-and-media"
-last_updated = "2026-04-19"
-tags = ["design", "ux-writing", "copy"]
-score = 95.0
-
-[skills.clarify.install_action]
-type = "copy"
-
-[skills.clarify.install_action.value]
-folder = ".agents/skills/clarify"
-
-[skills.optimize]
-name = "optimize"
-description = "Performance improvements for frontend applications."
-source_url = "https://github.com/pbakaus/impeccable/tree/main/.agents/skills/optimize"
-stars = 20000
-commit_sha = ""
-context_size = 200
-domain = "design-and-media"
-last_updated = "2026-04-19"
-tags = ["design", "performance", "optimization"]
-score = 95.0
-
-[skills.optimize.install_action]
-type = "copy"
-
-[skills.optimize.install_action.value]
-folder = ".agents/skills/optimize"
-
-[skills.harden]
-name = "harden"
-description = "Error handling, edge cases, accessibility, and robustness."
-source_url = "https://github.com/pbakaus/impeccable/tree/main/.agents/skills/harden"
-stars = 20000
-commit_sha = ""
-context_size = 200
-domain = "design-and-media"
-last_updated = "2026-04-19"
-tags = ["design", "robustness", "accessibility"]
-score = 95.0
-
-[skills.harden.install_action]
-type = "copy"
-
-[skills.harden.install_action.value]
-folder = ".agents/skills/harden"
-
-[skills.animate]
-name = "animate"
-description = "Add purposeful motion with easing curves and staggering."
-source_url = "https://github.com/pbakaus/impeccable/tree/main/.agents/skills/animate"
-stars = 20000
-commit_sha = ""
-context_size = 200
-domain = "design-and-media"
-last_updated = "2026-04-19"
-tags = ["design", "motion", "animation"]
-score = 95.0
-
-[skills.animate.install_action]
-type = "copy"
-
-[skills.animate.install_action.value]
-folder = ".agents/skills/animate"
-
-[skills.colorize]
-name = "colorize"
-description = "Introduce strategic color using OKLCH and tinted neutrals."
-source_url = "https://github.com/pbakaus/impeccable/tree/main/.agents/skills/colorize"
-stars = 20000
-commit_sha = ""
-context_size = 200
-domain = "design-and-media"
-last_updated = "2026-04-19"
-tags = ["design", "color", "palette"]
-score = 95.0
-
-[skills.colorize.install_action]
-type = "copy"
-
-[skills.colorize.install_action.value]
-folder = ".agents/skills/colorize"
-
-[skills.bolder]
-name = "bolder"
-description = "Amplify boring designs with stronger visual impact."
-source_url = "https://github.com/pbakaus/impeccable/tree/main/.agents/skills/bolder"
-stars = 20000
-commit_sha = ""
-context_size = 200
-domain = "design-and-media"
-last_updated = "2026-04-19"
-tags = ["design", "impact", "emphasis"]
-score = 95.0
-
-[skills.bolder.install_action]
-type = "copy"
-
-[skills.bolder.install_action.value]
-folder = ".agents/skills/bolder"
-
-[skills.quieter]
-name = "quieter"
-description = "Tone down overly bold designs for better balance."
-source_url = "https://github.com/pbakaus/impeccable/tree/main/.agents/skills/quieter"
-stars = 20000
-commit_sha = ""
-context_size = 200
-domain = "design-and-media"
-last_updated = "2026-04-19"
-tags = ["design", "balance", "refinement"]
-score = 95.0
-
-[skills.quieter.install_action]
-type = "copy"
-
-[skills.quieter.install_action.value]
-folder = ".agents/skills/quieter"
-
-[skills.delight]
-name = "delight"
-description = "Add moments of joy and delightful interactions."
-source_url = "https://github.com/pbakaus/impeccable/tree/main/.agents/skills/delight"
-stars = 20000
-commit_sha = ""
-context_size = 200
-domain = "design-and-media"
-last_updated = "2026-04-19"
-tags = ["design", "ux", "delight"]
-score = 95.0
-
-[skills.delight.install_action]
-type = "copy"
-
-[skills.delight.install_action.value]
-folder = ".agents/skills/delight"
-
-[skills.adapt]
-name = "adapt"
-description = "Adapt designs for different devices and responsive layouts."
-source_url = "https://github.com/pbakaus/impeccable/tree/main/.agents/skills/adapt"
-stars = 20000
-commit_sha = ""
-context_size = 200
-domain = "design-and-media"
-last_updated = "2026-04-19"
-tags = ["design", "responsive", "mobile"]
-score = 95.0
-
-[skills.adapt.install_action]
-type = "copy"
-
-[skills.adapt.install_action.value]
-folder = ".agents/skills/adapt"
-
-[skills.typeset]
-name = "typeset"
-description = "Fix typography, hierarchy, and font sizing."
-source_url = "https://github.com/pbakaus/impeccable/tree/main/.agents/skills/typeset"
-stars = 20000
-commit_sha = ""
-context_size = 200
-domain = "design-and-media"
-last_updated = "2026-04-19"
-tags = ["design", "typography", "fonts"]
-score = 95.0
-
-[skills.typeset.install_action]
-type = "copy"
-
-[skills.typeset.install_action.value]
-folder = ".agents/skills/typeset"
-
-[skills.layout]
-name = "layout"
-description = "Fix layout, spacing, and visual rhythm."
-source_url = "https://github.com/pbakaus/impeccable/tree/main/.agents/skills/layout"
-stars = 20000
-commit_sha = ""
-context_size = 200
-domain = "design-and-media"
-last_updated = "2026-04-19"
-tags = ["design", "layout", "spacing"]
-score = 95.0
-
-[skills.layout.install_action]
-type = "copy"
-
-[skills.layout.install_action.value]
-folder = ".agents/skills/layout"
-
-[skills.overdrive]
-name = "overdrive"
-description = "Add technically extraordinary effects and advanced animations."
-source_url = "https://github.com/pbakaus/impeccable/tree/main/.agents/skills/overdrive"
-stars = 20000
-commit_sha = ""
-context_size = 200
-domain = "design-and-media"
-last_updated = "2026-04-19"
-tags = ["design", "advanced", "effects"]
-score = 95.0
-
-[skills.overdrive.install_action]
-type = "copy"
-
-[skills.overdrive.install_action.value]
-folder = ".agents/skills/overdrive"
-
-[skills.shape]
-name = "shape"
-description = "Design exploration before implementation. Shape-then-build flow."
-source_url = "https://github.com/pbakaus/impeccable/tree/main/.agents/skills/shape"
-stars = 20000
-commit_sha = ""
-context_size = 200
-domain = "design-and-media"
-last_updated = "2026-04-19"
-tags = ["design", "planning", "exploration"]
-score = 95.0
-
-[skills.shape.install_action]
-type = "copy"
-
-[skills.shape.install_action.value]
-folder = ".agents/skills/shape"
-
-# GSD - npx installer
-[skills.gsd]
-name = "gsd"
-description = "Get Shit Done - 57 commands for planning, execution, verification, and milestone tracking. Full project management system."
-source_url = "https://github.com/gsd-build/get-shit-done"
-stars = 56700
-commit_sha = ""
-context_size = 0
-domain = "project-management"
-last_updated = "2026-04-19"
-tags = ["project-management", "planning", "workflow", "execution"]
-score = 98.0
-
-[skills.gsd.install_action]
-type = "npx"
-
-[skills.gsd.install_action.value]
-package = "get-shit-done-cc"
-args = ["@latest"]
-uninstall_flag = "--uninstall"
-
-# Individual skills from awesome lists
-[skills.pypict]
-name = "pypict"
-description = "Combinatorial testing with PICT. Generates optimized test suites from pairwise testing."
-source_url = "https://github.com/omkamal/pypict-claude-skill/tree/main/skills/pypict"
-stars = 100
-commit_sha = ""
-context_size = 300
-domain = "testing-and-debugging"
-last_updated = "2026-04-19"
-tags = ["testing", "combinatorial", "pict"]
-score = 85.0
-
-[skills.pypict.install_action]
-type = "copy"
-
-[skills.pypict.install_action.value]
-folder = "skills/pypict"
-
-[skills.ffuf]
-name = "ffuf"
-description = "Security fuzzing with FFUF for vulnerability analysis and penetration testing."
-source_url = "https://github.com/jthack/ffuf_claude_skill/tree/main/skills/ffuf"
-stars = 50
-commit_sha = ""
-context_size = 300
-domain = "security-and-privacy"
-last_updated = "2026-04-19"
-tags = ["security", "fuzzing", "penetration-testing"]
-score = 85.0
-
-[skills.ffuf.install_action]
-type = "copy"
-
-[skills.ffuf.install_action.value]
-folder = "skills/ffuf"
-
-[skills.tapestry]
-name = "tapestry"
-description = "Interlink documents into navigable knowledge networks. Create interconnected wiki from docs."
-source_url = "https://github.com/michalparkola/tapestry-skills-for-claude-code/tree/main/skills/tapestry"
-stars = 50
-commit_sha = ""
-context_size = 400
-domain = "data-and-research"
-last_updated = "2026-04-19"
-tags = ["knowledge", "documentation", "graph"]
-score = 85.0
-
-[skills.tapestry.install_action]
-type = "copy"
-
-[skills.tapestry.install_action.value]
-folder = "skills/tapestry"
-
-[skills.youtube-transcript]
-name = "youtube-transcript"
-description = "Fetch and summarize YouTube video transcripts for research."
-source_url = "https://github.com/michalparkola/tapestry-skills-for-claude-code/tree/main/skills/youtube-transcript"
-stars = 50
-commit_sha = ""
-context_size = 300
-domain = "data-and-research"
-last_updated = "2026-04-19"
-tags = ["research", "video", "transcription"]
-score = 85.0
-
-[skills.youtube-transcript.install_action]
-type = "copy"
-
-[skills.youtube-transcript.install_action.value]
-folder = "skills/youtube-transcript"
-
-[skills.article-extractor]
-name = "article-extractor"
-description = "Extract full article text and metadata from web pages."
-source_url = "https://github.com/michalparkola/tapestry-skills-for-claude-code/tree/main/skills/article-extractor"
-stars = 50
-commit_sha = ""
-context_size = 300
-domain = "data-and-research"
-last_updated = "2026-04-19"
-tags = ["research", "web", "extraction"]
-score = 85.0
-
-[skills.article-extractor.install_action]
-type = "copy"
-
-[skills.article-extractor.install_action.value]
-folder = "skills/article-extractor"
-
-[skills.file-organizer]
-name = "file-organizer"
-description = "Smart file and folder categorization for chaotic directories."
-source_url = "https://github.com/ComposioHQ/awesome-claude-skills/tree/main/skills/file-organizer"
-stars = 100
-commit_sha = ""
-context_size = 300
-domain = "deployment-and-infrastructure"
-last_updated = "2026-04-19"
-tags = ["organization", "files", "categorization"]
-score = 85.0
-
-[skills.file-organizer.install_action]
-type = "copy"
-
-[skills.file-organizer.install_action.value]
-folder = "skills/file-organizer"
-
-[skills.invoice-organizer]
-name = "invoice-organizer"
-description = "Organize invoices and receipts for tax preparation. Finance document management."
-source_url = "https://github.com/ComposioHQ/awesome-claude-skills/tree/main/skills/invoice-organizer"
-stars = 100
-commit_sha = ""
-context_size = 300
-domain = "deployment-and-infrastructure"
-last_updated = "2026-04-19"
-tags = ["organization", "finance", "tax"]
-score = 85.0
-
-[skills.invoice-organizer.install_action]
-type = "copy"
-
-[skills.invoice-organizer.install_action.value]
-folder = "skills/invoice-organizer"
-
-[skills.web-asset-generator]
-name = "web-asset-generator"
-description = "Generate favicons, app icons, Open Graph tags, and PWA assets."
-source_url = "https://github.com/alonw0/web-asset-generator/tree/main/skills/web-asset-generator"
-stars = 50
-commit_sha = ""
-context_size = 400
-domain = "design-and-media"
-last_updated = "2026-04-19"
-tags = ["web", "assets", "icons"]
-score = 85.0
-
-[skills.web-asset-generator.install_action]
-type = "copy"
-
-[skills.web-asset-generator.install_action.value]
-folder = "skills/web-asset-generator"
-
-[skills.content-research-writer]
-name = "content-research-writer"
-description = "Research-backed content writing with citations and iterative quality improvement."
-source_url = "https://github.com/ComposioHQ/awesome-claude-skills/tree/main/skills/content-research-writer"
-stars = 100
-commit_sha = ""
-context_size = 400
-domain = "documentation"
-last_updated = "2026-04-19"
-tags = ["writing", "research", "citations"]
-score = 85.0
-
-[skills.content-research-writer.install_action]
-type = "copy"
-
-[skills.content-research-writer.install_action.value]
-folder = "skills/content-research-writer"
-
-[skills.epub-analyzer]
-name = "epub-analyzer"
-description = "Summarize and query ebooks and academic papers in EPUB/PDF format."
-source_url = "https://github.com/smerchek/claude-epub-skill/tree/main/skills/epub-analyzer"
-stars = 50
-commit_sha = ""
-context_size = 300
-domain = "data-and-research"
-last_updated = "2026-04-19"
-tags = ["research", "books", "epub"]
-score = 85.0
-
-[skills.epub-analyzer.install_action]
-type = "copy"
-
-[skills.epub-analyzer.install_action.value]
-folder = "skills/epub-analyzer"
+[skills.internal-comms.install_action.value]
+folder = "skills/internal-comms"
