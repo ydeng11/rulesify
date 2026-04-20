@@ -38,6 +38,9 @@ pub enum SkillCommands {
         /// Install to global skill directory instead of project
         #[arg(long)]
         global: bool,
+        /// Output instructions for AI agent instead of executing
+        #[arg(long)]
+        agent_mode: bool,
     },
 
     /// Remove an installed skill
@@ -47,10 +50,17 @@ pub enum SkillCommands {
         /// Remove from global skill directory instead of project
         #[arg(long)]
         global: bool,
+        /// Output instructions for AI agent instead of executing
+        #[arg(long)]
+        agent_mode: bool,
     },
 
     /// Update registry cache
-    Update,
+    Update {
+        /// Output instructions for AI agent instead of executing
+        #[arg(long)]
+        agent_mode: bool,
+    },
 }
 
 pub async fn run(cli: Cli) -> crate::utils::Result<()> {

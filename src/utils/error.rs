@@ -29,6 +29,9 @@ pub enum RulesifyError {
     #[error("HTTP error: {0}")]
     HttpError(#[from] reqwest::Error),
 
+    #[error("Network error: {0}")]
+    NetworkError(String),
+
     #[error("GitHub API error: {0}")]
     GitHubApi(String),
 

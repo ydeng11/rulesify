@@ -1,3 +1,4 @@
+use crate::fetcher::ArchiveCache;
 use crate::installer::{
     install_skill, print_install_summary, print_uninstall_summary, uninstall_skill,
 };
@@ -91,6 +92,7 @@ pub async fn run(verbose: bool) -> Result<()> {
     }
 
     let client = GitHubClient::new();
+    let cache = ArchiveCache::new();
     let mut config = existing_config.unwrap_or(ProjectConfig::new());
     config.tools = tools.clone();
 
@@ -117,7 +119,7 @@ pub async fn run(verbose: bool) -> Result<()> {
             }
 
             println!("Installing '{}'...", skill.name);
-            let results = install_skill(skill, &tools, Scope::Project, &client).await?;
+            let results = install_skill(skill, &tools, Scope::Project, &client, &cache).await?;
             print_install_summary(&results, &skill.name);
             config.add_skill(id, &skill.source_url, &skill.commit_sha, Scope::Project);
         }

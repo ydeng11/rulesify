@@ -1,8 +1,12 @@
 use crate::cli::SkillCommands;
+use crate::fetcher::ArchiveCache;
 use crate::installer::{
-    install_skill, print_install_summary, print_uninstall_summary, prompt_confirm, uninstall_skill,
+    execute_npx_install, generate_install_instructions, generate_uninstall_instructions,
+    install_skill, print_install_summary, print_uninstall_summary, uninstall_skill,
 };
-use crate::models::{get_global_config_path, GlobalConfig, ProjectConfig, Registry, Scope};
+use crate::models::{
+    get_global_config_path, GlobalConfig, InstallAction, ProjectConfig, Registry, Scope,
+};
 use crate::registry::{fetch_registry, load_builtin, GitHubClient, RegistryCache};
 use crate::utils::{Result, RulesifyError};
 use std::path::Path;
@@ -10,9 +14,17 @@ use std::path::Path;
 pub async fn run(command: SkillCommands, verbose: bool) -> Result<()> {
     match command {
         SkillCommands::List => list_skills(verbose),
-        SkillCommands::Add { id, global } => add_skill(id, global, verbose).await,
-        SkillCommands::Remove { id, global } => remove_skill(id, global, verbose),
-        SkillCommands::Update => update_registry(verbose).await,
+        SkillCommands::Add {
+            id,
+            global,
+            agent_mode,
+        } => add_skill(id, global, agent_mode, verbose).await,
+        SkillCommands::Remove {
+            id,
+            global,
+            agent_mode,
+        } => remove_skill(id, global, agent_mode, verbose),
+        SkillCommands::Update { agent_mode } => update_registry(agent_mode, verbose).await,
     }
 }
 
@@ -63,7 +75,7 @@ fn list_skills(verbose: bool) -> Result<()> {
     Ok(())
 }
 
-async fn add_skill(id: String, global: bool, _verbose: bool) -> Result<()> {
+async fn add_skill(id: String, global: bool, agent_mode: bool, _verbose: bool) -> Result<()> {
     let scope = if global {
         Scope::Global
     } else {
@@ -73,7 +85,7 @@ async fn add_skill(id: String, global: bool, _verbose: bool) -> Result<()> {
     let global_config = GlobalConfig::load();
     let project_config_path = Path::new(".rulesify.toml");
 
-    if global_config.is_skill_installed_globally(&id) {
+    if !agent_mode && global_config.is_skill_installed_globally(&id) {
         let tools = global_config.get_tools_for_skill(&id);
         println!(
             "'{}' is already installed globally for: {}",
@@ -86,7 +98,7 @@ async fn add_skill(id: String, global: bool, _verbose: bool) -> Result<()> {
         return Ok(());
     }
 
-    if !global {
+    if !agent_mode && !global {
         if let Some(project_config) = load_project_config(project_config_path)? {
             if project_config.installed_skills.contains_key(&id) {
                 println!("'{}' is already installed at project level.", id);
@@ -111,11 +123,29 @@ async fn add_skill(id: String, global: bool, _verbose: bool) -> Result<()> {
         .get_skill(&id)
         .ok_or_else(|| RulesifyError::SkillNotFound(id.clone()))?;
 
-    let client = GitHubClient::new();
+    if agent_mode {
+        output_install_instructions(&skill, &tools, scope);
+        return Ok(());
+    }
 
     println!("Installing '{}'...", skill.name);
 
-    let results = install_skill(skill, &tools, scope.clone(), &client).await?;
+    let results = match &skill.install_action {
+        Some(InstallAction::Npx {
+            package,
+            args,
+            uninstall_flag,
+        }) => execute_npx_install(package, args, uninstall_flag.as_deref(), &tools, scope)?,
+        Some(InstallAction::Copy { .. }) | None => {
+            let cache = ArchiveCache::new();
+            let client = GitHubClient::new();
+            install_skill(skill, &tools, scope.clone(), &client, &cache).await?
+        }
+        Some(InstallAction::Command { value }) => {
+            println!("Running custom install command: {}", value);
+            return Ok(());
+        }
+    };
 
     print_install_summary(&results, &skill.name);
 
@@ -152,7 +182,45 @@ async fn add_skill(id: String, global: bool, _verbose: bool) -> Result<()> {
     Ok(())
 }
 
-fn remove_skill(id: String, global: bool, _verbose: bool) -> Result<()> {
+fn output_install_instructions(skill: &crate::models::Skill, tools: &[String], scope: Scope) {
+    let scope_clone = scope.clone();
+    println!(
+        "{}",
+        generate_install_instructions(&skill.name, &skill.source_url, tools, scope,)
+    );
+
+    if let Some(InstallAction::Npx {
+        package,
+        args,
+        uninstall_flag,
+    }) = &skill.install_action
+    {
+        println!("\n## Npx Install (GSD)");
+        println!("\nRun the following command:");
+        let scope_flag = match scope_clone {
+            Scope::Global => "--global",
+            Scope::Project => "--local",
+        };
+        println!(
+            "  npx {} {} --<tool> {}",
+            package,
+            args.join(" "),
+            scope_flag
+        );
+        if let Some(flag) = uninstall_flag {
+            println!("\nTo uninstall:");
+            println!(
+                "  npx {} {} {} --<tool> {}",
+                package,
+                args.join(" "),
+                flag,
+                scope_flag
+            );
+        }
+    }
+}
+
+fn remove_skill(id: String, global: bool, agent_mode: bool, _verbose: bool) -> Result<()> {
     let scope = if global {
         Scope::Global
     } else {
@@ -169,14 +237,8 @@ fn remove_skill(id: String, global: bool, _verbose: bool) -> Result<()> {
             return Ok(());
         }
 
-        let message = format!(
-            "Delete skill folders for '{}' from {} global tools?",
-            id,
-            tools.len()
-        );
-
-        if !prompt_confirm(&message) {
-            println!("Cancelled.");
+        if agent_mode {
+            println!("{}", generate_uninstall_instructions(&id, &tools, scope));
             return Ok(());
         }
 
@@ -198,14 +260,11 @@ fn remove_skill(id: String, global: bool, _verbose: bool) -> Result<()> {
             return Ok(());
         }
 
-        let message = format!(
-            "Delete skill folders for '{}' (used by {} tools)?",
-            id,
-            project_config.tools.len()
-        );
-
-        if !prompt_confirm(&message) {
-            println!("Cancelled.");
+        if agent_mode {
+            println!(
+                "{}",
+                generate_uninstall_instructions(&id, &project_config.tools, scope)
+            );
             return Ok(());
         }
 
@@ -224,7 +283,7 @@ fn remove_skill(id: String, global: bool, _verbose: bool) -> Result<()> {
     Ok(())
 }
 
-async fn update_registry(verbose: bool) -> Result<()> {
+async fn update_registry(agent_mode: bool, verbose: bool) -> Result<()> {
     println!("Updating registry cache...");
 
     let registry = fetch_registry().await?;
@@ -235,6 +294,12 @@ async fn update_registry(verbose: bool) -> Result<()> {
 
     if verbose {
         println!("Updated date: {}", registry.updated);
+    }
+
+    if agent_mode {
+        println!("\nTo update installed skills, run:");
+        println!("  rulesify skill update");
+        return Ok(());
     }
 
     let global_config = GlobalConfig::load();
@@ -295,21 +360,12 @@ async fn update_registry(verbose: bool) -> Result<()> {
         println!("  - {} (project: {} → {})", id, old_sha, skill.commit_sha);
     }
 
-    let message = format!(
-        "Update {} skills?",
-        global_updated.len() + project_updated.len()
-    );
-
-    if !prompt_confirm(&message) {
-        println!("Cancelled.");
-        return Ok(());
-    }
-
+    let cache = ArchiveCache::new();
     let client = GitHubClient::new();
 
     for (tool, _id, skill) in &global_updated {
         println!("\nUpdating '{}' [{}] (global)...", skill.name, tool);
-        let results = install_skill(skill, &[tool.clone()], Scope::Global, &client).await?;
+        let results = install_skill(skill, &[tool.clone()], Scope::Global, &client, &cache).await?;
         print_install_summary(&results, &skill.name);
     }
 
@@ -317,7 +373,7 @@ async fn update_registry(verbose: bool) -> Result<()> {
         let tools = project_config.as_ref().unwrap().tools.clone();
         for (_id, skill) in &project_updated {
             println!("\nUpdating '{}' (project)...", skill.name);
-            let results = install_skill(skill, &tools, Scope::Project, &client).await?;
+            let results = install_skill(skill, &tools, Scope::Project, &client, &cache).await?;
             print_install_summary(&results, &skill.name);
         }
     }

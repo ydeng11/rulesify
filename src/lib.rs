@@ -1,4 +1,5 @@
 pub mod cli;
+pub mod fetcher;
 pub mod installer;
 pub mod llm;
 pub mod models;

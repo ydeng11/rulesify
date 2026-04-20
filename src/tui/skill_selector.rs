@@ -29,6 +29,8 @@ struct SkillSelectorState {
     global_ids: HashSet<String>,
     domains: Vec<String>,
     domain_index: usize,
+    domain_scroll_offset: usize,
+    domain_visible_count: usize,
     all_tags: Vec<(String, usize)>,
     selected_tags: HashSet<String>,
     sort_mode: SortMode,
@@ -70,6 +72,8 @@ impl SkillSelectorState {
             global_ids,
             domains,
             domain_index: 0,
+            domain_scroll_offset: 0,
+            domain_visible_count: 10,
             all_tags,
             selected_tags: HashSet::new(),
             sort_mode: SortMode::default(),
@@ -193,11 +197,60 @@ impl SkillSelectorState {
         sorted
     }
 
-    fn render_domain_tabs(&self, f: &mut ratatui::Frame, area: Rect) {
-        let titles: Vec<Span> = self
+    fn render_domain_tabs(&mut self, f: &mut ratatui::Frame, area: Rect) {
+        let available_width = area.width as usize;
+        let separator_len = 3; // " | "
+        let indicator_len = 4; // "◀ " or " ▶"
+
+        // Helper function to calculate visible count from a given start position
+        let calc_visible_count = |domains: &[String], start_pos: usize| {
+            let mut used_width = 0;
+            let mut count = 0;
+            let has_left = start_pos > 0;
+            let reserved = if has_left { indicator_len } else { 0 };
+
+            for i in start_pos..domains.len() {
+                let domain_len = domains[i].len();
+                let total_len = if count > 0 {
+                    separator_len + domain_len
+                } else {
+                    domain_len
+                };
+
+                if used_width + total_len + reserved + indicator_len > available_width {
+                    break;
+                }
+                used_width += total_len;
+                count += 1;
+            }
+            std::cmp::max(1, count)
+        };
+
+        // Initial visible count calculation
+        let initial_visible = calc_visible_count(&self.domains, self.domain_scroll_offset);
+
+        // Ensure selected domain is visible with current visible_count
+        if self.domain_index < self.domain_scroll_offset {
+            self.domain_scroll_offset = self.domain_index;
+        } else if self.domain_index >= self.domain_scroll_offset + initial_visible {
+            // Need to scroll forward - recalculate from new position
+            let new_start = self.domain_index.saturating_sub(initial_visible / 2);
+            self.domain_scroll_offset = new_start;
+        }
+
+        // Final calculation with adjusted scroll_offset
+        self.domain_visible_count = calc_visible_count(&self.domains, self.domain_scroll_offset);
+
+        let start = self.domain_scroll_offset;
+        let end = std::cmp::min(start + self.domain_visible_count, self.domains.len());
+
+        // Build visible domain spans
+        let visible_domains: Vec<Span> = self
             .domains
             .iter()
             .enumerate()
+            .skip(start)
+            .take(end - start)
             .map(|(i, d)| {
                 if i == self.domain_index {
                     Span::styled(
@@ -212,7 +265,19 @@ impl SkillSelectorState {
             })
             .collect();
 
-        let tabs = Tabs::new(titles)
+        let mut title_parts: Vec<Span> = Vec::new();
+
+        if start > 0 {
+            title_parts.push(Span::styled("◀ ", Style::default().fg(Color::DarkGray)));
+        }
+
+        title_parts.extend(visible_domains);
+
+        if end < self.domains.len() {
+            title_parts.push(Span::styled(" ▶", Style::default().fg(Color::DarkGray)));
+        }
+
+        let tabs = Tabs::new(title_parts)
             .block(Block::default().borders(Borders::BOTTOM))
             .divider(Span::raw(" | "))
             .style(Style::default().fg(Color::White));
@@ -671,12 +736,14 @@ impl SkillSelectorState {
             KeyCode::Left => {
                 if self.domain_index > 0 {
                     self.domain_index -= 1;
+                    self.update_domain_scroll_offset();
                     self.apply_filters();
                 }
             }
             KeyCode::Right => {
                 if self.domain_index < self.domains.len().saturating_sub(1) {
                     self.domain_index += 1;
+                    self.update_domain_scroll_offset();
                     self.apply_filters();
                 }
             }
@@ -831,6 +898,27 @@ impl SkillSelectorState {
         } else if self.current_skill_index >= self.skill_scroll_offset + list_height {
             self.skill_scroll_offset = self.current_skill_index - list_height + 1;
         }
+    }
+
+    fn update_domain_scroll_offset(&mut self) {
+        if self.domains.is_empty() {
+            return;
+        }
+
+        // Use a reasonable default if visible_count hasn't been calculated yet
+        let visible_count = std::cmp::max(3, self.domain_visible_count);
+        let half = visible_count / 2;
+
+        // Center the selected domain in visible window
+        let ideal_offset = if self.domain_index < half {
+            0
+        } else {
+            self.domain_index - half
+        };
+
+        // Clamp to valid range - ensure last domains accessible
+        let max_offset = self.domains.len().saturating_sub(visible_count);
+        self.domain_scroll_offset = std::cmp::min(ideal_offset, max_offset);
     }
 }
 

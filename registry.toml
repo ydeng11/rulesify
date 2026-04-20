@@ -1060,3 +1060,856 @@ type = "copy"
 
 [skills.qa.install_action.value]
 folder = "qa"
+
+# Superpowers - 15 skills
+[skills.test-driven-development]
+name = "test-driven-development"
+description = "Enforces TDD workflows - write tests first, watch them fail, write minimal code to pass."
+source_url = "https://github.com/obra/superpowers/tree/main/skills/test-driven-development"
+stars = 20000
+commit_sha = ""
+context_size = 500
+domain = "development"
+last_updated = "2026-04-19"
+tags = ["tdd", "testing", "quality"]
+score = 95.0
+
+[skills.test-driven-development.install_action]
+type = "copy"
+
+[skills.test-driven-development.install_action.value]
+folder = "skills/test-driven-development"
+
+[skills.systematic-debugging]
+name = "systematic-debugging"
+description = "Root-cause analysis instead of guessing fixes. Forces structured investigation of bugs."
+source_url = "https://github.com/obra/superpowers/tree/main/skills/systematic-debugging"
+stars = 20000
+commit_sha = ""
+context_size = 800
+domain = "development"
+last_updated = "2026-04-19"
+tags = ["debugging", "investigation", "quality"]
+score = 95.0
+
+[skills.systematic-debugging.install_action]
+type = "copy"
+
+[skills.systematic-debugging.install_action.value]
+folder = "skills/systematic-debugging"
+
+[skills.brainstorming]
+name = "brainstorming"
+description = "Transform rough ideas into structured designs. Explores requirements before implementation."
+source_url = "https://github.com/obra/superpowers/tree/main/skills/brainstorming"
+stars = 20000
+commit_sha = ""
+context_size = 600
+domain = "development"
+last_updated = "2026-04-19"
+tags = ["planning", "design", "ideation"]
+score = 95.0
+
+[skills.brainstorming.install_action]
+type = "copy"
+
+[skills.brainstorming.install_action.value]
+folder = "skills/brainstorming"
+
+[skills.using-git-worktrees]
+name = "using-git-worktrees"
+description = "Isolated git worktrees for parallel development. Work on multiple branches simultaneously."
+source_url = "https://github.com/obra/superpowers/tree/main/skills/using-git-worktrees"
+stars = 20000
+commit_sha = ""
+context_size = 400
+domain = "development"
+last_updated = "2026-04-19"
+tags = ["git", "workflow", "parallel"]
+score = 95.0
+
+[skills.using-git-worktrees.install_action]
+type = "copy"
+
+[skills.using-git-worktrees.install_action.value]
+folder = "skills/using-git-worktrees"
+
+[skills.finishing-a-development-branch]
+name = "finishing-a-development-branch"
+description = "Merge, cleanup, and integrate completed work. Streamlines the branch completion workflow."
+source_url = "https://github.com/obra/superpowers/tree/main/skills/finishing-a-development-branch"
+stars = 20000
+commit_sha = ""
+context_size = 300
+domain = "development"
+last_updated = "2026-04-19"
+tags = ["git", "merge", "cleanup"]
+score = 95.0
+
+[skills.finishing-a-development-branch.install_action]
+type = "copy"
+
+[skills.finishing-a-development-branch.install_action.value]
+folder = "skills/finishing-a-development-branch"
+
+[skills.executing-plans]
+name = "executing-plans"
+description = "Execute multi-step implementation plans with review checkpoints."
+source_url = "https://github.com/obra/superpowers/tree/main/skills/executing-plans"
+stars = 20000
+commit_sha = ""
+context_size = 400
+domain = "development"
+last_updated = "2026-04-19"
+tags = ["execution", "planning", "workflow"]
+score = 95.0
+
+[skills.executing-plans.install_action]
+type = "copy"
+
+[skills.executing-plans.install_action.value]
+folder = "skills/executing-plans"
+
+[skills.requesting-code-review]
+name = "requesting-code-review"
+description = "Request structured code review with specific review criteria."
+source_url = "https://github.com/obra/superpowers/tree/main/skills/requesting-code-review"
+stars = 20000
+commit_sha = ""
+context_size = 400
+domain = "development"
+last_updated = "2026-04-19"
+tags = ["review", "quality", "feedback"]
+score = 95.0
+
+[skills.requesting-code-review.install_action]
+type = "copy"
+
+[skills.requesting-code-review.install_action.value]
+folder = "skills/requesting-code-review"
+
+[skills.receiving-code-review]
+name = "receiving-code-review"
+description = "Handle and implement code review feedback with verification before blind implementation."
+source_url = "https://github.com/obra/superpowers/tree/main/skills/receiving-code-review"
+stars = 20000
+commit_sha = ""
+context_size = 400
+domain = "development"
+last_updated = "2026-04-19"
+tags = ["review", "feedback", "quality"]
+score = 95.0
+
+[skills.receiving-code-review.install_action]
+type = "copy"
+
+[skills.receiving-code-review.install_action.value]
+folder = "skills/receiving-code-review"
+
+[skills.subagent-driven-development]
+name = "subagent-driven-development"
+description = "Parallel subagent execution for independent tasks. Spawn agents for isolated work."
+source_url = "https://github.com/obra/superpowers/tree/main/skills/subagent-driven-development"
+stars = 20000
+commit_sha = ""
+context_size = 500
+domain = "development"
+last_updated = "2026-04-19"
+tags = ["agents", "parallel", "execution"]
+score = 95.0
+
+[skills.subagent-driven-development.install_action]
+type = "copy"
+
+[skills.subagent-driven-development.install_action.value]
+folder = "skills/subagent-driven-development"
+
+[skills.dispatching-parallel-agents]
+name = "dispatching-parallel-agents"
+description = "Spawn parallel agents for independent work without shared state."
+source_url = "https://github.com/obra/superpowers/tree/main/skills/dispatching-parallel-agents"
+stars = 20000
+commit_sha = ""
+context_size = 400
+domain = "development"
+last_updated = "2026-04-19"
+tags = ["agents", "parallel", "dispatch"]
+score = 95.0
+
+[skills.dispatching-parallel-agents.install_action]
+type = "copy"
+
+[skills.dispatching-parallel-agents.install_action.value]
+folder = "skills/dispatching-parallel-agents"
+
+[skills.verification-before-completion]
+name = "verification-before-completion"
+description = "Verify work passes tests before claiming complete. Evidence before assertions."
+source_url = "https://github.com/obra/superpowers/tree/main/skills/verification-before-completion"
+stars = 20000
+commit_sha = ""
+context_size = 300
+domain = "development"
+last_updated = "2026-04-19"
+tags = ["testing", "verification", "quality"]
+score = 95.0
+
+[skills.verification-before-completion.install_action]
+type = "copy"
+
+[skills.verification-before-completion.install_action.value]
+folder = "skills/verification-before-completion"
+
+[skills.writing-plans]
+name = "writing-plans"
+description = "Write structured implementation plans before touching code."
+source_url = "https://github.com/obra/superpowers/tree/main/skills/writing-plans"
+stars = 20000
+commit_sha = ""
+context_size = 400
+domain = "development"
+last_updated = "2026-04-19"
+tags = ["planning", "documentation", "workflow"]
+score = 95.0
+
+[skills.writing-plans.install_action]
+type = "copy"
+
+[skills.writing-plans.install_action.value]
+folder = "skills/writing-plans"
+
+[skills.using-superpowers]
+name = "using-superpowers"
+description = "Guide to discovering and using skills. Establishes skill invocation patterns."
+source_url = "https://github.com/obra/superpowers/tree/main/skills/using-superpowers"
+stars = 20000
+commit_sha = ""
+context_size = 400
+domain = "development"
+last_updated = "2026-04-19"
+tags = ["meta", "skills", "discovery"]
+score = 95.0
+
+[skills.using-superpowers.install_action]
+type = "copy"
+
+[skills.using-superpowers.install_action.value]
+folder = "skills/using-superpowers"
+
+[skills.find-skills]
+name = "find-skills"
+description = "Discover and install agent skills. Helps users find skills for specific tasks."
+source_url = "https://github.com/obra/superpowers/tree/main/skills/find-skills"
+stars = 20000
+commit_sha = ""
+context_size = 300
+domain = "development"
+last_updated = "2026-04-19"
+tags = ["discovery", "skills", "installation"]
+score = 95.0
+
+[skills.find-skills.install_action]
+type = "copy"
+
+[skills.find-skills.install_action.value]
+folder = "skills/find-skills"
+
+# Superpowers Lab - 4 experimental skills
+[skills.finding-duplicate-functions]
+name = "finding-duplicate-functions"
+description = "Detect semantic code duplication in codebases. Find redundant implementations."
+source_url = "https://github.com/obra/superpowers-lab/tree/main/skills/finding-duplicate-functions"
+stars = 291
+commit_sha = ""
+context_size = 400
+domain = "development"
+last_updated = "2026-04-19"
+tags = ["experimental", "analysis", "duplication"]
+score = 90.0
+
+[skills.finding-duplicate-functions.install_action]
+type = "copy"
+
+[skills.finding-duplicate-functions.install_action.value]
+folder = "skills/finding-duplicate-functions"
+
+[skills.mcp-cli]
+name = "mcp-cli"
+description = "MCP server CLI management. Configure and manage MCP servers."
+source_url = "https://github.com/obra/superpowers-lab/tree/main/skills/mcp-cli"
+stars = 291
+commit_sha = ""
+context_size = 300
+domain = "development"
+last_updated = "2026-04-19"
+tags = ["experimental", "mcp", "cli"]
+score = 90.0
+
+[skills.mcp-cli.install_action]
+type = "copy"
+
+[skills.mcp-cli.install_action.value]
+folder = "skills/mcp-cli"
+
+[skills.tmux-interactive]
+name = "tmux-interactive"
+description = "Tmux interactive command execution for terminal workflows."
+source_url = "https://github.com/obra/superpowers-lab/tree/main/skills/tmux-interactive"
+stars = 291
+commit_sha = ""
+context_size = 300
+domain = "development"
+last_updated = "2026-04-19"
+tags = ["experimental", "terminal", "tmux"]
+score = 90.0
+
+[skills.tmux-interactive.install_action]
+type = "copy"
+
+[skills.tmux-interactive.install_action.value]
+folder = "skills/tmux-interactive"
+
+[skills.windows-vm]
+name = "windows-vm"
+description = "Windows VM management for cross-platform testing."
+source_url = "https://github.com/obra/superpowers-lab/tree/main/skills/windows-vm"
+stars = 291
+commit_sha = ""
+context_size = 300
+domain = "development"
+last_updated = "2026-04-19"
+tags = ["experimental", "vm", "windows"]
+score = 90.0
+
+[skills.windows-vm.install_action]
+type = "copy"
+
+[skills.windows-vm.install_action.value]
+folder = "skills/windows-vm"
+
+# Impeccable - 18 skills
+[skills.impeccable]
+name = "impeccable"
+description = "Frontend design vocabulary with 7 reference files. Create distinctive, production-grade interfaces."
+source_url = "https://github.com/pbakaus/impeccable/tree/main/.agents/skills/impeccable"
+stars = 20000
+commit_sha = ""
+context_size = 1500
+domain = "design-and-media"
+last_updated = "2026-04-19"
+tags = ["design", "frontend", "ux"]
+score = 95.0
+
+[skills.impeccable.install_action]
+type = "copy"
+
+[skills.impeccable.install_action.value]
+folder = ".agents/skills/impeccable"
+
+[skills.audit]
+name = "audit"
+description = "Run technical quality checks: accessibility, performance, responsive design."
+source_url = "https://github.com/pbakaus/impeccable/tree/main/.agents/skills/audit"
+stars = 20000
+commit_sha = ""
+context_size = 300
+domain = "design-and-media"
+last_updated = "2026-04-19"
+tags = ["design", "quality", "audit"]
+score = 95.0
+
+[skills.audit.install_action]
+type = "copy"
+
+[skills.audit.install_action.value]
+folder = ".agents/skills/audit"
+
+[skills.polish]
+name = "polish"
+description = "Final pass, design system alignment, and shipping readiness."
+source_url = "https://github.com/pbakaus/impeccable/tree/main/.agents/skills/polish"
+stars = 20000
+commit_sha = ""
+context_size = 300
+domain = "design-and-media"
+last_updated = "2026-04-19"
+tags = ["design", "refinement", "polish"]
+score = 95.0
+
+[skills.polish.install_action]
+type = "copy"
+
+[skills.polish.install_action.value]
+folder = ".agents/skills/polish"
+
+[skills.critique]
+name = "critique"
+description = "UX design review with heuristics scoring and cognitive load analysis."
+source_url = "https://github.com/pbakaus/impeccable/tree/main/.agents/skills/critique"
+stars = 20000
+commit_sha = ""
+context_size = 400
+domain = "design-and-media"
+last_updated = "2026-04-19"
+tags = ["design", "review", "ux"]
+score = 95.0
+
+[skills.critique.install_action]
+type = "copy"
+
+[skills.critique.install_action.value]
+folder = ".agents/skills/critique"
+
+[skills.distill]
+name = "distill"
+description = "Strip design to essence. Remove complexity and visual noise."
+source_url = "https://github.com/pbakaus/impeccable/tree/main/.agents/skills/distill"
+stars = 20000
+commit_sha = ""
+context_size = 200
+domain = "design-and-media"
+last_updated = "2026-04-19"
+tags = ["design", "minimalism", "simplification"]
+score = 95.0
+
+[skills.distill.install_action]
+type = "copy"
+
+[skills.distill.install_action.value]
+folder = ".agents/skills/distill"
+
+[skills.clarify]
+name = "clarify"
+description = "Improve UX copy clarity. Better button labels, error messages, empty states."
+source_url = "https://github.com/pbakaus/impeccable/tree/main/.agents/skills/clarify"
+stars = 20000
+commit_sha = ""
+context_size = 200
+domain = "design-and-media"
+last_updated = "2026-04-19"
+tags = ["design", "ux-writing", "copy"]
+score = 95.0
+
+[skills.clarify.install_action]
+type = "copy"
+
+[skills.clarify.install_action.value]
+folder = ".agents/skills/clarify"
+
+[skills.optimize]
+name = "optimize"
+description = "Performance improvements for frontend applications."
+source_url = "https://github.com/pbakaus/impeccable/tree/main/.agents/skills/optimize"
+stars = 20000
+commit_sha = ""
+context_size = 200
+domain = "design-and-media"
+last_updated = "2026-04-19"
+tags = ["design", "performance", "optimization"]
+score = 95.0
+
+[skills.optimize.install_action]
+type = "copy"
+
+[skills.optimize.install_action.value]
+folder = ".agents/skills/optimize"
+
+[skills.harden]
+name = "harden"
+description = "Error handling, edge cases, accessibility, and robustness."
+source_url = "https://github.com/pbakaus/impeccable/tree/main/.agents/skills/harden"
+stars = 20000
+commit_sha = ""
+context_size = 200
+domain = "design-and-media"
+last_updated = "2026-04-19"
+tags = ["design", "robustness", "accessibility"]
+score = 95.0
+
+[skills.harden.install_action]
+type = "copy"
+
+[skills.harden.install_action.value]
+folder = ".agents/skills/harden"
+
+[skills.animate]
+name = "animate"
+description = "Add purposeful motion with easing curves and staggering."
+source_url = "https://github.com/pbakaus/impeccable/tree/main/.agents/skills/animate"
+stars = 20000
+commit_sha = ""
+context_size = 200
+domain = "design-and-media"
+last_updated = "2026-04-19"
+tags = ["design", "motion", "animation"]
+score = 95.0
+
+[skills.animate.install_action]
+type = "copy"
+
+[skills.animate.install_action.value]
+folder = ".agents/skills/animate"
+
+[skills.colorize]
+name = "colorize"
+description = "Introduce strategic color using OKLCH and tinted neutrals."
+source_url = "https://github.com/pbakaus/impeccable/tree/main/.agents/skills/colorize"
+stars = 20000
+commit_sha = ""
+context_size = 200
+domain = "design-and-media"
+last_updated = "2026-04-19"
+tags = ["design", "color", "palette"]
+score = 95.0
+
+[skills.colorize.install_action]
+type = "copy"
+
+[skills.colorize.install_action.value]
+folder = ".agents/skills/colorize"
+
+[skills.bolder]
+name = "bolder"
+description = "Amplify boring designs with stronger visual impact."
+source_url = "https://github.com/pbakaus/impeccable/tree/main/.agents/skills/bolder"
+stars = 20000
+commit_sha = ""
+context_size = 200
+domain = "design-and-media"
+last_updated = "2026-04-19"
+tags = ["design", "impact", "emphasis"]
+score = 95.0
+
+[skills.bolder.install_action]
+type = "copy"
+
+[skills.bolder.install_action.value]
+folder = ".agents/skills/bolder"
+
+[skills.quieter]
+name = "quieter"
+description = "Tone down overly bold designs for better balance."
+source_url = "https://github.com/pbakaus/impeccable/tree/main/.agents/skills/quieter"
+stars = 20000
+commit_sha = ""
+context_size = 200
+domain = "design-and-media"
+last_updated = "2026-04-19"
+tags = ["design", "balance", "refinement"]
+score = 95.0
+
+[skills.quieter.install_action]
+type = "copy"
+
+[skills.quieter.install_action.value]
+folder = ".agents/skills/quieter"
+
+[skills.delight]
+name = "delight"
+description = "Add moments of joy and delightful interactions."
+source_url = "https://github.com/pbakaus/impeccable/tree/main/.agents/skills/delight"
+stars = 20000
+commit_sha = ""
+context_size = 200
+domain = "design-and-media"
+last_updated = "2026-04-19"
+tags = ["design", "ux", "delight"]
+score = 95.0
+
+[skills.delight.install_action]
+type = "copy"
+
+[skills.delight.install_action.value]
+folder = ".agents/skills/delight"
+
+[skills.adapt]
+name = "adapt"
+description = "Adapt designs for different devices and responsive layouts."
+source_url = "https://github.com/pbakaus/impeccable/tree/main/.agents/skills/adapt"
+stars = 20000
+commit_sha = ""
+context_size = 200
+domain = "design-and-media"
+last_updated = "2026-04-19"
+tags = ["design", "responsive", "mobile"]
+score = 95.0
+
+[skills.adapt.install_action]
+type = "copy"
+
+[skills.adapt.install_action.value]
+folder = ".agents/skills/adapt"
+
+[skills.typeset]
+name = "typeset"
+description = "Fix typography, hierarchy, and font sizing."
+source_url = "https://github.com/pbakaus/impeccable/tree/main/.agents/skills/typeset"
+stars = 20000
+commit_sha = ""
+context_size = 200
+domain = "design-and-media"
+last_updated = "2026-04-19"
+tags = ["design", "typography", "fonts"]
+score = 95.0
+
+[skills.typeset.install_action]
+type = "copy"
+
+[skills.typeset.install_action.value]
+folder = ".agents/skills/typeset"
+
+[skills.layout]
+name = "layout"
+description = "Fix layout, spacing, and visual rhythm."
+source_url = "https://github.com/pbakaus/impeccable/tree/main/.agents/skills/layout"
+stars = 20000
+commit_sha = ""
+context_size = 200
+domain = "design-and-media"
+last_updated = "2026-04-19"
+tags = ["design", "layout", "spacing"]
+score = 95.0
+
+[skills.layout.install_action]
+type = "copy"
+
+[skills.layout.install_action.value]
+folder = ".agents/skills/layout"
+
+[skills.overdrive]
+name = "overdrive"
+description = "Add technically extraordinary effects and advanced animations."
+source_url = "https://github.com/pbakaus/impeccable/tree/main/.agents/skills/overdrive"
+stars = 20000
+commit_sha = ""
+context_size = 200
+domain = "design-and-media"
+last_updated = "2026-04-19"
+tags = ["design", "advanced", "effects"]
+score = 95.0
+
+[skills.overdrive.install_action]
+type = "copy"
+
+[skills.overdrive.install_action.value]
+folder = ".agents/skills/overdrive"
+
+[skills.shape]
+name = "shape"
+description = "Design exploration before implementation. Shape-then-build flow."
+source_url = "https://github.com/pbakaus/impeccable/tree/main/.agents/skills/shape"
+stars = 20000
+commit_sha = ""
+context_size = 200
+domain = "design-and-media"
+last_updated = "2026-04-19"
+tags = ["design", "planning", "exploration"]
+score = 95.0
+
+[skills.shape.install_action]
+type = "copy"
+
+[skills.shape.install_action.value]
+folder = ".agents/skills/shape"
+
+# GSD - npx installer
+[skills.gsd]
+name = "gsd"
+description = "Get Shit Done - 57 commands for planning, execution, verification, and milestone tracking. Full project management system."
+source_url = "https://github.com/gsd-build/get-shit-done"
+stars = 56700
+commit_sha = ""
+context_size = 0
+domain = "project-management"
+last_updated = "2026-04-19"
+tags = ["project-management", "planning", "workflow", "execution"]
+score = 98.0
+
+[skills.gsd.install_action]
+type = "npx"
+
+[skills.gsd.install_action.value]
+package = "get-shit-done-cc"
+args = ["@latest"]
+uninstall_flag = "--uninstall"
+
+# Individual skills from awesome lists
+[skills.pypict]
+name = "pypict"
+description = "Combinatorial testing with PICT. Generates optimized test suites from pairwise testing."
+source_url = "https://github.com/omkamal/pypict-claude-skill/tree/main/skills/pypict"
+stars = 100
+commit_sha = ""
+context_size = 300
+domain = "testing-and-debugging"
+last_updated = "2026-04-19"
+tags = ["testing", "combinatorial", "pict"]
+score = 85.0
+
+[skills.pypict.install_action]
+type = "copy"
+
+[skills.pypict.install_action.value]
+folder = "skills/pypict"
+
+[skills.ffuf]
+name = "ffuf"
+description = "Security fuzzing with FFUF for vulnerability analysis and penetration testing."
+source_url = "https://github.com/jthack/ffuf_claude_skill/tree/main/skills/ffuf"
+stars = 50
+commit_sha = ""
+context_size = 300
+domain = "security-and-privacy"
+last_updated = "2026-04-19"
+tags = ["security", "fuzzing", "penetration-testing"]
+score = 85.0
+
+[skills.ffuf.install_action]
+type = "copy"
+
+[skills.ffuf.install_action.value]
+folder = "skills/ffuf"
+
+[skills.tapestry]
+name = "tapestry"
+description = "Interlink documents into navigable knowledge networks. Create interconnected wiki from docs."
+source_url = "https://github.com/michalparkola/tapestry-skills-for-claude-code/tree/main/skills/tapestry"
+stars = 50
+commit_sha = ""
+context_size = 400
+domain = "data-and-research"
+last_updated = "2026-04-19"
+tags = ["knowledge", "documentation", "graph"]
+score = 85.0
+
+[skills.tapestry.install_action]
+type = "copy"
+
+[skills.tapestry.install_action.value]
+folder = "skills/tapestry"
+
+[skills.youtube-transcript]
+name = "youtube-transcript"
+description = "Fetch and summarize YouTube video transcripts for research."
+source_url = "https://github.com/michalparkola/tapestry-skills-for-claude-code/tree/main/skills/youtube-transcript"
+stars = 50
+commit_sha = ""
+context_size = 300
+domain = "data-and-research"
+last_updated = "2026-04-19"
+tags = ["research", "video", "transcription"]
+score = 85.0
+
+[skills.youtube-transcript.install_action]
+type = "copy"
+
+[skills.youtube-transcript.install_action.value]
+folder = "skills/youtube-transcript"
+
+[skills.article-extractor]
+name = "article-extractor"
+description = "Extract full article text and metadata from web pages."
+source_url = "https://github.com/michalparkola/tapestry-skills-for-claude-code/tree/main/skills/article-extractor"
+stars = 50
+commit_sha = ""
+context_size = 300
+domain = "data-and-research"
+last_updated = "2026-04-19"
+tags = ["research", "web", "extraction"]
+score = 85.0
+
+[skills.article-extractor.install_action]
+type = "copy"
+
+[skills.article-extractor.install_action.value]
+folder = "skills/article-extractor"
+
+[skills.file-organizer]
+name = "file-organizer"
+description = "Smart file and folder categorization for chaotic directories."
+source_url = "https://github.com/ComposioHQ/awesome-claude-skills/tree/main/skills/file-organizer"
+stars = 100
+commit_sha = ""
+context_size = 300
+domain = "deployment-and-infrastructure"
+last_updated = "2026-04-19"
+tags = ["organization", "files", "categorization"]
+score = 85.0
+
+[skills.file-organizer.install_action]
+type = "copy"
+
+[skills.file-organizer.install_action.value]
+folder = "skills/file-organizer"
+
+[skills.invoice-organizer]
+name = "invoice-organizer"
+description = "Organize invoices and receipts for tax preparation. Finance document management."
+source_url = "https://github.com/ComposioHQ/awesome-claude-skills/tree/main/skills/invoice-organizer"
+stars = 100
+commit_sha = ""
+context_size = 300
+domain = "deployment-and-infrastructure"
+last_updated = "2026-04-19"
+tags = ["organization", "finance", "tax"]
+score = 85.0
+
+[skills.invoice-organizer.install_action]
+type = "copy"
+
+[skills.invoice-organizer.install_action.value]
+folder = "skills/invoice-organizer"
+
+[skills.web-asset-generator]
+name = "web-asset-generator"
+description = "Generate favicons, app icons, Open Graph tags, and PWA assets."
+source_url = "https://github.com/alonw0/web-asset-generator/tree/main/skills/web-asset-generator"
+stars = 50
+commit_sha = ""
+context_size = 400
+domain = "design-and-media"
+last_updated = "2026-04-19"
+tags = ["web", "assets", "icons"]
+score = 85.0
+
+[skills.web-asset-generator.install_action]
+type = "copy"
+
+[skills.web-asset-generator.install_action.value]
+folder = "skills/web-asset-generator"
+
+[skills.content-research-writer]
+name = "content-research-writer"
+description = "Research-backed content writing with citations and iterative quality improvement."
+source_url = "https://github.com/ComposioHQ/awesome-claude-skills/tree/main/skills/content-research-writer"
+stars = 100
+commit_sha = ""
+context_size = 400
+domain = "documentation"
+last_updated = "2026-04-19"
+tags = ["writing", "research", "citations"]
+score = 85.0
+
+[skills.content-research-writer.install_action]
+type = "copy"
+
+[skills.content-research-writer.install_action.value]
+folder = "skills/content-research-writer"
+
+[skills.epub-analyzer]
+name = "epub-analyzer"
+description = "Summarize and query ebooks and academic papers in EPUB/PDF format."
+source_url = "https://github.com/smerchek/claude-epub-skill/tree/main/skills/epub-analyzer"
+stars = 50
+commit_sha = ""
+context_size = 300
+domain = "data-and-research"
+last_updated = "2026-04-19"
+tags = ["research", "books", "epub"]
+score = 85.0
+
+[skills.epub-analyzer.install_action]
+type = "copy"
+
+[skills.epub-analyzer.install_action.value]
+folder = "skills/epub-analyzer"

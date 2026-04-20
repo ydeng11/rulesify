@@ -1,9 +1,10 @@
+use crate::fetcher::ArchiveCache;
 use crate::installer::tool_paths::get_skill_folder;
-use crate::models::{InstallAction, Scope, Skill};
+use crate::models::{Scope, Skill};
 use crate::registry::github::GitHubClient;
 use crate::utils::{Result, RulesifyError};
-use std::io::{self, BufRead, Write};
 use std::path::PathBuf;
+use std::process::Command;
 
 #[derive(Debug)]
 pub struct InstallResult {
@@ -63,52 +64,32 @@ pub async fn install_skill(
     skill: &Skill,
     tools: &[String],
     scope: Scope,
-    client: &GitHubClient,
+    _client: &GitHubClient,
+    cache: &ArchiveCache,
 ) -> Result<Vec<InstallResult>> {
     let source = parse_source_url(&skill.source_url)?;
 
-    let folder_path = skill
-        .install_action
-        .as_ref()
-        .and_then(|a| match a {
-            InstallAction::Copy { folder } => Some(folder.clone()),
-            InstallAction::Command { .. } => None,
-        })
-        .unwrap_or_else(|| source.folder.clone());
+    let extracted_folder = cache.get_extracted_folder(&source).await?;
 
-    let entries = client
-        .list_folder(&source.owner, &source.repo, &folder_path)
-        .await?;
-
-    let files: Vec<_> = entries
-        .iter()
-        .filter(|e| e.content_type == "file")
+    let entries: Vec<_> = std::fs::read_dir(&extracted_folder)
+        .map_err(|e| RulesifyError::SkillParse(format!("Failed to read extracted folder: {}", e)))?
+        .filter_map(|e| e.ok())
         .collect();
 
     let mut results = Vec::new();
 
     for tool in tools {
         let skill_folder = get_skill_folder(tool, scope.clone(), &skill.name);
-        let result = install_for_tool(
-            client,
-            &source,
-            &folder_path,
-            &files,
-            &skill_folder,
-            tool.clone(),
-        )
-        .await;
+        let result = install_for_tool(&extracted_folder, &entries, &skill_folder, tool.clone());
         results.push(result);
     }
 
     Ok(results)
 }
 
-async fn install_for_tool(
-    client: &GitHubClient,
-    source: &SkillSource,
-    folder_path: &str,
-    files: &[&crate::registry::github::ContentEntry],
+fn install_for_tool(
+    extracted_folder: &PathBuf,
+    entries: &[std::fs::DirEntry],
     skill_folder: &PathBuf,
     tool: String,
 ) -> InstallResult {
@@ -135,23 +116,22 @@ async fn install_for_tool(
     let mut files_created = 0;
     let mut errors = Vec::new();
 
-    for file_entry in files {
-        let file_path = format!("{}/{}", folder_path, file_entry.name);
-        let local_path = skill_folder.join(&file_entry.name);
+    for entry in entries {
+        let file_name = entry.file_name().to_string_lossy().to_string();
+        let source_path = extracted_folder.join(&file_name);
+        let target_path = skill_folder.join(&file_name);
 
-        match client
-            .fetch_file_raw(&source.owner, &source.repo, &file_path)
-            .await
-        {
-            Ok(content) => {
-                if let Err(e) = std::fs::write(&local_path, &content) {
-                    errors.push(format!("{}: {}", file_entry.name, e));
-                } else {
-                    files_created += 1;
-                }
+        if entry.path().is_dir() {
+            if let Err(e) = copy_dir_all(&source_path, &target_path) {
+                errors.push(format!("{}: {}", file_name, e));
+            } else {
+                files_created += 1;
             }
-            Err(e) => {
-                errors.push(format!("{}: fetch failed - {}", file_entry.name, e));
+        } else {
+            if let Err(e) = std::fs::copy(&source_path, &target_path) {
+                errors.push(format!("{}: {}", file_name, e));
+            } else {
+                files_created += 1;
             }
         }
     }
@@ -166,6 +146,155 @@ async fn install_for_tool(
             Some(errors.join("; "))
         },
     }
+}
+
+fn copy_dir_all(src: &PathBuf, dst: &PathBuf) -> std::io::Result<()> {
+    std::fs::create_dir_all(dst)?;
+
+    for entry in std::fs::read_dir(src)? {
+        let entry = entry?;
+        let ty = entry.file_type()?;
+        let src_path = entry.path();
+        let dst_path = dst.join(entry.file_name());
+
+        if ty.is_dir() {
+            copy_dir_all(&src_path, &dst_path)?;
+        } else {
+            std::fs::copy(&src_path, &dst_path)?;
+        }
+    }
+
+    Ok(())
+}
+
+pub fn execute_npx_install(
+    package: &str,
+    args: &[String],
+    _uninstall_flag: Option<&str>,
+    tools: &[String],
+    scope: Scope,
+) -> Result<Vec<InstallResult>> {
+    let mut results = Vec::new();
+
+    for tool in tools {
+        let tool_flag = match tool.as_str() {
+            "claude-code" => "--claude",
+            "opencode" => "--opencode",
+            "cursor" => "--cursor",
+            "codex" => "--codex",
+            "pi" => "--pi",
+            _ => "",
+        };
+
+        let scope_flag = match scope {
+            Scope::Global => "--global",
+            Scope::Project => "--local",
+        };
+
+        let mut full_args = vec![package];
+        full_args.extend(args.iter().map(|s| s.as_str()));
+        if !tool_flag.is_empty() {
+            full_args.push(tool_flag);
+        }
+        full_args.push(scope_flag);
+
+        let output = Command::new("npx").args(&full_args).output();
+
+        match output {
+            Ok(o) if o.status.success() => {
+                results.push(InstallResult {
+                    tool: tool.clone(),
+                    files_created: 0,
+                    success: true,
+                    error: None,
+                });
+            }
+            Ok(o) => {
+                let stderr = String::from_utf8_lossy(&o.stderr).to_string();
+                results.push(InstallResult {
+                    tool: tool.clone(),
+                    files_created: 0,
+                    success: false,
+                    error: Some(stderr),
+                });
+            }
+            Err(e) => {
+                results.push(InstallResult {
+                    tool: tool.clone(),
+                    files_created: 0,
+                    success: false,
+                    error: Some(format!("Failed to run npx: {}", e)),
+                });
+            }
+        }
+    }
+
+    Ok(results)
+}
+
+pub fn execute_npx_uninstall(
+    package: &str,
+    args: &[String],
+    uninstall_flag: Option<&str>,
+    tools: &[String],
+    scope: Scope,
+) -> Vec<UninstallResult> {
+    let uninstall_flag = uninstall_flag.unwrap_or("--uninstall");
+
+    let mut results = Vec::new();
+
+    for tool in tools {
+        let tool_flag = match tool.as_str() {
+            "claude-code" => "--claude",
+            "opencode" => "--opencode",
+            "cursor" => "--cursor",
+            "codex" => "--codex",
+            "pi" => "--pi",
+            _ => "",
+        };
+
+        let scope_flag = match scope {
+            Scope::Global => "--global",
+            Scope::Project => "--local",
+        };
+
+        let mut full_args = vec![package];
+        full_args.extend(args.iter().map(|s| s.as_str()));
+        full_args.push(uninstall_flag);
+        if !tool_flag.is_empty() {
+            full_args.push(tool_flag);
+        }
+        full_args.push(scope_flag);
+
+        let output = Command::new("npx").args(&full_args).output();
+
+        match output {
+            Ok(o) if o.status.success() => {
+                results.push(UninstallResult {
+                    tool: tool.clone(),
+                    folder_deleted: true,
+                    error: None,
+                });
+            }
+            Ok(o) => {
+                let stderr = String::from_utf8_lossy(&o.stderr).to_string();
+                results.push(UninstallResult {
+                    tool: tool.clone(),
+                    folder_deleted: false,
+                    error: Some(stderr),
+                });
+            }
+            Err(e) => {
+                results.push(UninstallResult {
+                    tool: tool.clone(),
+                    folder_deleted: false,
+                    error: Some(format!("Failed to run npx: {}", e)),
+                });
+            }
+        }
+    }
+
+    results
 }
 
 pub fn uninstall_skill(skill_name: &str, tools: &[String], scope: Scope) -> Vec<UninstallResult> {
@@ -199,17 +328,6 @@ fn uninstall_for_tool(skill_folder: PathBuf, tool: String) -> UninstallResult {
             error: Some(e.to_string()),
         },
     }
-}
-
-pub fn prompt_confirm(message: &str) -> bool {
-    print!("{} [y/N]: ", message);
-    io::stdout().flush().ok();
-
-    let stdin = io::stdin();
-    let mut input = String::new();
-    stdin.lock().read_line(&mut input).ok();
-
-    input.trim().eq_ignore_ascii_case("y")
 }
 
 pub fn print_install_summary(results: &[InstallResult], skill_name: &str) {
