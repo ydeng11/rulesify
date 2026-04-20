@@ -8,7 +8,7 @@ use clap::{Parser, Subcommand};
 #[command(about = "Discover and install AI agent skills")]
 pub struct Cli {
     #[command(subcommand)]
-    pub command: Commands,
+    pub command: Option<Commands>,
 
     #[arg(short, long)]
     pub verbose: bool,
@@ -16,9 +16,6 @@ pub struct Cli {
 
 #[derive(Subcommand)]
 pub enum Commands {
-    /// Interactive setup to discover and install skills
-    Init,
-
     /// Manage installed skills
     Skill {
         #[command(subcommand)]
@@ -65,8 +62,8 @@ pub enum SkillCommands {
 
 pub async fn run(cli: Cli) -> crate::utils::Result<()> {
     match cli.command {
-        Commands::Init => init::run(cli.verbose).await?,
-        Commands::Skill { command } => skill::run(command, cli.verbose).await?,
+        None => init::run(cli.verbose).await?,
+        Some(Commands::Skill { command }) => skill::run(command, cli.verbose).await?,
     }
     Ok(())
 }

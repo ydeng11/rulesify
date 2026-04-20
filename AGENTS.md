@@ -49,7 +49,7 @@ rulesify/
 │   │   └── update-registry.rs  # Registry automation binary
 │   ├── cli/
 │   │   ├── mod.rs          # CLI structure (clap Parser/Subcommand)
-│   │   ├── init.rs         # `rulesify init` interactive setup
+│   │   ├── init.rs         # Main TUI interface (default command)
 │   │   └── skill.rs        # `rulesify skill list/add/remove/update`
 │   ├── models/
 │   │   ├── mod.rs          # Model exports
@@ -113,7 +113,7 @@ rulesify/
 │   ├── lib.rs              # Library exports
 │   ├── cli/
 │   │   ├── mod.rs          # CLI structure (clap Parser/Subcommand)
-│   │   ├── init.rs         # `rulesify init` interactive setup
+│   │   ├── init.rs         # Main TUI interface (default command)
 │   │   └── skill.rs        # `rulesify skill list/add/remove/update`
 │   ├── models/
 │   │   ├── mod.rs          # Model exports
@@ -177,11 +177,11 @@ cargo build --release
 cargo test
 
 # Run with verbose logging
-RUST_LOG=debug cargo run -- init
+RUST_LOG=debug cargo run --bin rulesify
 
 # Run release binary
 ./target/release/rulesify --help
-./target/release/rulesify init
+./target/release/rulesify
 ./target/release/rulesify skill list
 ```
 
@@ -221,8 +221,8 @@ RUST_LOG=debug cargo run --bin update-registry
 ### CLI Commands
 
 ```bash
-# Interactive setup (project-level only, shows global skills with [g] tag)
-rulesify init
+# Interactive TUI (default, shows global skills with [g] tag)
+rulesify
 
 # List installed skills (shows both global and project)
 rulesify skill list
