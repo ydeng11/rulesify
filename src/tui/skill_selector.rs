@@ -22,20 +22,20 @@ pub struct SelectionResult {
     pub removed: Vec<String>,
 }
 
-struct SkillSelectorState {
-    all_skills: Vec<(String, Skill)>,
-    filtered_skills: Vec<(String, Skill)>,
-    installed_ids: HashSet<String>,
-    global_ids: HashSet<String>,
-    domains: Vec<String>,
+pub(crate) struct SkillSelectorState {
+    pub all_skills: Vec<(String, Skill)>,
+    pub filtered_skills: Vec<(String, Skill)>,
+    pub installed_ids: HashSet<String>,
+    pub global_ids: HashSet<String>,
+    pub domains: Vec<String>,
     domain_index: usize,
     domain_scroll_offset: usize,
     domain_visible_count: usize,
-    all_tags: Vec<(String, usize)>,
+    pub all_tags: Vec<(String, usize)>,
     selected_tags: HashSet<String>,
     sort_mode: SortMode,
     current_skill_index: usize,
-    selected_skill_ids: HashSet<String>,
+    pub selected_skill_ids: HashSet<String>,
     skill_search_query: String,
     skill_search_active: bool,
     skill_scroll_offset: usize,
@@ -49,7 +49,7 @@ struct SkillSelectorState {
 }
 
 impl SkillSelectorState {
-    fn new(
+    pub(crate) fn new(
         skills: Vec<(String, Skill)>,
         installed_ids: HashSet<String>,
         global_ids: HashSet<String>,
