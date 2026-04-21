@@ -56,7 +56,12 @@ impl SkillSelectorState {
     ) -> Self {
         let domains = Self::extract_domains(&skills);
         let all_tags = Self::extract_tags_with_counts(&skills);
-        let filtered_skills = skills.clone();
+        let filtered_skills = Self::apply_sort(
+            skills.clone(),
+            SortMode::default(),
+            &global_ids,
+            &installed_ids,
+        );
 
         let selected_skill_ids: HashSet<String> = filtered_skills
             .iter()
@@ -168,31 +173,64 @@ impl SkillSelectorState {
             .cloned()
             .collect();
 
-        self.filtered_skills = Self::apply_sort(filtered, self.sort_mode);
+        self.filtered_skills = Self::apply_sort(
+            filtered,
+            self.sort_mode,
+            &self.global_ids,
+            &self.installed_ids,
+        );
         self.current_skill_index = 0;
         self.skill_scroll_offset = 0;
     }
 
-    fn apply_sort(skills: Vec<(String, Skill)>, mode: SortMode) -> Vec<(String, Skill)> {
-        let mut sorted = skills;
-        match mode {
-            SortMode::StarsDesc => sorted.sort_by(|a, b| b.1.stars.cmp(&a.1.stars)),
-            SortMode::StarsAsc => sorted.sort_by(|a, b| a.1.stars.cmp(&b.1.stars)),
-            SortMode::ScoreDesc => sorted.sort_by(|a, b| {
-                b.1.score
-                    .unwrap_or(0.0)
-                    .partial_cmp(&a.1.score.unwrap_or(0.0))
-                    .unwrap()
-            }),
-            SortMode::ScoreAsc => sorted.sort_by(|a, b| {
-                a.1.score
-                    .unwrap_or(0.0)
-                    .partial_cmp(&b.1.score.unwrap_or(0.0))
-                    .unwrap()
-            }),
-            SortMode::NameAsc => sorted.sort_by(|a, b| a.1.name.cmp(&b.1.name)),
-            SortMode::NameDesc => sorted.sort_by(|a, b| b.1.name.cmp(&a.1.name)),
+    fn get_skill_priority(
+        skill_id: &str,
+        global_ids: &HashSet<String>,
+        installed_ids: &HashSet<String>,
+    ) -> u8 {
+        if global_ids.contains(skill_id) {
+            0
+        } else if installed_ids.contains(skill_id) {
+            1
+        } else {
+            2
         }
+    }
+
+    fn apply_sort(
+        skills: Vec<(String, Skill)>,
+        mode: SortMode,
+        global_ids: &HashSet<String>,
+        installed_ids: &HashSet<String>,
+    ) -> Vec<(String, Skill)> {
+        let mut sorted = skills;
+        sorted.sort_by(|a, b| {
+            let priority_a = Self::get_skill_priority(&a.0, global_ids, installed_ids);
+            let priority_b = Self::get_skill_priority(&b.0, global_ids, installed_ids);
+
+            if priority_a != priority_b {
+                return priority_a.cmp(&priority_b);
+            }
+
+            match mode {
+                SortMode::StarsDesc => b.1.stars.cmp(&a.1.stars),
+                SortMode::StarsAsc => a.1.stars.cmp(&b.1.stars),
+                SortMode::ScoreDesc => {
+                    b.1.score
+                        .unwrap_or(0.0)
+                        .partial_cmp(&a.1.score.unwrap_or(0.0))
+                        .unwrap()
+                }
+                SortMode::ScoreAsc => {
+                    a.1.score
+                        .unwrap_or(0.0)
+                        .partial_cmp(&b.1.score.unwrap_or(0.0))
+                        .unwrap()
+                }
+                SortMode::NameAsc => a.1.name.cmp(&b.1.name),
+                SortMode::NameDesc => b.1.name.cmp(&a.1.name),
+            }
+        });
         sorted
     }
 

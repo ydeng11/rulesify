@@ -566,12 +566,16 @@ mod tests {
         let skills = vec![
             ("skill-a".to_string(), make_skill("skill-a", "Skill A")),
             ("skill-b".to_string(), make_skill("skill-b", "Skill B")),
-            ("superpowers".to_string(), make_mega_skill("superpowers", "Superpowers")),
+            (
+                "superpowers".to_string(),
+                make_mega_skill("superpowers", "Superpowers"),
+            ),
         ];
 
         let installed_ids: HashSet<String> = ["skill-a".to_string()].into_iter().collect();
-        let global_ids: HashSet<String> =
-            ["skill-b".to_string(), "superpowers".to_string()].into_iter().collect();
+        let global_ids: HashSet<String> = ["skill-b".to_string(), "superpowers".to_string()]
+            .into_iter()
+            .collect();
 
         let state = SkillSelectorState::new(skills, installed_ids.clone(), global_ids.clone());
 
