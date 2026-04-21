@@ -2,7 +2,8 @@ use crate::cli::SkillCommands;
 use crate::fetcher::ArchiveCache;
 use crate::installer::{
     execute_npx_install, generate_install_instructions, generate_uninstall_instructions,
-    install_skill, print_install_summary, print_uninstall_summary, uninstall_skill,
+    install_mega_skill, install_skill, print_install_summary, print_uninstall_summary,
+    uninstall_skill,
 };
 use crate::models::{
     get_global_config_path, GlobalConfig, InstallAction, ProjectConfig, Registry, Scope,
@@ -14,6 +15,7 @@ use std::path::Path;
 pub async fn run(command: SkillCommands, verbose: bool) -> Result<()> {
     match command {
         SkillCommands::List => list_skills(verbose),
+        SkillCommands::Search { query } => search_skills(query, verbose),
         SkillCommands::Add {
             id,
             global,
@@ -71,6 +73,84 @@ fn list_skills(verbose: bool) -> Result<()> {
             }
         }
     }
+
+    Ok(())
+}
+
+fn search_skills(query: Option<String>, verbose: bool) -> Result<()> {
+    let registry = load_builtin()?;
+
+    let skills: Vec<_> = if let Some(q) = query {
+        registry
+            .skills
+            .iter()
+            .filter(|(_, skill)| {
+                skill.name.to_lowercase().contains(&q.to_lowercase())
+                    || skill.description.to_lowercase().contains(&q.to_lowercase())
+            })
+            .map(|(k, v)| (k.clone(), v.clone()))
+            .collect()
+    } else {
+        registry
+            .skills
+            .iter()
+            .map(|(k, v)| (k.clone(), v.clone()))
+            .collect()
+    };
+
+    if skills.is_empty() {
+        println!("No skills found.");
+        return Ok(());
+    }
+
+    println!("Available skills ({} total):\n", skills.len());
+
+    let mut mega_skills: Vec<_> = skills.iter().filter(|(_, s)| s.is_mega_skill).collect();
+    mega_skills.sort_by(|a, b| b.1.stars.cmp(&a.1.stars));
+
+    let mut regular_skills: Vec<_> = skills.iter().filter(|(_, s)| !s.is_mega_skill).collect();
+    regular_skills.sort_by(|a, b| b.1.name.cmp(&a.1.name));
+
+    if !mega_skills.is_empty() {
+        println!("Mega-Skills (skill collections):");
+        for (id, skill) in mega_skills {
+            let score_text = skill
+                .score
+                .map(|s| format!("{:.0}", s))
+                .unwrap_or_else(|| "-".to_string());
+            println!("  [M] {} - {}", skill.name, skill.description);
+            if verbose {
+                println!("      ID: {}", id);
+                println!("      Stars: ★{}", skill.stars);
+                println!("      Score: {}", score_text);
+                println!("      Source: {}", skill.source_url);
+            }
+        }
+        println!();
+    }
+
+    println!("Regular Skills:");
+    for (id, skill) in regular_skills {
+        let score_text = skill
+            .score
+            .map(|s| format!("{:.0}", s))
+            .unwrap_or_else(|| "-".to_string());
+        println!(
+            "  {} - {}",
+            skill.name,
+            skill.description.lines().next().unwrap_or("")
+        );
+        if verbose {
+            println!("      ID: {}", id);
+            println!("      Domain: {}", skill.domain);
+            println!("      Stars: ★{}", skill.stars);
+            println!("      Score: {}", score_text);
+            println!("      Tags: {}", skill.tags.join(", "));
+        }
+    }
+
+    println!("\nTo install: rulesify skill add <id>");
+    println!("For mega-skills: rulesify skill add <name> --global");
 
     Ok(())
 }
@@ -140,6 +220,23 @@ async fn add_skill(id: String, global: bool, agent_mode: bool, _verbose: bool) -
             let cache = ArchiveCache::new();
             let client = GitHubClient::new();
             install_skill(skill, &tools, scope.clone(), &client, &cache).await?
+        }
+        Some(InstallAction::MegaSkillCopy {
+            source_folder,
+            dest_name,
+        }) => {
+            let cache = ArchiveCache::new();
+            let client = GitHubClient::new();
+            install_mega_skill(
+                skill,
+                source_folder,
+                dest_name,
+                &tools,
+                scope.clone(),
+                &client,
+                &cache,
+            )
+            .await?
         }
         Some(InstallAction::Command { value }) => {
             println!("Running custom install command: {}", value);
@@ -365,7 +462,36 @@ async fn update_registry(agent_mode: bool, verbose: bool) -> Result<()> {
 
     for (tool, _id, skill) in &global_updated {
         println!("\nUpdating '{}' [{}] (global)...", skill.name, tool);
-        let results = install_skill(skill, &[tool.clone()], Scope::Global, &client, &cache).await?;
+
+        let results = match &skill.install_action {
+            Some(InstallAction::Npx {
+                package,
+                args,
+                uninstall_flag,
+            }) => execute_npx_install(
+                package,
+                args,
+                uninstall_flag.as_deref(),
+                &[tool.clone()],
+                Scope::Global,
+            )?,
+            Some(InstallAction::MegaSkillCopy {
+                source_folder,
+                dest_name,
+            }) => {
+                install_mega_skill(
+                    skill,
+                    source_folder,
+                    dest_name,
+                    &[tool.clone()],
+                    Scope::Global,
+                    &client,
+                    &cache,
+                )
+                .await?
+            }
+            _ => install_skill(skill, &[tool.clone()], Scope::Global, &client, &cache).await?,
+        };
         print_install_summary(&results, &skill.name);
     }
 
@@ -373,7 +499,36 @@ async fn update_registry(agent_mode: bool, verbose: bool) -> Result<()> {
         let tools = project_config.as_ref().unwrap().tools.clone();
         for (_id, skill) in &project_updated {
             println!("\nUpdating '{}' (project)...", skill.name);
-            let results = install_skill(skill, &tools, Scope::Project, &client, &cache).await?;
+
+            let results = match &skill.install_action {
+                Some(InstallAction::Npx {
+                    package,
+                    args,
+                    uninstall_flag,
+                }) => execute_npx_install(
+                    package,
+                    args,
+                    uninstall_flag.as_deref(),
+                    &tools,
+                    Scope::Project,
+                )?,
+                Some(InstallAction::MegaSkillCopy {
+                    source_folder,
+                    dest_name,
+                }) => {
+                    install_mega_skill(
+                        skill,
+                        source_folder,
+                        dest_name,
+                        &tools,
+                        Scope::Project,
+                        &client,
+                        &cache,
+                    )
+                    .await?
+                }
+                _ => install_skill(skill, &tools, Scope::Project, &client, &cache).await?,
+            };
             print_install_summary(&results, &skill.name);
         }
     }

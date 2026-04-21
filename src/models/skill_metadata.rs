@@ -19,6 +19,8 @@ pub struct SkillMetadata {
     pub domain: String,
     pub last_updated: String,
     pub install_action: InstallAction,
+    #[serde(default)]
+    pub is_mega_skill: bool,
 }
 
 impl SkillMetadata {
@@ -35,6 +37,7 @@ impl SkillMetadata {
             tags: self.tags.clone(),
             install_action: Some(self.install_action.clone()),
             score: Some(score),
+            is_mega_skill: self.is_mega_skill,
         }
     }
 }

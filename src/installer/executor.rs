@@ -87,6 +87,45 @@ pub async fn install_skill(
     Ok(results)
 }
 
+pub async fn install_mega_skill(
+    skill: &Skill,
+    source_folder: &str,
+    dest_name: &str,
+    tools: &[String],
+    scope: Scope,
+    _client: &GitHubClient,
+    cache: &ArchiveCache,
+) -> Result<Vec<InstallResult>> {
+    let source = parse_source_url(&skill.source_url)?;
+
+    let extracted_root = cache.get_extracted_folder(&source).await?;
+
+    let source_path = extracted_root.join(source_folder);
+
+    if !source_path.exists() {
+        return Err(RulesifyError::SkillParse(format!(
+            "Source folder '{}' not found in archive",
+            source_folder
+        ))
+        .into());
+    }
+
+    let entries: Vec<_> = std::fs::read_dir(&source_path)
+        .map_err(|e| RulesifyError::SkillParse(format!("Failed to read source folder: {}", e)))?
+        .filter_map(|e| e.ok())
+        .collect();
+
+    let mut results = Vec::new();
+
+    for tool in tools {
+        let skill_folder = get_skill_folder(tool, scope.clone(), dest_name);
+        let result = install_for_tool(&source_path, &entries, &skill_folder, tool.clone());
+        results.push(result);
+    }
+
+    Ok(results)
+}
+
 fn install_for_tool(
     extracted_folder: &PathBuf,
     entries: &[std::fs::DirEntry],

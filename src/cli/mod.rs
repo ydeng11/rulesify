@@ -28,6 +28,12 @@ pub enum SkillCommands {
     /// List installed skills
     List,
 
+    /// Search available skills in registry
+    Search {
+        /// Filter by name or description
+        query: Option<String>,
+    },
+
     /// Add a skill from registry
     Add {
         /// Skill ID to add

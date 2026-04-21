@@ -22,6 +22,7 @@ mod tests {
                     folder: "tdd".to_string(),
                 }),
                 score: Some(85.0),
+                is_mega_skill: false,
             },
         );
 

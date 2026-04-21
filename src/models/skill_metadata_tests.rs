@@ -21,6 +21,7 @@ mod tests {
             install_action: InstallAction::Copy {
                 folder: "tdd".to_string(),
             },
+            is_mega_skill: false,
         };
         assert_eq!(meta.skill_id, "tdd");
         assert!(meta.install_action.is_simple());

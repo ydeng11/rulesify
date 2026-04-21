@@ -7,6 +7,8 @@ pub struct ParsedSkill {
     pub description: String,
     #[serde(default)]
     pub tags: Vec<String>,
+    #[serde(default)]
+    pub is_mega_skill: bool,
 }
 
 pub struct SkillParser;

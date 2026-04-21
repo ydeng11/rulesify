@@ -19,6 +19,7 @@ mod tests {
                 folder: id.to_string(),
             }),
             score: Some(80.0),
+            is_mega_skill: false,
         }
     }
 

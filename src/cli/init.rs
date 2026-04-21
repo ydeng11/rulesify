@@ -1,8 +1,9 @@
 use crate::fetcher::ArchiveCache;
 use crate::installer::{
-    install_skill, print_install_summary, print_uninstall_summary, uninstall_skill,
+    install_mega_skill, install_skill, print_install_summary, print_uninstall_summary,
+    uninstall_skill,
 };
-use crate::models::{GlobalConfig, ProjectConfig, Registry, Scope};
+use crate::models::{GlobalConfig, InstallAction, ProjectConfig, Registry, Scope};
 use crate::registry::{fetch_registry, load_builtin, GitHubClient, RegistryCache};
 use crate::scanner::scan_project;
 use crate::tui::{SelectionResult, SkillSelector, ToolPicker};
@@ -119,7 +120,36 @@ pub async fn run(verbose: bool) -> Result<()> {
             }
 
             println!("Installing '{}'...", skill.name);
-            let results = install_skill(skill, &tools, Scope::Project, &client, &cache).await?;
+
+            let results = match &skill.install_action {
+                Some(InstallAction::MegaSkillCopy {
+                    source_folder,
+                    dest_name,
+                }) => {
+                    install_mega_skill(
+                        skill,
+                        source_folder,
+                        dest_name,
+                        &tools,
+                        Scope::Project,
+                        &client,
+                        &cache,
+                    )
+                    .await?
+                }
+                Some(InstallAction::Npx {
+                    package,
+                    args,
+                    uninstall_flag,
+                }) => crate::installer::execute_npx_install(
+                    package,
+                    args,
+                    uninstall_flag.as_deref(),
+                    &tools,
+                    Scope::Project,
+                )?,
+                _ => install_skill(skill, &tools, Scope::Project, &client, &cache).await?,
+            };
             print_install_summary(&results, &skill.name);
             config.add_skill(id, &skill.source_url, &skill.commit_sha, Scope::Project);
         }

@@ -7,6 +7,7 @@ pub struct Scorer {
     recency_weight: f32,
     issue_weight: f32,
     contributor_weight: f32,
+    mega_skill_bonus: f32,
 }
 
 impl Default for Scorer {
@@ -17,6 +18,7 @@ impl Default for Scorer {
             recency_weight: 30.0,
             issue_weight: 20.0,
             contributor_weight: 10.0,
+            mega_skill_bonus: 20.0,
         }
     }
 }
@@ -66,6 +68,15 @@ impl Scorer {
 
     pub fn calculate_for_skill(&self, _meta: &SkillMetadata, repo_metrics: &RepoMetrics) -> f32 {
         self.calculate(repo_metrics)
+    }
+
+    pub fn calculate_for_mega_skill(
+        &self,
+        _meta: &SkillMetadata,
+        repo_metrics: &RepoMetrics,
+    ) -> f32 {
+        let base_score = self.calculate(repo_metrics);
+        base_score + self.mega_skill_bonus
     }
 
     pub fn filter_above_threshold(

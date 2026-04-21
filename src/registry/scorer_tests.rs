@@ -21,6 +21,26 @@ mod tests {
             install_action: InstallAction::Copy {
                 folder: "test".into(),
             },
+            is_mega_skill: false,
+        }
+    }
+
+    fn make_mega_skill_meta() -> SkillMetadata {
+        SkillMetadata {
+            skill_id: "superpowers".into(),
+            name: "superpowers".into(),
+            description: "Complete software development methodology for coding agents".into(),
+            source_repo: "obra/superpowers".into(),
+            source_folder: "skills".into(),
+            source_url: "https://github.com/obra/superpowers/tree/main/skills".into(),
+            commit_sha: String::new(),
+            tags: vec!["mega-skill".into()],
+            stars: 160000,
+            context_size: 0,
+            domain: "development".into(),
+            last_updated: "2026-04-20".into(),
+            install_action: InstallAction::mega_skill_copy("skills", "superpowers"),
+            is_mega_skill: true,
         }
     }
 
@@ -41,6 +61,22 @@ mod tests {
         let metrics = make_metrics(5000, 10);
         let score = scorer.calculate(&metrics);
         assert!(score > 0.0 && score <= 100.0);
+    }
+
+    #[test]
+    fn test_mega_skill_score_bonus() {
+        let scorer = Scorer::default();
+        let metrics = make_metrics(5000, 10);
+
+        let regular_meta = make_meta();
+        let regular_score = scorer.calculate_for_skill(&regular_meta, &metrics);
+
+        let mega_meta = make_mega_skill_meta();
+        let mega_score = scorer.calculate_for_mega_skill(&mega_meta, &metrics);
+
+        assert!(mega_score > regular_score);
+        let diff = mega_score - regular_score;
+        assert!(diff >= 20.0);
     }
 
     #[test]
@@ -132,5 +168,35 @@ mod tests {
         let sorted = scorer.sort_and_limit(filtered, 2);
         assert_eq!(sorted.len(), 2);
         assert!(sorted[0].1 >= sorted[1].1);
+    }
+
+    #[test]
+    fn test_mega_skill_with_npx() {
+        let scorer = Scorer::default();
+        let metrics = make_metrics(200, 5);
+
+        let gsd_meta = SkillMetadata {
+            skill_id: "gsd".into(),
+            name: "gsd".into(),
+            description: "Get Shit Done project management system".into(),
+            source_repo: "gsd-build/get-shit-done".into(),
+            source_folder: String::new(),
+            source_url: "https://github.com/gsd-build/get-shit-done".into(),
+            commit_sha: String::new(),
+            tags: vec!["mega-skill".into()],
+            stars: 200,
+            context_size: 0,
+            domain: "development".into(),
+            last_updated: "2026-04-20".into(),
+            install_action: InstallAction::Npx {
+                package: "get-shit-done-cc".into(),
+                args: vec!["@latest".into()],
+                uninstall_flag: None,
+            },
+            is_mega_skill: true,
+        };
+
+        let score = scorer.calculate_for_mega_skill(&gsd_meta, &metrics);
+        assert!(score > 20.0);
     }
 }

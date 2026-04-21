@@ -22,6 +22,9 @@ pub struct Skill {
 
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub score: Option<f32>,
+
+    #[serde(default)]
+    pub is_mega_skill: bool,
 }
 
 impl Skill {

@@ -61,7 +61,60 @@ async fn fetch_skill(
         domain: String::new(),
         last_updated: chrono::Utc::now().format("%Y-%m-%d").to_string(),
         install_action: InstallAction::Copy { folder },
+        is_mega_skill: parsed.is_mega_skill,
     })
+}
+
+fn create_synthetic_mega_skill(source: SourceRepo, repo_metrics: &RepoMetrics) -> SkillMetadata {
+    let skill_id = source.mega_skill_dest_name().to_string();
+    let source_folder = source.mega_skill_source_folder();
+    let source_url = format!(
+        "https://github.com/{}/tree/{}/",
+        source.full_name(),
+        source.branch()
+    );
+
+    let (description, install_action) = match source {
+        SourceRepo::ObraSuperpowers => (
+            "Complete software development methodology for coding agents - brainstorming, test-driven development, systematic debugging, writing plans, executing plans, and more. Skills trigger automatically for mandatory workflows.".to_string(),
+            InstallAction::mega_skill_copy("skills", "superpowers"),
+        ),
+        SourceRepo::ObraSuperpowersLab => (
+            "Experimental skills for Claude Code Superpowers - finding-duplicate-functions, mcp-cli, using-tmux-for-interactive-commands, windows-vm. Under active development.".to_string(),
+            InstallAction::mega_skill_copy("skills", "superpowers-lab"),
+        ),
+        SourceRepo::GsdSkills => (
+            "Get Shit Done - A comprehensive project management system for solo developers using Claude agents. Spec-driven development with context engineering and meta-prompting.".to_string(),
+            InstallAction::Npx {
+                package: "get-shit-done-cc".to_string(),
+                args: vec!["@latest".to_string()],
+                uninstall_flag: None,
+            },
+        ),
+        _ => (
+            "Mega-skill collection".to_string(),
+            InstallAction::mega_skill_copy(source_folder, &skill_id),
+        ),
+    };
+
+    let name = skill_id.clone();
+
+    SkillMetadata {
+        skill_id,
+        name,
+        description,
+        source_repo: source.full_name(),
+        source_folder: source_folder.to_string(),
+        source_url,
+        commit_sha: String::new(),
+        tags: vec!["mega-skill".to_string()],
+        stars: repo_metrics.stars,
+        context_size: 0,
+        domain: "development".to_string(),
+        last_updated: chrono::Utc::now().format("%Y-%m-%d").to_string(),
+        install_action,
+        is_mega_skill: true,
+    }
 }
 
 fn load_cached_registry(path: &Path) -> HashMap<String, (String, Vec<String>)> {
@@ -154,6 +207,63 @@ async fn main() -> Result<()> {
             }
         };
 
+        if source.is_mega_skill_collection() {
+            match source {
+                SourceRepo::ObraSuperpowers
+                | SourceRepo::ObraSuperpowersLab
+                | SourceRepo::GsdSkills => {
+                    log::info!("Creating synthetic mega-skill for {}", source.full_name());
+                    let meta = create_synthetic_mega_skill(source, &repo_metrics);
+                    let score = scorer.calculate_for_mega_skill(&meta, &repo_metrics);
+                    all_skills.push((meta, score));
+                }
+                SourceRepo::PbakausImpeccable => {
+                    let pattern = source.skill_pattern();
+                    match client
+                        .fetch_file(source.owner(), source.repo(), pattern)
+                        .await
+                    {
+                        Ok(content) => match SkillParser::parse(&content) {
+                            Ok(parsed) => {
+                                let skill_id = source
+                                    .parse_skill_id(pattern)
+                                    .unwrap_or("impeccable".into());
+                                let context_size = SkillParser::estimate_context_size(&content);
+                                let source_url =
+                                    format!("https://github.com/{}/tree/main/", source.full_name());
+
+                                let meta = SkillMetadata {
+                                    skill_id,
+                                    name: parsed.name,
+                                    description: parsed.description,
+                                    source_repo: source.full_name(),
+                                    source_folder: String::new(),
+                                    source_url,
+                                    commit_sha: String::new(),
+                                    tags: parsed.tags,
+                                    stars: repo_metrics.stars,
+                                    context_size,
+                                    domain: "design-and-media".to_string(),
+                                    last_updated: chrono::Utc::now().format("%Y-%m-%d").to_string(),
+                                    install_action: InstallAction::mega_skill_copy(
+                                        "source/skills",
+                                        "impeccable",
+                                    ),
+                                    is_mega_skill: true,
+                                };
+                                let score = scorer.calculate_for_mega_skill(&meta, &repo_metrics);
+                                all_skills.push((meta, score));
+                            }
+                            Err(e) => log::warn!("Failed to parse impeccable SKILL.md: {}", e),
+                        },
+                        Err(e) => log::warn!("Failed to fetch impeccable SKILL.md: {}", e),
+                    }
+                }
+                _ => {}
+            }
+            continue;
+        }
+
         let tree = match client
             .fetch_tree(source.owner(), source.repo(), source.branch())
             .await
@@ -191,6 +301,11 @@ async fn main() -> Result<()> {
     let mut cached_count = 0;
 
     for (mut meta, score) in top {
+        if meta.is_mega_skill {
+            final_skills.insert(meta.skill_id.clone(), meta.to_skill(score));
+            continue;
+        }
+
         let was_cached = apply_cache(&mut meta, &cached);
 
         if was_cached {
