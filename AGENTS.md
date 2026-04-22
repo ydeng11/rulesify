@@ -204,8 +204,8 @@ cargo watch -x check
 ### Registry Automation
 
 ```bash
-# Update registry from GitHub repos (requires GITHUB_TOKEN)
-GITHUB_TOKEN=your_token cargo run --bin update-registry
+# Update registry from GitHub repos (requires GH_TOKEN)
+GH_TOKEN=your_token cargo run --bin update-registry
 
 # Run with verbose logging
 RUST_LOG=debug cargo run --bin update-registry

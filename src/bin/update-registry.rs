@@ -172,12 +172,12 @@ async fn main() -> Result<()> {
     log::info!("Starting registry update");
     log::info!("Args: force={}, verbose={}", args.force, args.verbose);
 
-    let token = std::env::var("GITHUB_TOKEN").ok();
+    let token = std::env::var("GH_TOKEN").ok();
     let client = if let Some(t) = token {
         log::info!("Using authenticated GitHub API");
         GitHubClient::with_token(Some(t))
     } else {
-        log::warn!("No GITHUB_TOKEN set - using unauthenticated API (60 requests/hr rate limit)");
+        log::warn!("No GH_TOKEN set - using unauthenticated API (60 requests/hr rate limit)");
         GitHubClient::new()
     };
     let scorer = Scorer::default();

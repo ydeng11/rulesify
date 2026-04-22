@@ -194,7 +194,7 @@ The registry updates weekly via GitHub Actions. To manually refresh:
 
 ```bash
 # Requires GitHub and OpenRouter tokens
-GITHUB_TOKEN=xxx OPENROUTER_API_KEY=xxx cargo run --bin update-registry
+GH_TOKEN=xxx OPENROUTER_API_KEY=xxx cargo run --bin update-registry
 
 # Force re-classification
 cargo run --bin update-registry -- --force
