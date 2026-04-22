@@ -1,0 +1,365 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: 'Action to perform'
+        required: true
+        type: choice
+        options:
+          - production-release
+          - bump-version
+      version:
+        description: 'Version (e.g., 0.5.0) - required for production-release'
+        required: false
+        type: string
+      next_version:
+        description: 'Next version (e.g., 0.5.1) - required for bump-version'
+        required: false
+        type: string
+
+env:
+  CARGO_TERM_COLOR: always
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  validate:
+    name: Validate Version
+    if: github.event.inputs.action == 'production-release'
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.ver.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+
+      - name: Validate version
+        id: ver
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          CARGO_VERSION=$(grep '^version = ' Cargo.toml | sed 's/version = "\(.*\)"/\1/')
+          INPUT_VERSION="${{ github.event.inputs.version }}"
+
+          if [ -z "$INPUT_VERSION" ]; then
+            echo "version input is required for production-release" >&2
+            exit 1
+          fi
+
+          if ! [[ "$INPUT_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Invalid version '$INPUT_VERSION' (expected x.y.z)" >&2
+            exit 1
+          fi
+
+          if [ "$CARGO_VERSION" != "$INPUT_VERSION" ]; then
+            echo "Cargo.toml version ($CARGO_VERSION) does not match release version ($INPUT_VERSION)." >&2
+            echo "Update Cargo.toml first (use bump-version action)." >&2
+            exit 1
+          fi
+
+          TAG="v$INPUT_VERSION"
+          if git rev-parse "$TAG" >/dev/null 2>&1; then
+            echo "Tag $TAG already exists." >&2
+            exit 1
+          fi
+
+          LATEST_TAG=$(git tag -l 'v*' | sort -V | tail -1 || true)
+          if [ -n "$LATEST_TAG" ]; then
+            LATEST_VERSION=${LATEST_TAG#v}
+            HIGHEST=$(printf '%s\n%s\n' "$LATEST_VERSION" "$INPUT_VERSION" | sort -V | tail -1)
+            if [ "$HIGHEST" != "$INPUT_VERSION" ] || [ "$INPUT_VERSION" = "$LATEST_VERSION" ]; then
+              echo "Version ($INPUT_VERSION) must be > latest tag ($LATEST_VERSION)." >&2
+              exit 1
+            fi
+          fi
+
+          echo "version=$INPUT_VERSION" >> "$GITHUB_OUTPUT"
+
+  test:
+    name: Run Tests
+    needs: validate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - run: cargo test --all-features -- --test-threads=1
+
+  build:
+    name: Build (${{ matrix.asset_name }})
+    needs: test
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            target: x86_64-unknown-linux-gnu
+            artifact: rulesify
+            asset: rulesify-linux-amd64
+          - os: macos-latest
+            target: x86_64-apple-darwin
+            artifact: rulesify
+            asset: rulesify-darwin-amd64
+          - os: macos-latest
+            target: aarch64-apple-darwin
+            artifact: rulesify
+            asset: rulesify-darwin-arm64
+          - os: windows-latest
+            target: x86_64-pc-windows-msvc
+            artifact: rulesify.exe
+            asset: rulesify-windows-amd64.exe
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+
+      - run: cargo build --release --target ${{ matrix.target }}
+
+      - name: Package
+        shell: bash
+        run: |
+          cd target/${{ matrix.target }}/release
+          if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
+            7z a ../../../${{ matrix.asset }}.zip ${{ matrix.artifact }}
+            certutil -hashfile ../../../${{ matrix.asset }}.zip SHA256 > ../../../${{ matrix.asset }}.zip.sha256
+          else
+            tar -czf ../../../${{ matrix.asset }}.tar.gz ${{ matrix.artifact }}
+            shasum -a 256 ../../../${{ matrix.asset }}.tar.gz > ../../../${{ matrix.asset }}.tar.gz.sha256
+          fi
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.asset }}
+          path: |
+            ${{ matrix.asset }}.tar.gz
+            ${{ matrix.asset }}.tar.gz.sha256
+            ${{ matrix.asset }}.zip
+            ${{ matrix.asset }}.zip.sha256
+
+  create-release:
+    name: Create Release
+    needs: [validate, build]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Generate release notes
+        shell: bash
+        run: |
+          VERSION="${{ needs.validate.outputs.version }}"
+          echo "## Rulesify CLI v$VERSION" > RELEASE_NOTES.md
+          echo "" >> RELEASE_NOTES.md
+          echo "### Changelog" >> RELEASE_NOTES.md
+          echo "" >> RELEASE_NOTES.md
+
+          DEFAULT_BRANCH="${{ github.event.repository.default_branch }}"
+          CHANGELOG_TMP="$(mktemp)"
+          if curl -fsSL "https://raw.githubusercontent.com/${{ github.repository }}/${DEFAULT_BRANCH}/CHANGELOG.md" -o "$CHANGELOG_TMP"; then
+            if grep -q "^## \[$VERSION\]" "$CHANGELOG_TMP"; then
+              sed -n "/^## \[$VERSION\]/,/^## \[/p" "$CHANGELOG_TMP" | sed '$d' >> RELEASE_NOTES.md || true
+            else
+              echo "_Changelog entry not found for $VERSION._" >> RELEASE_NOTES.md
+            fi
+          fi
+          rm -f "$CHANGELOG_TMP" || true
+
+      - name: Create release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: bash
+        run: |
+          VERSION="${{ needs.validate.outputs.version }}"
+          TAG="v$VERSION"
+          SHA="${{ github.sha }}"
+
+          gh release create "$TAG" \
+            --target "$SHA" \
+            --title "Rulesify CLI v$VERSION" \
+            --notes-file RELEASE_NOTES.md
+
+          for asset in artifacts/*/; do
+            for file in "$asset"*; do
+              if [ -f "$file" ]; then
+                gh release upload "$TAG" "$file" --clobber
+              fi
+            done
+          done
+
+      - name: Create git tag
+        shell: bash
+        run: |
+          VERSION="${{ needs.validate.outputs.version }}"
+          TAG="v$VERSION"
+
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git config user.name "github-actions[bot]"
+          git tag -a "$TAG" -m "Release $TAG"
+          git push origin "$TAG"
+
+  update-homebrew:
+    name: Update Homebrew Tap
+    needs: [validate, create-release]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get version and checksums
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        id: info
+        shell: bash
+        run: |
+          VERSION="${{ needs.validate.outputs.version }}"
+          TAG="v$VERSION"
+
+          gh release download "$TAG" \
+            --pattern "rulesify-darwin-amd64.tar.gz.sha256" \
+            --pattern "rulesify-darwin-arm64.tar.gz.sha256" \
+            --dir checksums
+
+          SHA_AMD64=$(cut -d' ' -f1 checksums/rulesify-darwin-amd64.tar.gz.sha256)
+          SHA_ARM64=$(cut -d' ' -f1 checksums/rulesify-darwin-arm64.tar.gz.sha256)
+
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "sha_amd64=$SHA_AMD64" >> "$GITHUB_OUTPUT"
+          echo "sha_arm64=$SHA_ARM64" >> "$GITHUB_OUTPUT"
+
+      - name: Generate Homebrew formula
+        run: |
+          VERSION="${{ steps.info.outputs.version }}"
+          SHA_AMD64="${{ steps.info.outputs.sha_amd64 }}"
+          SHA_ARM64="${{ steps.info.outputs.sha_arm64 }}"
+
+          cat > rulesify.rb << EOF
+          class Rulesify < Formula
+            desc "Discover and install AI agent skills"
+            homepage "https://github.com/ydeng11/rulesify"
+            license "MIT"
+            version "$VERSION"
+
+            on_macos do
+              on_intel do
+                url "https://github.com/ydeng11/rulesify/releases/download/v#{version}/rulesify-darwin-amd64.tar.gz"
+                sha256 "$SHA_AMD64"
+              end
+              on_arm do
+                url "https://github.com/ydeng11/rulesify/releases/download/v#{version}/rulesify-darwin-arm64.tar.gz"
+                sha256 "$SHA_ARM64"
+              end
+            end
+
+            def install
+              bin.install "rulesify"
+            end
+
+            test do
+              assert_match "rulesify", shell_output("#{bin}/rulesify --version")
+            end
+          end
+          EOF
+
+      - name: Push to tap
+        env:
+          HOMEBREW_TAP_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+        run: |
+          VERSION="${{ steps.info.outputs.version }}"
+
+          git clone https://github.com/ydeng11/homebrew-rulesify.git tap-repo
+          cd tap-repo
+          cp ../rulesify.rb Formula/rulesify.rb
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.norereply.github.com"
+          git add Formula/rulesify.rb
+          git commit -m "Update rulesify to v$VERSION" || echo "No changes"
+          git push https://x-access-token:${HOMEBREW_TAP_TOKEN}@github.com/ydeng11/homebrew-rulesify.git main
+
+  bump-version:
+    name: Create Version Bump PR
+    if: github.event.inputs.action == 'bump-version'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Compute versions
+        id: bump
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          CURRENT=$(grep '^version = ' Cargo.toml | sed 's/version = "\(.*\)"/\1/')
+          INPUT_NEXT="${{ github.event.inputs.next_version }}"
+
+          if [ -n "$INPUT_NEXT" ]; then
+            NEXT="$INPUT_NEXT"
+          else
+            MAJOR=$(echo "$CURRENT" | cut -d. -f1)
+            MINOR=$(echo "$CURRENT" | cut -d. -f2)
+            PATCH=$(echo "$CURRENT" | cut -d. -f3)
+            PATCH=$((PATCH + 1))
+            NEXT="${MAJOR}.${MINOR}.${PATCH}"
+          fi
+
+          if ! [[ "$NEXT" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Invalid next_version '$NEXT'" >&2
+            exit 1
+          fi
+
+          HIGHEST=$(printf '%s\n%s\n' "$CURRENT" "$NEXT" | sort -V | tail -1)
+          if [ "$HIGHEST" != "$NEXT" ] || [ "$NEXT" = "$CURRENT" ]; then
+            echo "Next version ($NEXT) must be > current ($CURRENT)" >&2
+            exit 1
+          fi
+
+          echo "current=$CURRENT" >> "$GITHUB_OUTPUT"
+          echo "next=$NEXT" >> "$GITHUB_OUTPUT"
+
+      - name: Create PR
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          BASE="${{ github.ref_name }}"
+          CURRENT="${{ steps.bump.outputs.current }}"
+          NEXT="${{ steps.bump.outputs.next }}"
+          BRANCH="chore/bump-version-$NEXT"
+
+          if git ls-remote --heads origin "$BRANCH" | grep -q "$BRANCH"; then
+            echo "Branch $BRANCH already exists"
+            exit 0
+          fi
+
+          git checkout -b "$BRANCH"
+          sed -i.bak "s/^version = \".*\"/version = \"$NEXT\"/" Cargo.toml
+          rm Cargo.toml.bak
+
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git config user.name "github-actions[bot]"
+          git add Cargo.toml
+          git commit -m "[CI] Bump version to $NEXT"
+          git push origin "$BRANCH"
+
+          gh pr create \
+            --title "[CI] Bump version to $NEXT" \
+            --body "Version bump: $CURRENT → $NEXT" \
+            --base "$BASE" \
+            --head "$BRANCH" \
+            --label "automated" || true
