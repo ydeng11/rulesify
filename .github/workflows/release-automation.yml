@@ -85,9 +85,7 @@ jobs:
               --prerelease
           fi
 
-          # Keep install.sh available on edge tags too
-          gh release upload "$EDGE_TAG" install.sh --clobber
-          gh release upload "$EDGE_SHA_TAG" install.sh --clobber
+          
 
   build-edge-assets:
     name: Build Edge Assets
