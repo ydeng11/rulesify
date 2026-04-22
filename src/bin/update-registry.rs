@@ -62,6 +62,7 @@ async fn fetch_skill(
         last_updated: chrono::Utc::now().format("%Y-%m-%d").to_string(),
         install_action: InstallAction::Copy { folder },
         is_mega_skill: parsed.is_mega_skill,
+        dependencies: Vec::new(),
     })
 }
 
@@ -74,14 +75,16 @@ fn create_synthetic_mega_skill(source: SourceRepo, repo_metrics: &RepoMetrics) -
         source.branch()
     );
 
-    let (description, install_action) = match source {
+    let (description, install_action, dependencies) = match source {
         SourceRepo::ObraSuperpowers => (
             "Complete software development methodology for coding agents - brainstorming, test-driven development, systematic debugging, writing plans, executing plans, and more. Skills trigger automatically for mandatory workflows.".to_string(),
             InstallAction::mega_skill_copy("skills", "superpowers"),
+            Vec::new(),
         ),
         SourceRepo::ObraSuperpowersLab => (
             "Experimental skills for Claude Code Superpowers - finding-duplicate-functions, mcp-cli, using-tmux-for-interactive-commands, windows-vm. Under active development.".to_string(),
             InstallAction::mega_skill_copy("skills", "superpowers-lab"),
+            Vec::new(),
         ),
         SourceRepo::GsdSkills => (
             "Get Shit Done - A comprehensive project management system for solo developers using Claude agents. Spec-driven development with context engineering and meta-prompting.".to_string(),
@@ -90,10 +93,12 @@ fn create_synthetic_mega_skill(source: SourceRepo, repo_metrics: &RepoMetrics) -
                 args: vec!["@latest".to_string()],
                 uninstall_flag: None,
             },
+            vec!["node".to_string(), "npx".to_string()],
         ),
         _ => (
             "Mega-skill collection".to_string(),
             InstallAction::mega_skill_copy(source_folder, &skill_id),
+            Vec::new(),
         ),
     };
 
@@ -114,6 +119,7 @@ fn create_synthetic_mega_skill(source: SourceRepo, repo_metrics: &RepoMetrics) -
         last_updated: chrono::Utc::now().format("%Y-%m-%d").to_string(),
         install_action,
         is_mega_skill: true,
+        dependencies,
     }
 }
 
@@ -250,6 +256,7 @@ async fn main() -> Result<()> {
                                         "impeccable",
                                     ),
                                     is_mega_skill: true,
+                                    dependencies: Vec::new(),
                                 };
                                 let score = scorer.calculate_for_mega_skill(&meta, &repo_metrics);
                                 all_skills.push((meta, score));

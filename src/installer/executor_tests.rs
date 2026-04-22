@@ -168,6 +168,7 @@ fn make_normal_skill(name: &str, source_url: &str) -> Skill {
         install_action: None,
         score: Some(80.0),
         is_mega_skill: false,
+        dependencies: Vec::new(),
     }
 }
 
@@ -185,6 +186,7 @@ fn make_mega_skill(name: &str, source_url: &str, source_folder: &str, dest_name:
         install_action: Some(InstallAction::mega_skill_copy(source_folder, dest_name)),
         score: Some(90.0),
         is_mega_skill: true,
+        dependencies: Vec::new(),
     }
 }
 

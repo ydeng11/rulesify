@@ -9,7 +9,7 @@ use crate::models::{
     get_global_config_path, GlobalConfig, InstallAction, ProjectConfig, Registry, Scope,
 };
 use crate::registry::{fetch_registry, load_builtin, GitHubClient, RegistryCache};
-use crate::utils::{Result, RulesifyError};
+use crate::utils::{check_all_dependencies, Result, RulesifyError};
 use std::path::Path;
 
 pub async fn run(command: SkillCommands, verbose: bool) -> Result<()> {
@@ -206,6 +206,15 @@ async fn add_skill(id: String, global: bool, agent_mode: bool, _verbose: bool) -
     if agent_mode {
         output_install_instructions(&skill, &tools, scope);
         return Ok(());
+    }
+
+    let missing_deps = check_all_dependencies(&skill.dependencies);
+    if !missing_deps.is_empty() {
+        return Err(RulesifyError::DependencyMissing {
+            dependency: missing_deps.join(", "),
+            skill: skill.name.clone(),
+        }
+        .into());
     }
 
     println!("Installing '{}'...", skill.name);

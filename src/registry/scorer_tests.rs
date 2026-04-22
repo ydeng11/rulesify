@@ -22,6 +22,7 @@ mod tests {
                 folder: "test".into(),
             },
             is_mega_skill: false,
+            dependencies: Vec::new(),
         }
     }
 
@@ -41,6 +42,7 @@ mod tests {
             last_updated: "2026-04-20".into(),
             install_action: InstallAction::mega_skill_copy("skills", "superpowers"),
             is_mega_skill: true,
+            dependencies: Vec::new(),
         }
     }
 
@@ -194,6 +196,7 @@ mod tests {
                 uninstall_flag: None,
             },
             is_mega_skill: true,
+            dependencies: Vec::new(),
         };
 
         let score = scorer.calculate_for_mega_skill(&gsd_meta, &metrics);

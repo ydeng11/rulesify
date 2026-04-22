@@ -20,6 +20,7 @@ mod tests {
             }),
             score: Some(80.0),
             is_mega_skill: false,
+            dependencies: Vec::new(),
         }
     }
 

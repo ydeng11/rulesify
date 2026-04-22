@@ -191,6 +191,7 @@ last_updated = "2026-04-21"
 tags = ["mega-skill"]
 score = 65.0
 is_mega_skill = true
+dependencies = ["node", "npx"]
 
 [skills.gsd.install_action]
 type = "npx"

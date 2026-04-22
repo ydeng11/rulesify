@@ -25,6 +25,9 @@ pub struct Skill {
 
     #[serde(default)]
     pub is_mega_skill: bool,
+
+    #[serde(default)]
+    pub dependencies: Vec<String>,
 }
 
 impl Skill {

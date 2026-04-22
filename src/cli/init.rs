@@ -7,7 +7,7 @@ use crate::models::{GlobalConfig, InstallAction, ProjectConfig, Registry, Scope}
 use crate::registry::{fetch_registry, load_builtin, GitHubClient, RegistryCache};
 use crate::scanner::scan_project;
 use crate::tui::{SelectionResult, SkillSelector, ToolPicker};
-use crate::utils::Result;
+use crate::utils::{check_all_dependencies, Result};
 use std::collections::HashSet;
 use std::path::Path;
 
@@ -108,6 +108,8 @@ pub async fn run(verbose: bool) -> Result<()> {
 
     if !result.added.is_empty() {
         println!("\nInstalling {} skills...", result.added.len());
+        let mut install_errors: Vec<(String, String)> = Vec::new();
+
         for (id, skill) in &result.added {
             if global_config.is_skill_installed_globally(id) {
                 let tools_for_skill = global_config.get_tools_for_skill(id);
@@ -119,6 +121,17 @@ pub async fn run(verbose: bool) -> Result<()> {
                 continue;
             }
 
+            let missing_deps = check_all_dependencies(&skill.dependencies);
+            if !missing_deps.is_empty() {
+                let deps_str = missing_deps.join(", ");
+                println!(
+                    "Skipping '{}' - missing dependencies: {}",
+                    skill.name, deps_str
+                );
+                install_errors.push((skill.name.clone(), deps_str));
+                continue;
+            }
+
             println!("Installing '{}'...", skill.name);
 
             let results = match &skill.install_action {
@@ -126,7 +139,7 @@ pub async fn run(verbose: bool) -> Result<()> {
                     source_folder,
                     dest_name,
                 }) => {
-                    install_mega_skill(
+                    match install_mega_skill(
                         skill,
                         source_folder,
                         dest_name,
@@ -135,23 +148,51 @@ pub async fn run(verbose: bool) -> Result<()> {
                         &client,
                         &cache,
                     )
-                    .await?
+                    .await
+                    {
+                        Ok(r) => r,
+                        Err(e) => {
+                            install_errors.push((skill.name.clone(), e.to_string()));
+                            continue;
+                        }
+                    }
                 }
                 Some(InstallAction::Npx {
                     package,
                     args,
                     uninstall_flag,
-                }) => crate::installer::execute_npx_install(
-                    package,
-                    args,
-                    uninstall_flag.as_deref(),
-                    &tools,
-                    Scope::Project,
-                )?,
-                _ => install_skill(skill, &tools, Scope::Project, &client, &cache).await?,
+                }) => {
+                    match crate::installer::execute_npx_install(
+                        package,
+                        args,
+                        uninstall_flag.as_deref(),
+                        &tools,
+                        Scope::Project,
+                    ) {
+                        Ok(r) => r,
+                        Err(e) => {
+                            install_errors.push((skill.name.clone(), e.to_string()));
+                            continue;
+                        }
+                    }
+                }
+                _ => match install_skill(skill, &tools, Scope::Project, &client, &cache).await {
+                    Ok(r) => r,
+                    Err(e) => {
+                        install_errors.push((skill.name.clone(), e.to_string()));
+                        continue;
+                    }
+                },
             };
             print_install_summary(&results, &skill.name);
             config.add_skill(id, &skill.source_url, &skill.commit_sha, Scope::Project);
+        }
+
+        if !install_errors.is_empty() {
+            println!("\n{} skills failed to install:", install_errors.len());
+            for (name, error) in &install_errors {
+                println!("  - {}: {}", name, error);
+            }
         }
     }
 

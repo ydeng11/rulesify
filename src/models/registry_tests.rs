@@ -11,7 +11,7 @@ mod tests {
             Skill {
                 name: "TDD".to_string(),
                 description: "Test driven development methodology".to_string(),
-                source_url: "https://github.com/mattpocock/skills/tree/main/tdd".to_string(),
+                source_url: "https://github.com/mattpoclock/skills/tree/main/tdd".to_string(),
                 stars: 1500,
                 commit_sha: "abc123def".to_string(),
                 context_size: 2400,
@@ -23,6 +23,7 @@ mod tests {
                 }),
                 score: Some(85.0),
                 is_mega_skill: false,
+                dependencies: Vec::new(),
             },
         );
 

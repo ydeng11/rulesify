@@ -7,7 +7,7 @@ mod tests {
         let skill = Skill {
             name: "TDD".to_string(),
             description: "Test driven development".to_string(),
-            source_url: "https://github.com/mattpocock/skills/tree/main/tdd".to_string(),
+            source_url: "https://github.com/mattpoclock/skills/tree/main/tdd".to_string(),
             stars: 1500,
             commit_sha: "abc123def".to_string(),
             context_size: 2400,
@@ -19,6 +19,7 @@ mod tests {
             }),
             score: Some(85.0),
             is_mega_skill: false,
+            dependencies: Vec::new(),
         };
         assert_eq!(skill.stars, 1500);
         assert!(skill.install_action.unwrap().is_simple());
@@ -40,6 +41,7 @@ mod tests {
             install_action: Some(InstallAction::mega_skill_copy("skills", "superpowers")),
             score: Some(100.0),
             is_mega_skill: true,
+            dependencies: Vec::new(),
         };
         assert!(skill.is_mega_skill);
         assert!(skill.install_action.unwrap().is_mega_skill_copy());
@@ -64,6 +66,7 @@ mod tests {
             }),
             score: Some(85.0),
             is_mega_skill: true,
+            dependencies: Vec::new(),
         };
 
         let serialized = serde_json::to_string(&skill).unwrap();

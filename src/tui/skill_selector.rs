@@ -352,7 +352,7 @@ impl SkillSelectorState {
             "↑↓ Nav | Space Select | ←→ Domain | s Sort | t Tags | / Search | Enter Done | Esc Cancel"
         };
 
-        let help = Paragraph::new(help_text).style(Style::default().fg(Color::DarkGray));
+        let help = Paragraph::new(help_text).style(Style::default().fg(Color::Gray));
 
         f.render_widget(help, area);
     }
@@ -435,7 +435,7 @@ impl SkillSelectorState {
                     end_idx,
                     self.filtered_skills.len()
                 ),
-                Style::default().fg(Color::DarkGray),
+                Style::default().fg(Color::Gray),
             )));
         }
 
@@ -507,7 +507,7 @@ impl SkillSelectorState {
         if skill.tags.is_empty() {
             lines.push(Line::from(Span::styled(
                 "  (none)",
-                Style::default().fg(Color::DarkGray),
+                Style::default().fg(Color::Gray),
             )));
         } else {
             let tags_str = skill
@@ -530,7 +530,7 @@ impl SkillSelectorState {
         )));
         lines.push(Line::from(Span::styled(
             skill.source_url.clone(),
-            Style::default().fg(Color::DarkGray),
+            Style::default().fg(Color::Gray),
         )));
 
         let details = Paragraph::new(Text::from(lines))
@@ -673,14 +673,14 @@ impl SkillSelectorState {
             );
             lines.push(Line::from(Span::styled(
                 scroll_info,
-                Style::default().fg(Color::DarkGray),
+                Style::default().fg(Color::Gray),
             )));
         }
 
         lines.push(Line::from(""));
         lines.push(Line::from(Span::styled(
             "↑↓ Nav | Space Toggle | Backspace Clear | Enter Apply | Esc Cancel",
-            Style::default().fg(Color::DarkGray),
+            Style::default().fg(Color::Gray),
         )));
 
         let title = format!(

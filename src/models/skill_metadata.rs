@@ -21,6 +21,8 @@ pub struct SkillMetadata {
     pub install_action: InstallAction,
     #[serde(default)]
     pub is_mega_skill: bool,
+    #[serde(default)]
+    pub dependencies: Vec<String>,
 }
 
 impl SkillMetadata {
@@ -38,6 +40,7 @@ impl SkillMetadata {
             install_action: Some(self.install_action.clone()),
             score: Some(score),
             is_mega_skill: self.is_mega_skill,
+            dependencies: self.dependencies.clone(),
         }
     }
 }

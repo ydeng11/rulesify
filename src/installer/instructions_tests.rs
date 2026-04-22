@@ -106,6 +106,7 @@ mod tests {
             install_action: Some(InstallAction::mega_skill_copy("skills", "superpowers")),
             score: Some(100.0),
             is_mega_skill: true,
+            dependencies: Vec::new(),
         };
 
         let instructions = generate_instructions(
@@ -138,6 +139,7 @@ mod tests {
             }),
             score: Some(85.0),
             is_mega_skill: true,
+            dependencies: Vec::new(),
         };
 
         let instructions =
@@ -167,6 +169,7 @@ mod tests {
             )),
             score: Some(90.0),
             is_mega_skill: true,
+            dependencies: Vec::new(),
         };
 
         let instructions = generate_instructions(

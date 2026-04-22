@@ -20,6 +20,7 @@ mod tests {
             }),
             score: Some(80.0),
             is_mega_skill: false,
+            dependencies: Vec::new(),
         }
     }
 
@@ -37,6 +38,7 @@ mod tests {
             install_action: Some(InstallAction::mega_skill_copy("skills", name)),
             score: Some(90.0),
             is_mega_skill: true,
+            dependencies: Vec::new(),
         }
     }
 
@@ -367,6 +369,7 @@ mod tests {
                     install_action: None,
                     score: Some(80.0),
                     is_mega_skill: false,
+                    dependencies: Vec::new(),
                 },
             ),
             (
@@ -384,6 +387,7 @@ mod tests {
                     install_action: None,
                     score: Some(80.0),
                     is_mega_skill: false,
+                    dependencies: Vec::new(),
                 },
             ),
         ];
@@ -413,6 +417,7 @@ mod tests {
                     install_action: None,
                     score: Some(80.0),
                     is_mega_skill: false,
+                    dependencies: Vec::new(),
                 },
             ),
             (
@@ -430,6 +435,7 @@ mod tests {
                     install_action: None,
                     score: Some(80.0),
                     is_mega_skill: false,
+                    dependencies: Vec::new(),
                 },
             ),
         ];

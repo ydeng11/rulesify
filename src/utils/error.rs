@@ -37,6 +37,9 @@ pub enum RulesifyError {
 
     #[error("Skill parse error: {0}")]
     SkillParse(String),
+
+    #[error("Missing dependency '{dependency}' required for skill '{skill}'. Install {dependency} first.")]
+    DependencyMissing { dependency: String, skill: String },
 }
 
 pub type Result<T> = anyhow::Result<T>;
