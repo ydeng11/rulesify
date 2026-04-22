@@ -217,6 +217,7 @@ jobs:
           TAG="v$VERSION"
 
           gh release download "$TAG" \
+            --repo "${{ github.repository }}" \
             --pattern "rulesify-darwin-amd64.tar.gz.sha256" \
             --pattern "rulesify-darwin-arm64.tar.gz.sha256" \
             --dir checksums
