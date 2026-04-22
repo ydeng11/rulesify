@@ -1,154 +1,75 @@
-use clap::{Parser, Subcommand};
-use clap_complete::Shell;
-use log::{debug, error};
-use std::path::PathBuf;
+pub mod init;
+pub mod skill;
 
-pub mod commands;
+use clap::{Parser, Subcommand};
 
 #[derive(Parser)]
 #[command(name = "rulesify")]
-#[command(version = env!("CARGO_PKG_VERSION"))]
-#[command(about = "A CLI tool for managing AI assistant rules")]
-#[command(
-    long_about = r#"Rulesify manages Universal Rule Files (URF) that can be deployed to multiple AI coding tools:
-- Cursor (.cursor/rules/*.mdc)
-- Cline (.clinerules/*.md)
-- Claude Code (CLAUDE.md)
-- Goose (.goosehints)
-
-Create rules once, deploy everywhere. Maintain consistency across all your AI tools.
-
-EXAMPLES:
-    rulesify rule new typescript-style    # Create a new rule
-    rulesify deploy --all                 # Deploy all rules to all tools
-    rulesify deploy --tool cursor --all   # Deploy to Cursor only
-    rulesify config show                  # Show current configuration
-    rulesify sync --dry-run               # Preview sync changes
-    rulesify completion shell             # Generate shell completion script"#
-)]
+#[command(about = "Discover and install AI agent skills")]
 pub struct Cli {
     #[command(subcommand)]
-    pub command: Commands,
+    pub command: Option<Commands>,
 
-    #[arg(long, global = true, help = "Path to custom config file")]
-    pub config: Option<PathBuf>,
-
-    #[arg(long, global = true, help = "Enable verbose output")]
+    #[arg(short, long)]
     pub verbose: bool,
 }
 
-#[derive(Subcommand, Debug)]
+#[derive(Subcommand)]
 pub enum Commands {
-    /// Manage rules (create, edit, list, show, delete)
-    Rule {
+    /// Manage installed skills
+    Skill {
         #[command(subcommand)]
-        action: commands::rule::RuleAction,
-    },
-    /// Deploy rules to AI tools (cursor, cline, claude-code, goose)
-    Deploy {
-        #[arg(long, help = "Target tool: cursor, cline, claude-code, or goose")]
-        tool: Option<String>,
-        #[arg(
-            long,
-            help = "Deploy specific rule(s) by name (comma-separated for multiple)"
-        )]
-        rule: Option<String>,
-        #[arg(long, help = "Deploy all rules")]
-        all: bool,
-    },
-    /// Import rules from AI tool formats to URF
-    Import {
-        #[arg(long, help = "Source tool: cursor, cline, claude-code, or goose")]
-        tool: String,
-        #[arg(help = "Path to the tool-specific rule file")]
-        file: PathBuf,
-        #[arg(long, help = "Override rule ID (default: derived from filename)")]
-        rule_id: Option<String>,
-    },
-    /// Validate rules for quality and format compliance
-    Validate {
-        #[arg(help = "Rule name to validate (use --all for all rules)")]
-        rule: Option<String>,
-        #[arg(long, help = "Validate all rules")]
-        all: bool,
-    },
-    /// Synchronize deployed rules back to URF format
-    Sync {
-        #[arg(long, help = "Preview changes without applying them")]
-        dry_run: bool,
-        #[arg(long, help = "Sync specific rule only")]
-        rule: Option<String>,
-        #[arg(long, help = "Sync from specific tool only")]
-        tool: Option<String>,
-    },
-    /// Manage configuration (show, edit, set storage location)
-    Config {
-        #[command(subcommand)]
-        action: commands::config::ConfigAction,
-    },
-    /// Generate shell completion scripts
-    Completion {
-        #[arg(help = "Shell to generate completion for")]
-        shell: Shell,
+        command: SkillCommands,
     },
 }
 
-impl Cli {
-    pub fn execute(self) -> anyhow::Result<()> {
-        debug!("Executing CLI command: {:?}", self.command);
+#[derive(Subcommand)]
+pub enum SkillCommands {
+    /// List installed skills
+    List,
 
-        let result = match self.command {
-            Commands::Rule { action } => {
-                debug!("Executing rule command: {:?}", action);
-                commands::rule::run(action, self.config)
-            }
-            Commands::Deploy { tool, rule, all } => {
-                debug!(
-                    "Executing deploy command: tool={:?}, rule={:?}, all={}",
-                    tool, rule, all
-                );
-                commands::deploy::run(tool, rule, all, self.config)
-            }
-            Commands::Import {
-                tool,
-                file,
-                rule_id,
-            } => {
-                debug!(
-                    "Executing import command: tool={}, file={:?}, rule_id={:?}",
-                    tool, file, rule_id
-                );
-                commands::import::run(tool, file, rule_id, self.config)
-            }
-            Commands::Validate { rule, all } => {
-                debug!("Executing validate command: rule={:?}, all={}", rule, all);
-                commands::validate::run(rule, all, self.config)
-            }
-            Commands::Sync {
-                dry_run,
-                rule,
-                tool,
-            } => {
-                debug!(
-                    "Executing sync command: dry_run={}, rule={:?}, tool={:?}",
-                    dry_run, rule, tool
-                );
-                commands::sync::run(dry_run, rule, tool, self.config)
-            }
-            Commands::Config { action } => {
-                debug!("Executing config command: {:?}", action);
-                commands::config::run(action, self.config)
-            }
-            Commands::Completion { shell } => {
-                debug!("Generating completion script for shell: {:?}", shell);
-                commands::completion::run(shell, self.config)
-            }
-        };
+    /// Search available skills in registry
+    Search {
+        /// Filter by name or description
+        query: Option<String>,
+    },
 
-        if let Err(ref e) = result {
-            error!("Command execution failed: {}", e);
-        }
+    /// Add a skill from registry
+    Add {
+        /// Skill ID to add
+        id: String,
+        /// Install to global skill directory instead of project
+        #[arg(long)]
+        global: bool,
+        /// Output instructions for AI agent instead of executing
+        #[arg(long)]
+        agent_mode: bool,
+    },
 
-        result
+    /// Remove an installed skill
+    Remove {
+        /// Skill ID to remove
+        id: String,
+        /// Remove from global skill directory instead of project
+        #[arg(long)]
+        global: bool,
+        /// Output instructions for AI agent instead of executing
+        #[arg(long)]
+        agent_mode: bool,
+    },
+
+    /// Update registry cache
+    Update {
+        /// Output instructions for AI agent instead of executing
+        #[arg(long)]
+        agent_mode: bool,
+    },
+}
+
+pub async fn run(cli: Cli) -> crate::utils::Result<()> {
+    match cli.command {
+        None => init::run(cli.verbose).await?,
+        Some(Commands::Skill { command }) => skill::run(command, cli.verbose).await?,
     }
+    Ok(())
 }

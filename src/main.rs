@@ -1,21 +1,14 @@
 use clap::Parser;
-use rulesify::cli::Cli;
+use rulesify::cli::{run, Cli};
 
-fn main() {
+#[tokio::main]
+async fn main() {
     env_logger::init();
 
     let cli = Cli::parse();
 
-    if let Err(e) = cli.execute() {
+    if let Err(e) = run(cli).await {
         eprintln!("Error: {}", e);
-
-        // Log the error chain for debugging
-        let mut source = e.source();
-        while let Some(err) = source {
-            eprintln!("  Caused by: {}", err);
-            source = err.source();
-        }
-
         std::process::exit(1);
     }
 }

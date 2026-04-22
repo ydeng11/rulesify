@@ -1,9 +1,70 @@
 use serde::{Deserialize, Serialize};
-use std::path::PathBuf;
+use std::collections::HashMap;
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+#[serde(rename_all = "lowercase")]
+pub enum Scope {
+    Project,
+    Global,
+}
+
+impl Default for Scope {
+    fn default() -> Self {
+        Scope::Project
+    }
+}
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct GlobalConfig {
-    pub rules_directory: PathBuf,
-    pub editor: Option<String>,
-    pub default_tools: Vec<String>,
-} 
+pub struct InstalledSkill {
+    pub added: String,
+    pub source: String,
+    pub commit_sha: String,
+    #[serde(default)]
+    pub scope: Scope,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ProjectConfig {
+    pub version: u32,
+    pub tools: Vec<String>,
+    pub installed_skills: HashMap<String, InstalledSkill>,
+}
+
+impl ProjectConfig {
+    pub fn new() -> Self {
+        Self {
+            version: 1,
+            tools: Vec::new(),
+            installed_skills: HashMap::new(),
+        }
+    }
+
+    pub fn add_skill(&mut self, id: &str, source: &str, commit_sha: &str, scope: Scope) {
+        self.installed_skills.insert(
+            id.to_string(),
+            InstalledSkill {
+                added: chrono::Local::now().format("%Y-%m-%d").to_string(),
+                source: source.to_string(),
+                commit_sha: commit_sha.to_string(),
+                scope,
+            },
+        );
+    }
+
+    pub fn update_skill_sha(&mut self, id: &str, commit_sha: &str) {
+        if let Some(skill) = self.installed_skills.get_mut(id) {
+            skill.commit_sha = commit_sha.to_string();
+        }
+    }
+
+    pub fn remove_skill(&mut self, id: &str) -> Option<InstalledSkill> {
+        self.installed_skills.remove(id)
+    }
+
+    pub fn list_skills(&self) -> Vec<(String, InstalledSkill)> {
+        self.installed_skills
+            .iter()
+            .map(|(k, v)| (k.clone(), v.clone()))
+            .collect()
+    }
+}

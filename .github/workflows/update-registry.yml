@@ -1,0 +1,33 @@
+name: Update Registry
+
+on:
+  schedule:
+    - cron: '0 6 * * 0'
+  workflow_dispatch:
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+      OPENROUTER_MODEL: ${{ vars.OPENROUTER_MODEL }}
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+      
+      - run: cargo run --bin update-registry -- --force --verbose
+      
+      - id: changes
+        run: |
+          git diff --quiet registry.toml && echo "has_changes=false" >> $GITHUB_OUTPUT
+          git diff --quiet registry.toml || echo "has_changes=true" >> $GITHUB_OUTPUT
+      
+      - if: steps.changes.outputs.has_changes == 'true'
+        uses: peter-evans/create-pull-request@v6
+        with:
+          title: "Weekly registry update"
+          branch: "auto/registry-update"
+          commit-message: "chore: update registry"

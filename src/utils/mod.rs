@@ -1,7 +1,5 @@
-pub mod config;
-pub mod fs;
-pub mod rule_id;
+pub mod dependency;
+pub mod error;
 
-// Re-export for convenience
-pub use config::*;
-pub use fs::*;
+pub use dependency::check_all_dependencies;
+pub use error::{Result, RulesifyError};

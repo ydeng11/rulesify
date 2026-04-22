@@ -1,0 +1,638 @@
+version = 1
+updated = "2026-04-21"
+
+[skills.skill-creator]
+name = "skill-creator"
+description = "Create new skills, modify and improve existing skills, and measure skill performance. Use when users want to create a skill from scratch, edit, or optimize an existing skill, run evals to test a skill, benchmark skill performance with variance analysis, or optimize a skill's description for better triggering accuracy."
+source_url = "https://github.com/anthropics/skills/tree/main/skills/skill-creator"
+stars = 121457
+commit_sha = "b9e19e6f44773509fbdd7001d77ff41a49a486c1"
+context_size = 8292
+domain = "development"
+last_updated = "2026-04-21"
+tags = [
+    "skill-creation",
+    "performance-evaluation",
+    "optimization",
+]
+score = 83.5999984741211
+is_mega_skill = false
+
+[skills.skill-creator.install_action]
+type = "copy"
+
+[skills.skill-creator.install_action.value]
+folder = "skills/skill-creator"
+
+[skills.xlsx]
+name = "xlsx"
+description = 'Use this skill any time a spreadsheet file is the primary input or output. This means any task where the user wants to: open, read, edit, or fix an existing .xlsx, .xlsm, .csv, or .tsv file (e.g., adding columns, computing formulas, formatting, charting, cleaning messy data); create a new spreadsheet from scratch or from other data sources; or convert between tabular file formats. Trigger especially when the user references a spreadsheet file by name or path — even casually (like "the xlsx in my downloads") — and wants something done to it or produced from it. Also trigger for cleaning or restructuring messy tabular data files (malformed rows, misplaced headers, junk data) into proper spreadsheets. The deliverable must be a spreadsheet file. Do NOT trigger when the primary deliverable is a Word document, HTML report, standalone Python script, database pipeline, or Google Sheets API integration, even if tabular data is involved.'
+source_url = "https://github.com/anthropics/skills/tree/main/skills/xlsx"
+stars = 121457
+commit_sha = "1ed29a03dc852d30fa6ef2ca53a67dc2c2c2c563"
+context_size = 2865
+domain = "data"
+last_updated = "2026-04-21"
+tags = [
+    "spreadsheet-management",
+    "data-cleaning",
+    "file-conversion",
+]
+score = 83.5999984741211
+is_mega_skill = false
+
+[skills.xlsx.install_action]
+type = "copy"
+
+[skills.xlsx.install_action.value]
+folder = "skills/xlsx"
+
+[skills.superpowers]
+name = "superpowers"
+description = "Complete software development methodology for coding agents - brainstorming, test-driven development, systematic debugging, writing plans, executing plans, and more. Skills trigger automatically for mandatory workflows."
+source_url = "https://github.com/obra/superpowers/tree/main/"
+stars = 0
+commit_sha = ""
+context_size = 0
+domain = "development"
+last_updated = "2026-04-21"
+tags = ["mega-skill"]
+score = 65.0
+is_mega_skill = true
+
+[skills.superpowers.install_action]
+type = "mega-skill-copy"
+
+[skills.superpowers.install_action.value]
+source_folder = "skills"
+dest_name = "superpowers"
+
+[skills.superpowers-lab]
+name = "superpowers-lab"
+description = "Experimental skills for Claude Code Superpowers - finding-duplicate-functions, mcp-cli, using-tmux-for-interactive-commands, windows-vm. Under active development."
+source_url = "https://github.com/obra/superpowers-lab/tree/main/"
+stars = 0
+commit_sha = ""
+context_size = 0
+domain = "development"
+last_updated = "2026-04-21"
+tags = ["mega-skill"]
+score = 65.0
+is_mega_skill = true
+
+[skills.superpowers-lab.install_action]
+type = "mega-skill-copy"
+
+[skills.superpowers-lab.install_action.value]
+source_folder = "skills"
+dest_name = "superpowers-lab"
+
+[skills.doc]
+name = "doc"
+description = "Use when the task involves reading, creating, or editing `.docx` documents, especially when formatting or layout fidelity matters; prefer `python-docx` plus the bundled `scripts/render_docx.py` for visual checks."
+source_url = "https://github.com/openai/skills/tree/main/skills/.curated/doc"
+stars = 17181
+commit_sha = "77963424cd7687fd52e5fcfdd3f08d826ab9b1ab"
+context_size = 747
+domain = "documentation"
+last_updated = "2026-04-21"
+tags = [
+    "document-management",
+    "editing",
+    "formatting",
+]
+score = 85.5999984741211
+is_mega_skill = false
+
+[skills.doc.install_action]
+type = "copy"
+
+[skills.doc.install_action.value]
+folder = "skills/.curated/doc"
+
+[skills.slack-gif-creator]
+name = "slack-gif-creator"
+description = 'Knowledge and utilities for creating animated GIFs optimized for Slack. Provides constraints, validation tools, and animation concepts. Use when users request animated GIFs for Slack like "make me a GIF of X doing Y for Slack."'
+source_url = "https://github.com/anthropics/skills/tree/main/skills/slack-gif-creator"
+stars = 121457
+commit_sha = "b9e19e6f44773509fbdd7001d77ff41a49a486c1"
+context_size = 1960
+domain = "design"
+last_updated = "2026-04-21"
+tags = [
+    "gif-creation",
+    "slack-optimization",
+    "animation-tools",
+]
+score = 83.5999984741211
+is_mega_skill = false
+
+[skills.slack-gif-creator.install_action]
+type = "copy"
+
+[skills.slack-gif-creator.install_action.value]
+folder = "skills/slack-gif-creator"
+
+[skills.web-artifacts-builder]
+name = "web-artifacts-builder"
+description = "Suite of tools for creating elaborate, multi-component claude.ai HTML artifacts using modern frontend web technologies (React, Tailwind CSS, shadcn/ui). Use for complex artifacts requiring state management, routing, or shadcn/ui components - not for simple single-file HTML/JSX artifacts."
+source_url = "https://github.com/anthropics/skills/tree/main/skills/web-artifacts-builder"
+stars = 121457
+commit_sha = "b9e19e6f44773509fbdd7001d77ff41a49a486c1"
+context_size = 771
+domain = "development"
+last_updated = "2026-04-21"
+tags = [
+    "html-creation",
+    "frontend-development",
+    "multi-component",
+]
+score = 83.5999984741211
+is_mega_skill = false
+
+[skills.web-artifacts-builder.install_action]
+type = "copy"
+
+[skills.web-artifacts-builder.install_action.value]
+folder = "skills/web-artifacts-builder"
+
+[skills.algorithmic-art]
+name = "algorithmic-art"
+description = "Creating algorithmic art using p5.js with seeded randomness and interactive parameter exploration. Use this when users request creating art using code, generative art, algorithmic art, flow fields, or particle systems. Create original algorithmic art rather than copying existing artists' work to avoid copyright violations."
+source_url = "https://github.com/anthropics/skills/tree/main/skills/algorithmic-art"
+stars = 121457
+commit_sha = "b9e19e6f44773509fbdd7001d77ff41a49a486c1"
+context_size = 4942
+domain = "design"
+last_updated = "2026-04-21"
+tags = [
+    "algorithmic-art",
+    "generative-art",
+    "interactive-design",
+]
+score = 83.5999984741211
+is_mega_skill = false
+
+[skills.algorithmic-art.install_action]
+type = "copy"
+
+[skills.algorithmic-art.install_action.value]
+folder = "skills/algorithmic-art"
+
+[skills.gsd]
+name = "gsd"
+description = "Get Shit Done - A comprehensive project management system for solo developers using Claude agents. Spec-driven development with context engineering and meta-prompting."
+source_url = "https://github.com/gsd-build/get-shit-done/tree/main/"
+stars = 0
+commit_sha = ""
+context_size = 0
+domain = "development"
+last_updated = "2026-04-21"
+tags = ["mega-skill"]
+score = 65.0
+is_mega_skill = true
+dependencies = ["node", "npx"]
+
+[skills.gsd.install_action]
+type = "npx"
+
+[skills.gsd.install_action.value]
+package = "get-shit-done-cc"
+args = ["@latest"]
+
+[skills.cloudflare-deploy]
+name = "cloudflare-deploy"
+description = "Deploy applications and infrastructure to Cloudflare using Workers, Pages, and related platform services. Use when the user asks to deploy, host, publish, or set up a project on Cloudflare."
+source_url = "https://github.com/openai/skills/tree/main/skills/.curated/cloudflare-deploy"
+stars = 17181
+commit_sha = "bf9e226541ec801750547acfa8cf761b7c878f27"
+context_size = 1844
+domain = "deployment"
+last_updated = "2026-04-21"
+tags = [
+    "cloudflare",
+    "deployment",
+    "infrastructure",
+]
+score = 85.5999984741211
+is_mega_skill = false
+
+[skills.cloudflare-deploy.install_action]
+type = "copy"
+
+[skills.cloudflare-deploy.install_action.value]
+folder = "skills/.curated/cloudflare-deploy"
+
+[skills.theme-factory]
+name = "theme-factory"
+description = "Toolkit for styling artifacts with a theme. These artifacts can be slides, docs, reportings, HTML landing pages, etc. There are 10 pre-set themes with colors/fonts that you can apply to any artifact that has been creating, or can generate a new theme on-the-fly."
+source_url = "https://github.com/anthropics/skills/tree/main/skills/theme-factory"
+stars = 121457
+commit_sha = "b9e19e6f44773509fbdd7001d77ff41a49a486c1"
+context_size = 781
+domain = "design"
+last_updated = "2026-04-21"
+tags = [
+    "styling",
+    "theming",
+    "artifact-customization",
+]
+score = 83.5999984741211
+is_mega_skill = false
+
+[skills.theme-factory.install_action]
+type = "copy"
+
+[skills.theme-factory.install_action.value]
+folder = "skills/theme-factory"
+
+[skills.frontend-design]
+name = "frontend-design"
+description = "Create distinctive, production-grade frontend interfaces with high design quality. Use this skill when the user asks to build web components, pages, artifacts, posters, or applications (examples include websites, landing pages, dashboards, React components, HTML/CSS layouts, or when styling/beautifying any web UI). Generates creative, polished code and UI design that avoids generic AI aesthetics."
+source_url = "https://github.com/anthropics/skills/tree/main/skills/frontend-design"
+stars = 121457
+commit_sha = "00756142ab04c82a447693cf373c4e0c554d1005"
+context_size = 1110
+domain = "design"
+last_updated = "2026-04-21"
+tags = [
+    "frontend",
+    "ui-design",
+    "web-components",
+]
+score = 83.5999984741211
+is_mega_skill = false
+
+[skills.frontend-design.install_action]
+type = "copy"
+
+[skills.frontend-design.install_action.value]
+folder = "skills/frontend-design"
+
+[skills.canvas-design]
+name = "canvas-design"
+description = "Create beautiful visual art in .png and .pdf documents using design philosophy. You should use this skill when the user asks to create a poster, piece of art, design, or other static piece. Create original visual designs, never copying existing artists' work to avoid copyright violations."
+source_url = "https://github.com/anthropics/skills/tree/main/skills/canvas-design"
+stars = 121457
+commit_sha = "b9e19e6f44773509fbdd7001d77ff41a49a486c1"
+context_size = 2984
+domain = "design"
+last_updated = "2026-04-21"
+tags = [
+    "visual-art",
+    "graphic-design",
+    "original-design",
+]
+score = 83.5999984741211
+is_mega_skill = false
+
+[skills.canvas-design.install_action]
+type = "copy"
+
+[skills.canvas-design.install_action.value]
+folder = "skills/canvas-design"
+
+[skills.webapp-testing]
+name = "webapp-testing"
+description = "Toolkit for interacting with and testing local web applications using Playwright. Supports verifying frontend functionality, debugging UI behavior, capturing browser screenshots, and viewing browser logs."
+source_url = "https://github.com/anthropics/skills/tree/main/skills/webapp-testing"
+stars = 121457
+commit_sha = "b9e19e6f44773509fbdd7001d77ff41a49a486c1"
+context_size = 978
+domain = "testing"
+last_updated = "2026-04-21"
+tags = [
+    "ui-testing",
+    "playwright",
+    "debugging",
+]
+score = 83.5999984741211
+is_mega_skill = false
+
+[skills.webapp-testing.install_action]
+type = "copy"
+
+[skills.webapp-testing.install_action.value]
+folder = "skills/webapp-testing"
+
+[skills.develop-web-game]
+name = "develop-web-game"
+description = "Use when Codex is building or iterating on a web game (HTML/JS) and needs a reliable development + testing loop: implement small changes, run a Playwright-based test script with short input bursts and intentional pauses, inspect screenshots/text, and review console errors with render_game_to_text."
+source_url = "https://github.com/openai/skills/tree/main/skills/.curated/develop-web-game"
+stars = 17181
+commit_sha = "77963424cd7687fd52e5fcfdd3f08d826ab9b1ab"
+context_size = 2308
+domain = "development"
+last_updated = "2026-04-21"
+tags = [
+    "web-game",
+    "testing",
+    "development-loop",
+]
+score = 85.5999984741211
+is_mega_skill = false
+
+[skills.develop-web-game.install_action]
+type = "copy"
+
+[skills.develop-web-game.install_action.value]
+folder = "skills/.curated/develop-web-game"
+
+[skills.figma-code-connect-components]
+name = "figma-code-connect-components"
+description = 'Connects Figma design components to code components using Code Connect mapping tools. Use when user says "code connect", "connect this component to code", "map this component", "link component to code", "create code connect mapping", or wants to establish mappings between Figma designs and code implementations. For canvas writes via `use_figma`, use `figma-use`.'
+source_url = "https://github.com/openai/skills/tree/main/skills/.curated/figma-code-connect-components"
+stars = 17181
+commit_sha = "736f600bf6ecbc000c04f1d2710b990899f28903"
+context_size = 4190
+domain = "design"
+last_updated = "2026-04-21"
+tags = [
+    "figma",
+    "component-mapping",
+    "design-code-integration",
+]
+score = 85.5999984741211
+is_mega_skill = false
+
+[skills.figma-code-connect-components.install_action]
+type = "copy"
+
+[skills.figma-code-connect-components.install_action.value]
+folder = "skills/.curated/figma-code-connect-components"
+
+[skills.aspnet-core]
+name = "aspnet-core"
+description = "Build, review, refactor, or architect ASP.NET Core web applications using current official guidance for .NET web development. Use when working on Blazor Web Apps, Razor Pages, MVC, Minimal APIs, controller-based Web APIs, SignalR, gRPC, middleware, dependency injection, configuration, authentication, authorization, testing, performance, deployment, or ASP.NET Core upgrades."
+source_url = "https://github.com/openai/skills/tree/main/skills/.curated/aspnet-core"
+stars = 17181
+commit_sha = "c207989386b30063bcecaf6b1977d761b244732e"
+context_size = 1386
+domain = "development"
+last_updated = "2026-04-21"
+tags = [
+    "web-development",
+    "aspnet",
+    "backend",
+]
+score = 85.5999984741211
+is_mega_skill = false
+
+[skills.aspnet-core.install_action]
+type = "copy"
+
+[skills.aspnet-core.install_action.value]
+folder = "skills/.curated/aspnet-core"
+
+[skills.brand-guidelines]
+name = "brand-guidelines"
+description = "Applies Anthropic's official brand colors and typography to any sort of artifact that may benefit from having Anthropic's look-and-feel. Use it when brand colors or style guidelines, visual formatting, or company design standards apply."
+source_url = "https://github.com/anthropics/skills/tree/main/skills/brand-guidelines"
+stars = 121457
+commit_sha = "b9e19e6f44773509fbdd7001d77ff41a49a486c1"
+context_size = 558
+domain = "design"
+last_updated = "2026-04-21"
+tags = [
+    "branding",
+    "visual-identity",
+    "style-guide",
+]
+score = 83.5999984741211
+is_mega_skill = false
+
+[skills.brand-guidelines.install_action]
+type = "copy"
+
+[skills.brand-guidelines.install_action.value]
+folder = "skills/brand-guidelines"
+
+[skills.chatgpt-apps]
+name = "chatgpt-apps"
+description = "Build, scaffold, refactor, and troubleshoot ChatGPT Apps SDK applications that combine an MCP server and widget UI. Use when Codex needs to design tools, register UI resources, wire the MCP Apps bridge or ChatGPT compatibility APIs, apply Apps SDK metadata or CSP or domain settings, or produce a docs-aligned project scaffold. Prefer a docs-first workflow by invoking the openai-docs skill or OpenAI developer docs MCP tools before generating code."
+source_url = "https://github.com/openai/skills/tree/main/skills/.curated/chatgpt-apps"
+stars = 17181
+commit_sha = "14f4eb1410aca89371166bc7e7a567435f3ace05"
+context_size = 4906
+domain = "development"
+last_updated = "2026-04-21"
+tags = [
+    "chatgpt",
+    "sdk",
+    "tool-development",
+]
+score = 85.5999984741211
+is_mega_skill = false
+
+[skills.chatgpt-apps.install_action]
+type = "copy"
+
+[skills.chatgpt-apps.install_action.value]
+folder = "skills/.curated/chatgpt-apps"
+
+[skills.claude-api]
+name = "claude-api"
+description = "Build, debug, and optimize Claude API / Anthropic SDK apps. Apps built with this skill should include prompt caching. Also handles migrating existing Claude API code between Claude model versions (4.5 → 4.6, 4.6 → 4.7, retired-model replacements). TRIGGER when: code imports `anthropic`/`@anthropic-ai/sdk`; user asks for the Claude API, Anthropic SDK, or Managed Agents; user adds/modifies/tunes a Claude feature (caching, thinking, compaction, tool use, batch, files, citations, memory) or model (Opus/Sonnet/Haiku) in a file; questions about prompt caching / cache hit rate in an Anthropic SDK project. SKIP: file imports `openai`/other-provider SDK, filename like `*-openai.py`/`*-generic.py`, provider-neutral code, general programming/ML."
+source_url = "https://github.com/anthropics/skills/tree/main/skills/claude-api"
+stars = 121457
+commit_sha = "b9e19e6f44773509fbdd7001d77ff41a49a486c1"
+context_size = 8246
+domain = "development"
+last_updated = "2026-04-21"
+tags = [
+    "api",
+    "sdk",
+    "optimization",
+]
+score = 83.5999984741211
+is_mega_skill = false
+
+[skills.claude-api.install_action]
+type = "copy"
+
+[skills.claude-api.install_action.value]
+folder = "skills/claude-api"
+
+[skills.figma-create-design-system-rules]
+name = "figma-create-design-system-rules"
+description = """Generates custom design system rules for the user's codebase. Use when user says "create design system rules", "generate rules for my project", "set up design rules", "customize design system guidelines", or wants to establish project-specific conventions for Figma-to-code workflows. Requires Figma MCP server connection."""
+source_url = "https://github.com/openai/skills/tree/main/skills/.curated/figma-create-design-system-rules"
+stars = 17181
+commit_sha = "736f600bf6ecbc000c04f1d2710b990899f28903"
+context_size = 4555
+domain = "design"
+last_updated = "2026-04-21"
+tags = [
+    "design-system",
+    "rules-creation",
+    "figma",
+]
+score = 85.5999984741211
+is_mega_skill = false
+
+[skills.figma-create-design-system-rules.install_action]
+type = "copy"
+
+[skills.figma-create-design-system-rules.install_action.value]
+folder = "skills/.curated/figma-create-design-system-rules"
+
+[skills.doc-coauthoring]
+name = "doc-coauthoring"
+description = "Guide users through a structured workflow for co-authoring documentation. Use when user wants to write documentation, proposals, technical specs, decision docs, or similar structured content. This workflow helps users efficiently transfer context, refine content through iteration, and verify the doc works for readers. Trigger when user mentions writing docs, creating proposals, drafting specs, or similar documentation tasks."
+source_url = "https://github.com/anthropics/skills/tree/main/skills/doc-coauthoring"
+stars = 121457
+commit_sha = "00756142ab04c82a447693cf373c4e0c554d1005"
+context_size = 3953
+domain = "documentation"
+last_updated = "2026-04-21"
+tags = [
+    "collaboration",
+    "structured-content",
+    "iteration",
+]
+score = 83.5999984741211
+is_mega_skill = false
+
+[skills.doc-coauthoring.install_action]
+type = "copy"
+
+[skills.doc-coauthoring.install_action.value]
+folder = "skills/doc-coauthoring"
+
+[skills.docx]
+name = "docx"
+description = "Use this skill whenever the user wants to create, read, edit, or manipulate Word documents (.docx files). Triggers include: any mention of 'Word doc', 'word document', '.docx', or requests to produce professional documents with formatting like tables of contents, headings, page numbers, or letterheads. Also use when extracting or reorganizing content from .docx files, inserting or replacing images in documents, performing find-and-replace in Word files, working with tracked changes or comments, or converting content into a polished Word document. If the user asks for a 'report', 'memo', 'letter', 'template', or similar deliverable as a Word or .docx file, use this skill. Do NOT use for PDFs, spreadsheets, Google Docs, or general coding tasks unrelated to document generation."
+source_url = "https://github.com/anthropics/skills/tree/main/skills/docx"
+stars = 121457
+commit_sha = "3d59511518591fa82e6cfcf0438d68dd5dad3e76"
+context_size = 5021
+domain = "documentation"
+last_updated = "2026-04-21"
+tags = [
+    "word-processing",
+    "document-editing",
+    "formatting",
+]
+score = 83.5999984741211
+is_mega_skill = false
+
+[skills.docx.install_action]
+type = "copy"
+
+[skills.docx.install_action.value]
+folder = "skills/docx"
+
+[skills.pdf]
+name = "pdf"
+description = "Use this skill whenever the user wants to do anything with PDF files. This includes reading or extracting text/tables from PDFs, combining or merging multiple PDFs into one, splitting PDFs apart, rotating pages, adding watermarks, creating new PDFs, filling PDF forms, encrypting/decrypting PDFs, extracting images, and OCR on scanned PDFs to make them searchable. If the user mentions a .pdf file or asks to produce one, use this skill."
+source_url = "https://github.com/anthropics/skills/tree/main/skills/pdf"
+stars = 121457
+commit_sha = "1ed29a03dc852d30fa6ef2ca53a67dc2c2c2c563"
+context_size = 2018
+domain = "documentation"
+last_updated = "2026-04-21"
+tags = [
+    "pdf-management",
+    "text-extraction",
+    "file-operations",
+]
+score = 83.5999984741211
+is_mega_skill = false
+
+[skills.pdf.install_action]
+type = "copy"
+
+[skills.pdf.install_action.value]
+folder = "skills/pdf"
+
+[skills.pptx]
+name = "pptx"
+description = 'Use this skill any time a .pptx file is involved in any way — as input, output, or both. This includes: creating slide decks, pitch decks, or presentations; reading, parsing, or extracting text from any .pptx file (even if the extracted content will be used elsewhere, like in an email or summary); editing, modifying, or updating existing presentations; combining or splitting slide files; working with templates, layouts, speaker notes, or comments. Trigger whenever the user mentions "deck," "slides," "presentation," or references a .pptx filename, regardless of what they plan to do with the content afterward. If a .pptx file needs to be opened, created, or touched, use this skill.'
+source_url = "https://github.com/anthropics/skills/tree/main/skills/pptx"
+stars = 121457
+commit_sha = "1ed29a03dc852d30fa6ef2ca53a67dc2c2c2c563"
+context_size = 2295
+domain = "documentation"
+last_updated = "2026-04-21"
+tags = [
+    "presentation",
+    "slide-decks",
+    "editing",
+]
+score = 83.5999984741211
+is_mega_skill = false
+
+[skills.pptx.install_action]
+type = "copy"
+
+[skills.pptx.install_action.value]
+folder = "skills/pptx"
+
+[skills.mcp-builder]
+name = "mcp-builder"
+description = "Guide for creating high-quality MCP (Model Context Protocol) servers that enable LLMs to interact with external services through well-designed tools. Use when building MCP servers to integrate external APIs or services, whether in Python (FastMCP) or Node/TypeScript (MCP SDK)."
+source_url = "https://github.com/anthropics/skills/tree/main/skills/mcp-builder"
+stars = 121457
+commit_sha = "b9e19e6f44773509fbdd7001d77ff41a49a486c1"
+context_size = 2273
+domain = "development"
+last_updated = "2026-04-21"
+tags = [
+    "mcp",
+    "api-integration",
+    "llm-interaction",
+]
+score = 83.5999984741211
+is_mega_skill = false
+
+[skills.mcp-builder.install_action]
+type = "copy"
+
+[skills.mcp-builder.install_action.value]
+folder = "skills/mcp-builder"
+
+[skills.internal-comms]
+name = "internal-comms"
+description = "A set of resources to help me write all kinds of internal communications, using the formats that my company likes to use. Claude should use this skill whenever asked to write some sort of internal communications (status reports, leadership updates, 3P updates, company newsletters, FAQs, incident reports, project updates, etc.)."
+source_url = "https://github.com/anthropics/skills/tree/main/skills/internal-comms"
+stars = 121457
+commit_sha = "b9e19e6f44773509fbdd7001d77ff41a49a486c1"
+context_size = 377
+domain = "collaboration"
+last_updated = "2026-04-21"
+tags = [
+    "communication",
+    "internal-messages",
+    "reporting",
+]
+score = 83.5999984741211
+is_mega_skill = false
+
+[skills.internal-comms.install_action]
+type = "copy"
+
+[skills.internal-comms.install_action.value]
+folder = "skills/internal-comms"
+
+[skills.cli-creator]
+name = "cli-creator"
+description = "Build a composable CLI for Codex from API docs, an OpenAPI spec, existing curl examples, an SDK, a web app, an admin tool, or a local script. Use when the user wants Codex to create a command-line tool that can run from any repo, expose composable read/write commands, return stable JSON, manage auth, and pair with a companion skill."
+source_url = "https://github.com/openai/skills/tree/main/skills/.curated/cli-creator"
+stars = 17181
+commit_sha = "0ed2046f287a92b5f4bcace213dcb3cc5f094cb9"
+context_size = 2625
+domain = "development"
+last_updated = "2026-04-21"
+tags = [
+    "cli-tools",
+    "api-integration",
+    "command-line",
+]
+score = 85.5999984741211
+is_mega_skill = false
+
+[skills.cli-creator.install_action]
+type = "copy"
+
+[skills.cli-creator.install_action.value]
+folder = "skills/.curated/cli-creator"

@@ -1,26 +1,36 @@
 [package]
 name = "rulesify"
-version = "0.3.1"
+version = "0.5.0"
 edition = "2021"
-description = "A CLI tool for managing AI assistant rules"
+description = "Discover and install AI agent skills"
 license = "MIT"
 
 [dependencies]
 anyhow = "1.0"
-clap = { version = "4.5.1", features = ["derive"] }
-clap_complete = "4.5.1"
-serde = { version = "1.0", features = ["derive"] }
-serde_yaml = "0.9"
-serde_json = "1.0"
-chrono = { version = "0.4", features = ["serde"] }
 thiserror = "1.0"
+clap = { version = "4.5", features = ["derive"] }
 tokio = { version = "1.37", features = ["rt-multi-thread", "macros"] }
-glob = "0.3"
-walkdir = "2.4"
+reqwest = { version = "0.12", features = ["json"] }
+serde = { version = "1.0", features = ["derive"] }
+toml = "0.8"
+ratatui = "0.26"
+crossterm = "0.27"
 dirs = "5.0"
-regex = "1.10"
+walkdir = "2.4"
+chrono = { version = "0.4", features = ["serde"] }
 env_logger = "0.10"
 log = "0.4"
+serde_yaml = "0.9"
+serde_json = "1.0"
+textwrap = "0.16"
+flate2 = "1.0"
+tar = "0.4"
+sha2 = "0.10"
 
 [dev-dependencies]
 tempfile = "3.8"
+serial_test = "3.0"
+
+[[bin]]
+name = "update-registry"
+path = "src/bin/update-registry.rs"

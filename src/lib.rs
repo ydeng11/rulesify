@@ -1,8 +1,9 @@
 pub mod cli;
+pub mod fetcher;
+pub mod installer;
+pub mod llm;
 pub mod models;
-pub mod store;
-pub mod converters;
-pub mod templates;
-pub mod validation;
-pub mod sync;
-pub mod utils; 
+pub mod registry;
+pub mod scanner;
+pub mod tui;
+pub mod utils;
