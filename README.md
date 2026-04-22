@@ -39,16 +39,16 @@ Skills are automatically classified into 10 domains:
 
 | Domain | Description | Example Skills |
 |--------|-------------|----------------|
-| `planning-and-workflows` | Project planning, task management | `notion-spec-to-implementation` |
+| `planning-and-orchestration` | Project planning, task orchestration | `notion-spec-to-implementation` |
 | `development` | Code development, SDKs, app building | `skill-creator`, `mcp-builder` |
-| `design-and-media` | UI design, visual arts, creative work | `figma-*`, `canvas-design` |
+| `design` | UI design, visual arts, creative work | `figma-*`, `canvas-design` |
 | `documentation` | Document creation, formatting | `docx`, `pptx`, `pdf` |
-| `data-and-research` | Data analysis, research | `jupyter-notebook` |
-| `testing-and-debugging` | Testing, debugging, error handling | `playwright`, `sentry` |
-| `deployment-and-infrastructure` | Cloud deployment, hosting | `netlify-deploy`, `render-deploy` |
-| `integrations-and-tools` | API integrations, MCP servers | `mcp-builder`, `linear` |
-| `collaboration-and-communication` | Team communication, meetings | `internal-comms`, `notion-meeting-intelligence` |
-| `security-and-privacy` | Security reviews, threat modeling | `security-threat-model` |
+| `data` | Data analysis, research | `jupyter-notebook` |
+| `testing` | Testing, debugging, error handling | `playwright`, `sentry` |
+| `deployment` | Cloud deployment, hosting | `netlify-deploy`, `render-deploy` |
+| `integrations` | API integrations, MCP servers | `mcp-builder`, `linear` |
+| `collaboration` | Team communication, meetings | `internal-comms`, `notion-meeting-intelligence` |
+| `security` | Security reviews, threat modeling | `security-threat-model` |
 
 Each skill has up to 3 tags describing specific capabilities.
 
@@ -147,7 +147,7 @@ rulesify skill add test-driven-development
 rulesify skill list
 
 # Find deployment skills
-rulesify skill list --domain deployment-and-infrastructure
+rulesify skill list --domain deployment
 
 # Find debugging skills
 rulesify skill list --tags debugging
@@ -182,10 +182,10 @@ rulesify skill update
 rulesify skill list --domain development
 
 # Design skills
-rulesify skill list --domain design-and-media
+rulesify skill list --domain design
 
 # Security skills
-rulesify skill list --domain security-and-privacy
+rulesify skill list --domain security
 ```
 
 ## Update Registry
