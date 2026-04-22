@@ -46,7 +46,13 @@ impl OpenRouterClient {
     pub fn from_env() -> Result<Self> {
         let api_key = std::env::var("OPENROUTER_API_KEY")
             .context("OPENROUTER_API_KEY environment variable not set")?;
-        let model = std::env::var("OPENROUTER_MODEL").unwrap_or_else(|_| DEFAULT_MODEL.to_string());
+        if api_key.trim().is_empty() {
+            return Err(anyhow::anyhow!("OPENROUTER_API_KEY is empty - please set a valid API key"));
+        }
+        let model = std::env::var("OPENROUTER_MODEL")
+            .ok()
+            .filter(|m| !m.trim().is_empty())
+            .unwrap_or_else(|| DEFAULT_MODEL.to_string());
 
         let client = Client::builder()
             .timeout(Duration::from_secs(60))
