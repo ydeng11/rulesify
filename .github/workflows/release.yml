@@ -206,6 +206,7 @@ jobs:
     name: Update Homebrew Tap
     needs: [validate, create-release]
     runs-on: ubuntu-latest
+    environment: Prod
     steps:
       - name: Get version and checksums
         env:
