@@ -10,8 +10,9 @@ on:
         options:
           - production-release
           - bump-version
+          - update-homebrew
       version:
-        description: 'Version (e.g., 0.5.0) - required for production-release'
+        description: 'Version (e.g., 0.5.0) - required for production-release and update-homebrew'
         required: false
         type: string
       next_version:
@@ -275,6 +276,102 @@ jobs:
           cp ../rulesify.rb Formula/rulesify.rb
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.norereply.github.com"
+          git add Formula/rulesify.rb
+          git commit -m "Update rulesify to v$VERSION" || echo "No changes"
+          git push https://x-access-token:${HOMEBREW_TAP_TOKEN}@github.com/ydeng11/homebrew-rulesify.git main
+
+  standalone-homebrew-update:
+    name: Update Homebrew Tap (Standalone)
+    if: github.event.inputs.action == 'update-homebrew'
+    runs-on: ubuntu-latest
+    environment: Prod
+    steps:
+      - name: Validate version
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        id: ver
+        shell: bash
+        run: |
+          set -euo pipefail
+          VERSION="${{ github.event.inputs.version }}"
+          if [ -z "$VERSION" ]; then
+            echo "Error: version input is required for update-homebrew"
+            exit 1
+          fi
+          TAG="v$VERSION"
+          if ! gh release view "$TAG" --repo "${{ github.repository }}" > /dev/null 2>&1; then
+            echo "Error: Release $TAG not found"
+            exit 1
+          fi
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Get checksums
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        id: info
+        shell: bash
+        run: |
+          VERSION="${{ steps.ver.outputs.version }}"
+          TAG="v$VERSION"
+
+          gh release download "$TAG" \
+            --repo "${{ github.repository }}" \
+            --pattern "rulesify-darwin-amd64.tar.gz.sha256" \
+            --pattern "rulesify-darwin-arm64.tar.gz.sha256" \
+            --dir checksums
+
+          SHA_AMD64=$(cut -d' ' -f1 checksums/rulesify-darwin-amd64.tar.gz.sha256)
+          SHA_ARM64=$(cut -d' ' -f1 checksums/rulesify-darwin-arm64.tar.gz.sha256)
+
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "sha_amd64=$SHA_AMD64" >> "$GITHUB_OUTPUT"
+          echo "sha_arm64=$SHA_ARM64" >> "$GITHUB_OUTPUT"
+
+      - name: Generate Homebrew formula
+        run: |
+          VERSION="${{ steps.info.outputs.version }}"
+          SHA_AMD64="${{ steps.info.outputs.sha_amd64 }}"
+          SHA_ARM64="${{ steps.info.outputs.sha_arm64 }}"
+
+          cat > rulesify.rb << EOF
+          class Rulesify < Formula
+            desc "Discover and install AI agent skills"
+            homepage "https://github.com/ydeng11/rulesify"
+            license "MIT"
+            version "$VERSION"
+
+            on_macos do
+              on_intel do
+                url "https://github.com/ydeng11/rulesify/releases/download/v#{version}/rulesify-darwin-amd64.tar.gz"
+                sha256 "$SHA_AMD64"
+              end
+              on_arm do
+                url "https://github.com/ydeng11/rulesify/releases/download/v#{version}/rulesify-darwin-arm64.tar.gz"
+                sha256 "$SHA_ARM64"
+              end
+            end
+
+            def install
+              bin.install "rulesify"
+            end
+
+            test do
+              assert_match "rulesify", shell_output("#{bin}/rulesify --version")
+            end
+          end
+          EOF
+
+      - name: Push to tap
+        env:
+          HOMEBREW_TAP_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+        run: |
+          VERSION="${{ steps.info.outputs.version }}"
+
+          git clone https://github.com/ydeng11/homebrew-rulesify.git tap-repo
+          cd tap-repo
+          cp ../rulesify.rb Formula/rulesify.rb
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
           git add Formula/rulesify.rb
           git commit -m "Update rulesify to v$VERSION" || echo "No changes"
           git push https://x-access-token:${HOMEBREW_TAP_TOKEN}@github.com/ydeng11/homebrew-rulesify.git main
