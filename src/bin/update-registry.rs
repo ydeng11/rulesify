@@ -66,6 +66,15 @@ async fn fetch_skill(
     })
 }
 
+fn get_hardcoded_mega_skill_stars(source: SourceRepo) -> Option<u32> {
+    match source {
+        SourceRepo::ObraSuperpowers => Some(166_899),
+        SourceRepo::ObraSuperpowersLab => Some(302),
+        SourceRepo::GsdSkills => Some(57_142),
+        _ => None,
+    }
+}
+
 fn create_synthetic_mega_skill(source: SourceRepo, repo_metrics: &RepoMetrics) -> SkillMetadata {
     let skill_id = source.mega_skill_dest_name().to_string();
     let source_folder = source.mega_skill_source_folder();
@@ -74,6 +83,12 @@ fn create_synthetic_mega_skill(source: SourceRepo, repo_metrics: &RepoMetrics) -
         source.full_name(),
         source.branch()
     );
+
+    let stars = if repo_metrics.stars == 0 {
+        get_hardcoded_mega_skill_stars(source).unwrap_or(1000)
+    } else {
+        repo_metrics.stars
+    };
 
     let (description, install_action, dependencies) = match source {
         SourceRepo::ObraSuperpowers => (
@@ -113,7 +128,7 @@ fn create_synthetic_mega_skill(source: SourceRepo, repo_metrics: &RepoMetrics) -
         source_url,
         commit_sha: String::new(),
         tags: vec!["mega-skill".to_string()],
-        stars: repo_metrics.stars,
+        stars,
         context_size: 0,
         domain: "development".to_string(),
         last_updated: chrono::Utc::now().format("%Y-%m-%d").to_string(),
@@ -195,23 +210,40 @@ async fn main() -> Result<()> {
 
     let mut all_skills: Vec<(SkillMetadata, f32)> = vec![];
 
-    for source in SourceRepo::all() {
-        log::info!("Fetching from {}", source.full_name());
+    log::info!("Fetching repo metrics for all sources first...");
+    let mut repo_metrics_map: HashMap<String, RepoMetrics> = HashMap::new();
 
-        let repo_metrics = match client
+    for source in SourceRepo::all() {
+        match client
             .fetch_repo_metrics(source.owner(), source.repo())
             .await
         {
-            Ok(m) => m,
+            Ok(m) => {
+                log::info!(
+                    "Fetched metrics for {}: {} stars",
+                    source.full_name(),
+                    m.stars
+                );
+                repo_metrics_map.insert(source.full_name(), m);
+            }
             Err(e) => {
                 log::warn!(
                     "Failed to fetch repo metrics for {}: {}",
                     source.full_name(),
                     e
                 );
-                RepoMetrics::default()
+                repo_metrics_map.insert(source.full_name(), RepoMetrics::default());
             }
-        };
+        }
+    }
+
+    for source in SourceRepo::all() {
+        log::info!("Processing {}", source.full_name());
+
+        let repo_metrics = repo_metrics_map
+            .get(&source.full_name())
+            .cloned()
+            .unwrap_or_default();
 
         if source.is_mega_skill_collection() {
             match source {

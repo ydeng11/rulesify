@@ -3,6 +3,7 @@ use crate::utils::{Result, RulesifyError};
 use chrono::{DateTime, Duration as ChronoDuration, Utc};
 use serde::Deserialize;
 use std::time::Duration;
+use tokio::time::sleep;
 
 #[derive(Debug, Clone, Deserialize)]
 pub struct RepoInfo {
@@ -107,17 +108,46 @@ impl GitHubClient {
         req
     }
 
+    async fn fetch_with_retry(&self, url: &str, max_retries: u32) -> Result<reqwest::Response> {
+        let mut retries = 0;
+        let mut delay = Duration::from_secs(1);
+
+        loop {
+            let resp = self
+                .request(url)
+                .send()
+                .await
+                .map_err(|e| RulesifyError::GitHubApi(e.to_string()))?;
+
+            if resp.status().is_success() {
+                return Ok(resp);
+            }
+
+            let status = resp.status();
+            let should_retry =
+                (status.as_u16() == 429 || status.as_u16() == 403) && retries < max_retries;
+
+            if should_retry {
+                log::warn!(
+                    "GitHub API returned HTTP {}, retrying in {} seconds (retry {} of {})",
+                    status.as_u16(),
+                    delay.as_secs(),
+                    retries + 1,
+                    max_retries
+                );
+                sleep(delay).await;
+                delay = Duration::from_secs(delay.as_secs() * 2);
+                retries += 1;
+                continue;
+            }
+
+            return Err(RulesifyError::GitHubApi(format!("HTTP {}", status)).into());
+        }
+    }
+
     pub async fn fetch_repo(&self, owner: &str, repo: &str) -> Result<RepoInfo> {
         let url = format!("https://api.github.com/repos/{}/{}", owner, repo);
-        let resp = self
-            .request(&url)
-            .send()
-            .await
-            .map_err(|e| RulesifyError::GitHubApi(e.to_string()))?;
-
-        if !resp.status().is_success() {
-            return Err(RulesifyError::GitHubApi(format!("HTTP {}", resp.status())).into());
-        }
+        let resp = self.fetch_with_retry(&url, 3).await?;
 
         resp.json::<RepoInfo>()
             .await
@@ -129,19 +159,65 @@ impl GitHubClient {
             "https://api.github.com/repos/{}/{}/git/trees/{}?recursive=1",
             owner, repo, branch
         );
-        let resp = self
-            .request(&url)
-            .send()
-            .await
-            .map_err(|e| RulesifyError::GitHubApi(e.to_string()))?;
-
-        if !resp.status().is_success() {
-            return Err(RulesifyError::GitHubApi(format!("HTTP {}", resp.status())).into());
-        }
+        let resp = self.fetch_with_retry(&url, 3).await?;
 
         resp.json::<TreeResponse>()
             .await
             .map_err(|e| RulesifyError::GitHubApi(e.to_string()).into())
+    }
+
+    async fn fetch_raw_with_retry(
+        &self,
+        url: &str,
+        accept_header: &str,
+        max_retries: u32,
+    ) -> Result<String> {
+        let mut retries = 0;
+        let mut delay = Duration::from_secs(1);
+
+        loop {
+            let mut req = self
+                .http
+                .get(url)
+                .header("Accept", accept_header)
+                .header("User-Agent", "rulesify");
+
+            if let Some(auth) = self.auth_header() {
+                req = req.header("Authorization", auth);
+            }
+
+            let resp = req
+                .send()
+                .await
+                .map_err(|e| RulesifyError::GitHubApi(e.to_string()))?;
+
+            if resp.status().is_success() {
+                return resp
+                    .text()
+                    .await
+                    .map_err(|e| RulesifyError::GitHubApi(e.to_string()).into());
+            }
+
+            let status = resp.status();
+            let should_retry =
+                (status.as_u16() == 429 || status.as_u16() == 403) && retries < max_retries;
+
+            if should_retry {
+                log::warn!(
+                    "GitHub API returned HTTP {} for raw content, retrying in {} seconds (retry {} of {})",
+                    status.as_u16(),
+                    delay.as_secs(),
+                    retries + 1,
+                    max_retries
+                );
+                sleep(delay).await;
+                delay = Duration::from_secs(delay.as_secs() * 2);
+                retries += 1;
+                continue;
+            }
+
+            return Err(RulesifyError::GitHubApi(format!("HTTP {}", status)).into());
+        }
     }
 
     pub async fn fetch_file(&self, owner: &str, repo: &str, path: &str) -> Result<String> {
@@ -149,28 +225,8 @@ impl GitHubClient {
             "https://api.github.com/repos/{}/{}/contents/{}",
             owner, repo, path
         );
-        let mut req = self
-            .http
-            .get(&url)
-            .header("Accept", "application/vnd.github.v3.raw")
-            .header("User-Agent", "rulesify");
-
-        if let Some(auth) = self.auth_header() {
-            req = req.header("Authorization", auth);
-        }
-
-        let resp = req
-            .send()
+        self.fetch_raw_with_retry(&url, "application/vnd.github.v3.raw", 3)
             .await
-            .map_err(|e| RulesifyError::GitHubApi(e.to_string()))?;
-
-        if !resp.status().is_success() {
-            return Err(RulesifyError::GitHubApi(format!("HTTP {}", resp.status())).into());
-        }
-
-        resp.text()
-            .await
-            .map_err(|e| RulesifyError::GitHubApi(e.to_string()).into())
     }
 
     pub fn contents_url(&self, owner: &str, repo: &str, path: &str) -> String {
@@ -187,15 +243,7 @@ impl GitHubClient {
         path: &str,
     ) -> Result<Vec<ContentEntry>> {
         let url = self.contents_url(owner, repo, path);
-        let resp = self
-            .request(&url)
-            .send()
-            .await
-            .map_err(|e| RulesifyError::GitHubApi(e.to_string()))?;
-
-        if !resp.status().is_success() {
-            return Err(RulesifyError::GitHubApi(format!("HTTP {}", resp.status())).into());
-        }
+        let resp = self.fetch_with_retry(&url, 3).await?;
 
         resp.json::<Vec<ContentEntry>>()
             .await
@@ -208,21 +256,43 @@ impl GitHubClient {
             owner, repo, path
         );
 
-        let resp = self
-            .http
-            .get(&url)
-            .header("User-Agent", "rulesify")
-            .send()
-            .await
-            .map_err(|e| RulesifyError::GitHubApi(e.to_string()))?;
+        let mut retries = 0;
+        let mut delay = Duration::from_secs(1);
 
-        if !resp.status().is_success() {
-            return Err(RulesifyError::GitHubApi(format!("HTTP {}", resp.status())).into());
+        loop {
+            let resp = self
+                .http
+                .get(&url)
+                .header("User-Agent", "rulesify")
+                .send()
+                .await
+                .map_err(|e| RulesifyError::GitHubApi(e.to_string()))?;
+
+            if resp.status().is_success() {
+                return resp
+                    .text()
+                    .await
+                    .map_err(|e| RulesifyError::GitHubApi(e.to_string()).into());
+            }
+
+            let status = resp.status();
+            let should_retry = (status.as_u16() == 429 || status.as_u16() == 403) && retries < 3;
+
+            if should_retry {
+                log::warn!(
+                    "GitHub API returned HTTP {} for raw file, retrying in {} seconds (retry {} of 3)",
+                    status.as_u16(),
+                    delay.as_secs(),
+                    retries + 1
+                );
+                sleep(delay).await;
+                delay = Duration::from_secs(delay.as_secs() * 2);
+                retries += 1;
+                continue;
+            }
+
+            return Err(RulesifyError::GitHubApi(format!("HTTP {}", status)).into());
         }
-
-        resp.text()
-            .await
-            .map_err(|e| RulesifyError::GitHubApi(e.to_string()).into())
     }
 
     pub async fn fetch_issues(
@@ -236,15 +306,7 @@ impl GitHubClient {
             "https://api.github.com/repos/{}/{}/issues?state=all&since={}&per_page=100",
             owner, repo, since_str
         );
-        let resp = self
-            .request(&url)
-            .send()
-            .await
-            .map_err(|e| RulesifyError::GitHubApi(e.to_string()))?;
-
-        if !resp.status().is_success() {
-            return Err(RulesifyError::GitHubApi(format!("HTTP {}", resp.status())).into());
-        }
+        let resp = self.fetch_with_retry(&url, 3).await?;
 
         resp.json::<Vec<Issue>>()
             .await
@@ -256,15 +318,7 @@ impl GitHubClient {
             "https://api.github.com/repos/{}/{}/contributors?per_page=100",
             owner, repo
         );
-        let resp = self
-            .request(&url)
-            .send()
-            .await
-            .map_err(|e| RulesifyError::GitHubApi(e.to_string()))?;
-
-        if !resp.status().is_success() {
-            return Err(RulesifyError::GitHubApi(format!("HTTP {}", resp.status())).into());
-        }
+        let resp = self.fetch_with_retry(&url, 3).await?;
 
         resp.json::<Vec<Contributor>>()
             .await
@@ -281,15 +335,7 @@ impl GitHubClient {
             "https://api.github.com/repos/{}/{}/commits?path={}&per_page=1",
             owner, repo, path
         );
-        let resp = self
-            .request(&url)
-            .send()
-            .await
-            .map_err(|e| RulesifyError::GitHubApi(e.to_string()))?;
-
-        if !resp.status().is_success() {
-            return Err(RulesifyError::GitHubApi(format!("HTTP {}", resp.status())).into());
-        }
+        let resp = self.fetch_with_retry(&url, 3).await?;
 
         let commits: Vec<CommitRef> = resp
             .json()
