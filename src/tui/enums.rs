@@ -1,5 +1,6 @@
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum SortMode {
+    #[default]
     StarsDesc,
     StarsAsc,
     ScoreDesc,
@@ -29,11 +30,5 @@ impl SortMode {
             SortMode::NameAsc => "Name A-Z",
             SortMode::NameDesc => "Name Z-A",
         }
-    }
-}
-
-impl Default for SortMode {
-    fn default() -> Self {
-        SortMode::StarsDesc
     }
 }

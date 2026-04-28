@@ -76,9 +76,15 @@ pub struct GitHubClient {
     pub token: Option<String>,
 }
 
+impl Default for GitHubClient {
+    fn default() -> Self {
+        Self::with_token(None)
+    }
+}
+
 impl GitHubClient {
     pub fn new() -> Self {
-        Self::with_token(None)
+        Self::default()
     }
 
     pub fn with_token(token: Option<String>) -> Self {

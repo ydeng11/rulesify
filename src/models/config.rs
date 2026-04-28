@@ -1,17 +1,12 @@
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+#[derive(Debug, Clone, Serialize, Deserialize, Default, PartialEq)]
 #[serde(rename_all = "lowercase")]
 pub enum Scope {
+    #[default]
     Project,
     Global,
-}
-
-impl Default for Scope {
-    fn default() -> Self {
-        Scope::Project
-    }
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -30,13 +25,19 @@ pub struct ProjectConfig {
     pub installed_skills: HashMap<String, InstalledSkill>,
 }
 
-impl ProjectConfig {
-    pub fn new() -> Self {
+impl Default for ProjectConfig {
+    fn default() -> Self {
         Self {
             version: 1,
             tools: Vec::new(),
             installed_skills: HashMap::new(),
         }
+    }
+}
+
+impl ProjectConfig {
+    pub fn new() -> Self {
+        Self::default()
     }
 
     pub fn add_skill(&mut self, id: &str, source: &str, commit_sha: &str, scope: Scope) {

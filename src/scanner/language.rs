@@ -52,10 +52,8 @@ pub fn detect(path: &Path) -> Result<Vec<String>> {
     if path.join("Cargo.toml").exists() {
         languages.insert("rust");
     }
-    if path.join("package.json").exists() {
-        if !languages.contains("typescript") {
-            languages.insert("javascript");
-        }
+    if path.join("package.json").exists() && !languages.contains("typescript") {
+        languages.insert("javascript");
     }
     if path.join("pyproject.toml").exists() || path.join("setup.py").exists() {
         languages.insert("python");

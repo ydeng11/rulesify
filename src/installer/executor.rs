@@ -3,7 +3,7 @@ use crate::installer::tool_paths::get_skill_folder;
 use crate::models::{Scope, Skill};
 use crate::registry::github::GitHubClient;
 use crate::utils::{Result, RulesifyError};
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::process::Command;
 
 #[derive(Debug)]
@@ -60,9 +60,9 @@ pub fn parse_source_url(source_url: &str) -> Result<SkillSource> {
     })
 }
 
-pub async fn install_skill(
+pub async fn install_skill<T: AsRef<str>>(
     skill: &Skill,
-    tools: &[String],
+    tools: &[T],
     scope: Scope,
     _client: &GitHubClient,
     cache: &ArchiveCache,
@@ -79,19 +79,19 @@ pub async fn install_skill(
     let mut results = Vec::new();
 
     for tool in tools {
-        let skill_folder = get_skill_folder(tool, scope.clone(), &skill.name);
-        let result = install_for_tool(&extracted_folder, &entries, &skill_folder, tool.clone());
+        let skill_folder = get_skill_folder(tool.as_ref(), scope.clone(), &skill.name);
+        let result = install_for_tool(&extracted_folder, &entries, &skill_folder, tool.as_ref());
         results.push(result);
     }
 
     Ok(results)
 }
 
-pub async fn install_mega_skill(
+pub async fn install_mega_skill<T: AsRef<str>>(
     skill: &Skill,
     source_folder: &str,
     dest_name: &str,
-    tools: &[String],
+    tools: &[T],
     scope: Scope,
     _client: &GitHubClient,
     cache: &ArchiveCache,
@@ -118,8 +118,8 @@ pub async fn install_mega_skill(
     let mut results = Vec::new();
 
     for tool in tools {
-        let skill_folder = get_skill_folder(tool, scope.clone(), dest_name);
-        let result = install_for_tool(&source_path, &entries, &skill_folder, tool.clone());
+        let skill_folder = get_skill_folder(tool.as_ref(), scope.clone(), dest_name);
+        let result = install_for_tool(&source_path, &entries, &skill_folder, tool.as_ref());
         results.push(result);
     }
 
@@ -127,15 +127,15 @@ pub async fn install_mega_skill(
 }
 
 fn install_for_tool(
-    extracted_folder: &PathBuf,
+    extracted_folder: &Path,
     entries: &[std::fs::DirEntry],
-    skill_folder: &PathBuf,
-    tool: String,
+    skill_folder: &Path,
+    tool: &str,
 ) -> InstallResult {
     if skill_folder.exists() {
         if let Err(e) = std::fs::remove_dir_all(skill_folder) {
             return InstallResult {
-                tool,
+                tool: tool.to_string(),
                 files_created: 0,
                 success: false,
                 error: Some(format!("Failed to clear existing folder: {}", e)),
@@ -145,7 +145,7 @@ fn install_for_tool(
 
     if let Err(e) = std::fs::create_dir_all(skill_folder) {
         return InstallResult {
-            tool,
+            tool: tool.to_string(),
             files_created: 0,
             success: false,
             error: Some(format!("Failed to create folder: {}", e)),
@@ -176,7 +176,7 @@ fn install_for_tool(
     }
 
     InstallResult {
-        tool,
+        tool: tool.to_string(),
         files_created,
         success: errors.is_empty(),
         error: if errors.is_empty() {
@@ -206,17 +206,17 @@ fn copy_dir_all(src: &PathBuf, dst: &PathBuf) -> std::io::Result<()> {
     Ok(())
 }
 
-pub fn execute_npx_install(
+pub fn execute_npx_install<T: AsRef<str>>(
     package: &str,
     args: &[String],
     _uninstall_flag: Option<&str>,
-    tools: &[String],
+    tools: &[T],
     scope: Scope,
 ) -> Result<Vec<InstallResult>> {
     let mut results = Vec::new();
 
     for tool in tools {
-        let tool_flag = match tool.as_str() {
+        let tool_flag = match tool.as_ref() {
             "claude-code" => "--claude",
             "opencode" => "--opencode",
             "cursor" => "--cursor",
@@ -242,7 +242,7 @@ pub fn execute_npx_install(
         match output {
             Ok(o) if o.status.success() => {
                 results.push(InstallResult {
-                    tool: tool.clone(),
+                    tool: tool.as_ref().to_string(),
                     files_created: 0,
                     success: true,
                     error: None,
@@ -251,7 +251,7 @@ pub fn execute_npx_install(
             Ok(o) => {
                 let stderr = String::from_utf8_lossy(&o.stderr).to_string();
                 results.push(InstallResult {
-                    tool: tool.clone(),
+                    tool: tool.as_ref().to_string(),
                     files_created: 0,
                     success: false,
                     error: Some(stderr),
@@ -259,7 +259,7 @@ pub fn execute_npx_install(
             }
             Err(e) => {
                 results.push(InstallResult {
-                    tool: tool.clone(),
+                    tool: tool.as_ref().to_string(),
                     files_created: 0,
                     success: false,
                     error: Some(format!("Failed to run npx: {}", e)),

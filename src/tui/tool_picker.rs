@@ -17,12 +17,18 @@ pub struct ToolPicker {
     cursor: usize,
 }
 
-impl ToolPicker {
-    pub fn new() -> Self {
+impl Default for ToolPicker {
+    fn default() -> Self {
         Self {
             selected: vec![false; TOOLS.len()],
             cursor: 0,
         }
+    }
+}
+
+impl ToolPicker {
+    pub fn new() -> Self {
+        Self::default()
     }
 
     pub fn new_with_selected(selected_tools: Vec<String>) -> Self {

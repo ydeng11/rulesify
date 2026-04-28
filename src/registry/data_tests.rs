@@ -5,7 +5,7 @@ mod tests {
     #[test]
     fn test_load_builtin() {
         let registry = load_builtin().unwrap();
-        assert!(registry.skills.len() > 0);
+        assert!(!registry.skills.is_empty());
         assert_eq!(registry.version, 1);
     }
 
@@ -19,7 +19,7 @@ mod tests {
     fn test_filter_by_domain() {
         let registry = load_builtin().unwrap();
         let filtered = registry.filter_by_domain("development");
-        assert!(filtered.len() > 0);
+        assert!(!filtered.is_empty());
 
         for (_, skill) in filtered {
             assert_eq!(skill.domain, "development");

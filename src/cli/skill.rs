@@ -204,7 +204,7 @@ async fn add_skill(id: String, global: bool, agent_mode: bool, _verbose: bool) -
         .ok_or_else(|| RulesifyError::SkillNotFound(id.clone()))?;
 
     if agent_mode {
-        output_install_instructions(&skill, &tools, scope);
+        output_install_instructions(skill, &tools, scope);
         return Ok(());
     }
 
@@ -481,7 +481,7 @@ async fn update_registry(agent_mode: bool, verbose: bool) -> Result<()> {
                 package,
                 args,
                 uninstall_flag.as_deref(),
-                &[tool.clone()],
+                std::slice::from_ref(&tool),
                 Scope::Global,
             )?,
             Some(InstallAction::MegaSkillCopy {
@@ -492,20 +492,32 @@ async fn update_registry(agent_mode: bool, verbose: bool) -> Result<()> {
                     skill,
                     source_folder,
                     dest_name,
-                    &[tool.clone()],
+                    std::slice::from_ref(&tool),
                     Scope::Global,
                     &client,
                     &cache,
                 )
                 .await?
             }
-            _ => install_skill(skill, &[tool.clone()], Scope::Global, &client, &cache).await?,
+            _ => {
+                install_skill(
+                    skill,
+                    std::slice::from_ref(&tool),
+                    Scope::Global,
+                    &client,
+                    &cache,
+                )
+                .await?
+            }
         };
         print_install_summary(&results, &skill.name);
     }
 
-    if !project_updated.is_empty() && project_config.is_some() {
-        let tools = project_config.as_ref().unwrap().tools.clone();
+    if !project_updated.is_empty() {
+        let Some(ref config) = project_config else {
+            return Err(RulesifyError::ConfigNotFound.into());
+        };
+        let tools = config.tools.clone();
         for (_id, skill) in &project_updated {
             println!("\nUpdating '{}' (project)...", skill.name);
 

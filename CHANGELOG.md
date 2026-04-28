@@ -5,6 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.1] - 2026-04-28
+
+### Fixed
+- **Code Quality**: Fixed all 16 clippy warnings for cleaner, more idiomatic Rust code
+  - Replaced `&PathBuf` with `&Path` in function signatures
+  - Used `std::slice::from_ref` instead of `&[tool.clone()]`
+  - Added `#[derive(Default)]` with `#[default]` attribute for enums
+  - Combined collapsible `if` statements
+  - Used `let Some(ref config) = ... else { ... }` pattern
+  - Replaced index-based loops with `.iter().skip()` pattern
+  - Used `.div_ceil()` instead of manual ceiling division
+  - Used `.saturating_sub()` for safer arithmetic
+  - Changed `len() > 0` to `!is_empty()` for clarity
+  - Used `std::io::Error::other(e)` instead of `Error::new(ErrorKind::Other, e)`
+
+### Documentation
+- Updated REQUIREMENTS.md traceability table to reflect all 26 requirements as "Delivered"
+
 ## [0.5.0] - 2026-04-18
 
 ### Added

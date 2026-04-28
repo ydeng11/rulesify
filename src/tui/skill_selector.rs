@@ -246,8 +246,8 @@ impl SkillSelectorState {
             let has_left = start_pos > 0;
             let reserved = if has_left { indicator_len } else { 0 };
 
-            for i in start_pos..domains.len() {
-                let domain_len = domains[i].len();
+            for domain in domains.iter().skip(start_pos) {
+                let domain_len = domain.len();
                 let total_len = if count > 0 {
                     separator_len + domain_len
                 } else {
@@ -604,7 +604,7 @@ impl SkillSelectorState {
         lines.push(search_line);
         lines.push(Line::from(""));
 
-        let total_rows = (filtered_tags.len() + cols - 1) / cols;
+        let total_rows = filtered_tags.len().div_ceil(cols);
         let start_row = self.tag_scroll_offset;
         let end_row = std::cmp::min(start_row + rows_per_page, total_rows);
 
@@ -944,11 +944,7 @@ impl SkillSelectorState {
         let half = visible_count / 2;
 
         // Center the selected domain in visible window
-        let ideal_offset = if self.domain_index < half {
-            0
-        } else {
-            self.domain_index - half
-        };
+        let ideal_offset = self.domain_index.saturating_sub(half);
 
         // Clamp to valid range - ensure last domains accessible
         let max_offset = self.domains.len().saturating_sub(visible_count);
