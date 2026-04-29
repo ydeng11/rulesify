@@ -1,7 +1,7 @@
 use crate::models::Registry;
 use crate::utils::{Result, RulesifyError};
 
-const REGISTRY_URL: &str = "https://raw.githubusercontent.com/user/rulesify/main/registry.toml";
+const REGISTRY_URL: &str = "https://raw.githubusercontent.com/ydeng11/rulesify/main/registry.toml";
 
 pub async fn fetch_registry() -> Result<Registry> {
     let client = reqwest::Client::new();
