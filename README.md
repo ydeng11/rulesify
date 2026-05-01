@@ -22,6 +22,7 @@ Skills are pre-built workflows, methodologies, and instructions that enhance AI 
 - **Direct Installation**: Skills are downloaded and installed automatically (full folder copy)
 - **Multi-Tool Support**: Install to multiple AI tools simultaneously (Claude Code, Codex, Cursor, etc.)
 - **Curated Sources**: Skills from Anthropic, OpenAI, and community experts
+- **Auto Reconciliation**: Config automatically syncs with disk state when skills are manually deleted
 
 ## Skills Registry
 
@@ -247,14 +248,15 @@ rulesify/
 ### Testing
 
 ```bash
-cargo test        # Run all 62 tests
+cargo test        # Run all 116 tests
 cargo check       # Verify compilation
 cargo clippy      # Lint
 ```
 
 ### Test Coverage
 
-- **62 total tests** across all modules
+- **116 total tests** across all modules
+- **12 reconciliation tests** (skill verification, config cleanup)
 - **7 executor tests** (URL parsing, install/uninstall)
 - **10 domain tests** (enum parsing, validation)
 - **24 registry tests** (skills catalog, GitHub API)

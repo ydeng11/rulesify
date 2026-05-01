@@ -5,6 +5,30 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.3] - 2026-04-30
+
+### Added
+- **Automatic Skill Reconciliation**: Config files now automatically sync with disk state
+  - Detects manually deleted skills on `init`, `list`, and config load operations
+  - Silently removes stale entries from `.rulesify.toml` and global config
+  - Verifies `SKILL.md` existence (not just folder) for both regular and mega-skills
+  - Per-tool granularity: removes global skills per-tool, keeps project skills if any tool has them
+  - Zero friction: automatic cleanup without user intervention
+  - Accurate markers: `[g]` and `[i]` always reflect actual installation state
+
+### Fixed
+- **Global Skill Installation Block**: Fixed bug where global skill check blocked installation for ALL tools
+  - Previously: If skill was global for claude-code, blocked installation for codex, cursor, etc.
+  - Now: Only blocks for tools that already have the skill globally installed
+  - Per-tool check allows installing to other selected tools without duplication
+
+### Technical Improvements
+- New `src/utils/reconcile.rs` module with skill verification logic
+- Added `ProjectConfig::reconcile_and_load()` helper method
+- Updated `GlobalConfig::load()` to auto-reconcile
+- 12 comprehensive reconciliation tests covering all edge cases
+- Total tests: 116 (all passing)
+
 ## [0.5.2] - 2026-04-28
 
 ### Fixed

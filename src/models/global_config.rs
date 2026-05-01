@@ -28,7 +28,13 @@ impl GlobalConfig {
         let path = get_global_config_path();
         if path.exists() {
             if let Ok(content) = std::fs::read_to_string(&path) {
-                if let Ok(config) = toml::from_str(&content) {
+                if let Ok(mut config) = toml::from_str(&content) {
+                    crate::utils::reconcile_global_config(&mut config);
+                    if !config.installed_skills.is_empty() {
+                        if let Err(e) = config.save() {
+                            log::error!("Failed to save reconciled global config: {}", e);
+                        }
+                    }
                     return config;
                 }
             }

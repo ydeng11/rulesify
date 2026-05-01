@@ -34,13 +34,7 @@ fn list_skills(verbose: bool) -> Result<()> {
     let global_config = GlobalConfig::load();
     let project_config_path = Path::new(".rulesify.toml");
 
-    let project_config = if project_config_path.exists() {
-        let content = std::fs::read_to_string(project_config_path)?;
-        let config: ProjectConfig = toml::from_str(&content)?;
-        Some(config)
-    } else {
-        None
-    };
+    let project_config = load_project_config(project_config_path)?;
 
     let global_skills = global_config.list_all_skills();
     let project_skills = project_config
@@ -586,10 +580,5 @@ async fn load_registry() -> Result<Registry> {
 }
 
 fn load_project_config(path: &Path) -> Result<Option<ProjectConfig>> {
-    if !path.exists() {
-        return Ok(None);
-    }
-    let content = std::fs::read_to_string(path)?;
-    let config: ProjectConfig = toml::from_str(&content)?;
-    Ok(Some(config))
+    ProjectConfig::reconcile_and_load(path)
 }

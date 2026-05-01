@@ -1,5 +1,7 @@
+use crate::utils::{reconcile_project_config, Result};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
+use std::path::Path;
 
 #[derive(Debug, Clone, Serialize, Deserialize, Default, PartialEq)]
 #[serde(rename_all = "lowercase")]
@@ -67,5 +69,29 @@ impl ProjectConfig {
             .iter()
             .map(|(k, v)| (k.clone(), v.clone()))
             .collect()
+    }
+
+    pub fn reconcile_and_load(path: &Path) -> Result<Option<Self>> {
+        if !path.exists() {
+            return Ok(None);
+        }
+
+        let content = std::fs::read_to_string(path)?;
+        let mut config: ProjectConfig = toml::from_str(&content)?;
+
+        reconcile_project_config(&mut config);
+
+        if config.installed_skills.is_empty() {
+            if let Err(e) = std::fs::remove_file(path) {
+                log::error!("Failed to remove empty config file: {}", e);
+            }
+            return Ok(None);
+        }
+
+        if let Err(e) = std::fs::write(path, toml::to_string_pretty(&config)?) {
+            log::error!("Failed to save reconciled project config: {}", e);
+        }
+
+        Ok(Some(config))
     }
 }

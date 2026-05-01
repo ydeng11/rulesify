@@ -28,19 +28,7 @@ pub async fn run(verbose: bool) -> Result<()> {
 
     let global_config = GlobalConfig::load();
 
-    let existing_config = if config_path.exists() {
-        let content = std::fs::read_to_string(config_path)?;
-        let config: ProjectConfig = toml::from_str(&content)?;
-        if verbose {
-            println!(
-                "Loaded existing config with {} installed skills",
-                config.installed_skills.len()
-            );
-        }
-        Some(config)
-    } else {
-        None
-    };
+    let existing_config = ProjectConfig::reconcile_and_load(config_path)?;
 
     let existing_tools = existing_config
         .as_ref()
@@ -111,13 +99,27 @@ pub async fn run(verbose: bool) -> Result<()> {
         let mut install_errors: Vec<(String, String)> = Vec::new();
 
         for (id, skill) in &result.added {
-            if global_config.is_skill_installed_globally(id) {
-                let tools_for_skill = global_config.get_tools_for_skill(id);
+            let tools_with_global = tools
+                .iter()
+                .filter(|tool| global_config.is_skill_installed_for_tool(tool, id))
+                .cloned()
+                .collect::<Vec<_>>();
+
+            if !tools_with_global.is_empty() {
                 println!(
-                    "'{}' is already installed globally for: {}, skipping.",
+                    "'{}' is already installed globally for: {}, skipping for those tools.",
                     skill.name,
-                    tools_for_skill.join(", ")
+                    tools_with_global.join(", ")
                 );
+            }
+
+            let tools_to_install = tools
+                .iter()
+                .filter(|tool| !global_config.is_skill_installed_for_tool(tool, id))
+                .cloned()
+                .collect::<Vec<_>>();
+
+            if tools_to_install.is_empty() {
                 continue;
             }
 
@@ -143,7 +145,7 @@ pub async fn run(verbose: bool) -> Result<()> {
                         skill,
                         source_folder,
                         dest_name,
-                        &tools,
+                        &tools_to_install,
                         Scope::Project,
                         &client,
                         &cache,
@@ -166,7 +168,7 @@ pub async fn run(verbose: bool) -> Result<()> {
                         package,
                         args,
                         uninstall_flag.as_deref(),
-                        &tools,
+                        &tools_to_install,
                         Scope::Project,
                     ) {
                         Ok(r) => r,
@@ -176,7 +178,9 @@ pub async fn run(verbose: bool) -> Result<()> {
                         }
                     }
                 }
-                _ => match install_skill(skill, &tools, Scope::Project, &client, &cache).await {
+                _ => match install_skill(skill, &tools_to_install, Scope::Project, &client, &cache)
+                    .await
+                {
                     Ok(r) => r,
                     Err(e) => {
                         install_errors.push((skill.name.clone(), e.to_string()));
