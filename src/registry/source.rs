@@ -73,7 +73,7 @@ impl SourceRepo {
             SourceRepo::OpenAISkillsCurated => "skills/.curated/*/SKILL.md",
             SourceRepo::OpenAISkillsSystem => "skills/.system/*/SKILL.md",
             SourceRepo::OpenAISkillsExperimental => "skills/.experimental/*/SKILL.md",
-            SourceRepo::MattPocockSkills => "*/SKILL.md",
+            SourceRepo::MattPocockSkills => "skills/*/*/SKILL.md",
             SourceRepo::MiniMaxSkills => "skills/*/SKILL.md",
             SourceRepo::ObraSuperpowers | SourceRepo::ObraSuperpowersLab => "",
             SourceRepo::GsdSkills => "",
@@ -112,8 +112,8 @@ impl SourceRepo {
                 }
             }
             SourceRepo::MattPocockSkills => {
-                if parts.len() >= 2 && parts.last() == Some(&"SKILL.md") {
-                    Some(parts[0].to_string())
+                if parts.len() >= 4 && parts.last() == Some(&"SKILL.md") {
+                    Some(parts[2].to_string())
                 } else {
                     None
                 }

@@ -51,8 +51,8 @@ mod tests {
         assert_eq!(id, Some("tdd".to_string()));
 
         let mattpocock = SourceRepo::MattPocockSkills;
-        let id = mattpocock.parse_skill_id("brainstorming/SKILL.md");
-        assert_eq!(id, Some("brainstorming".to_string()));
+        let id = mattpocock.parse_skill_id("skills/productivity/caveman/SKILL.md");
+        assert_eq!(id, Some("caveman".to_string()));
 
         let openai = SourceRepo::OpenAISkillsCurated;
         let id = openai.parse_skill_id("skills/.curated/gh-fix-ci/SKILL.md");
@@ -70,8 +70,8 @@ mod tests {
         assert_eq!(folder, Some("skills/tdd".to_string()));
 
         let mattpocock = SourceRepo::MattPocockSkills;
-        let folder = mattpocock.parse_skill_folder("brainstorming/SKILL.md");
-        assert_eq!(folder, Some("brainstorming".to_string()));
+        let folder = mattpocock.parse_skill_folder("skills/productivity/caveman/SKILL.md");
+        assert_eq!(folder, Some("skills/productivity/caveman".to_string()));
 
         let no_folder = anthropic.parse_skill_folder("skills/tdd/README.md");
         assert_eq!(no_folder, None);
