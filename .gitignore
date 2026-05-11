@@ -9,3 +9,6 @@
 *.goosehints
 
 CLAUDE.md
+
+.rulesify/
+install.log
