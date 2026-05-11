@@ -105,8 +105,9 @@ pub async fn run(verbose: bool) -> Result<()> {
 
     if !result.removed.is_empty() {
         println!("\nRemoving {} skills...", result.removed.len());
+        let mut global_removed = false;
         for (id, scope) in &result.removed {
-            let results = uninstall_skill(id, &tools, scope.clone());
+            let results = uninstall_skill(id, &tools, *scope);
             print_uninstall_summary(&results, id);
             match scope {
                 Scope::Project => {
@@ -116,10 +117,13 @@ pub async fn run(verbose: bool) -> Result<()> {
                     for tool in &tools {
                         global_config.remove_skill(tool, id);
                     }
+                    global_removed = true;
                 }
             }
         }
-        global_config.save()?;
+        if global_removed {
+            global_config.save()?;
+        }
     }
 
     if !result.added.is_empty() {
@@ -244,10 +248,19 @@ fn scan_disk_skills(tools: &[String], registry: &Registry) -> Vec<(String, Scope
     let mut found = HashSet::new();
 
     for skill_id in registry.skills.keys() {
-        for scope in [Scope::Project, Scope::Global] {
+        let mut project_found = false;
+        for tool in tools {
+            if skill_exists_on_disk(tool, Scope::Project, skill_id) {
+                found.insert((skill_id.clone(), Scope::Project));
+                project_found = true;
+                break;
+            }
+        }
+        if !project_found {
             for tool in tools {
-                if skill_exists_on_disk(tool, scope.clone(), skill_id) {
-                    found.insert((skill_id.clone(), scope.clone()));
+                if skill_exists_on_disk(tool, Scope::Global, skill_id) {
+                    found.insert((skill_id.clone(), Scope::Global));
+                    break;
                 }
             }
         }

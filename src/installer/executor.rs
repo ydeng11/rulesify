@@ -79,7 +79,7 @@ pub async fn install_skill<T: AsRef<str>>(
     let mut results = Vec::new();
 
     for tool in tools {
-        let skill_folder = get_skill_folder(tool.as_ref(), scope.clone(), &skill.name);
+        let skill_folder = get_skill_folder(tool.as_ref(), scope, &skill.name);
         let result = install_for_tool(&extracted_folder, &entries, &skill_folder, tool.as_ref());
         results.push(result);
     }
@@ -118,7 +118,7 @@ pub async fn install_mega_skill<T: AsRef<str>>(
     let mut results = Vec::new();
 
     for tool in tools {
-        let skill_folder = get_skill_folder(tool.as_ref(), scope.clone(), dest_name);
+        let skill_folder = get_skill_folder(tool.as_ref(), scope, dest_name);
         let result = install_for_tool(&source_path, &entries, &skill_folder, tool.as_ref());
         results.push(result);
     }
@@ -340,7 +340,7 @@ pub fn uninstall_skill(skill_name: &str, tools: &[String], scope: Scope) -> Vec<
     tools
         .iter()
         .map(|tool| {
-            let skill_folder = get_skill_folder(tool, scope.clone(), skill_name);
+            let skill_folder = get_skill_folder(tool, scope, skill_name);
             uninstall_for_tool(skill_folder, tool.clone())
         })
         .collect()

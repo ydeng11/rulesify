@@ -138,8 +138,8 @@ pub fn generate_install_instructions(
     output.push_str(&format!("Scope: {} level\n\n", scope_label));
 
     for tool in tools {
-        let skill_path = get_skill_path(tool, scope.clone(), skill_name);
-        let skill_folder = get_skill_folder(tool, scope.clone(), skill_name);
+        let skill_path = get_skill_path(tool, scope, skill_name);
+        let skill_folder = get_skill_folder(tool, scope, skill_name);
 
         output.push_str(&format!("## {} ({})\n\n", tool, scope_label));
         output.push_str(&format!("1. Fetch SKILL.md from:\n   {}\n\n", source_url));
@@ -168,7 +168,7 @@ pub fn generate_uninstall_instructions(skill_name: &str, tools: &[String], scope
     output.push_str(&format!("Scope: {} level\n\n", scope_label));
 
     for tool in tools {
-        let skill_folder = get_skill_folder(tool, scope.clone(), skill_name);
+        let skill_folder = get_skill_folder(tool, scope, skill_name);
 
         output.push_str(&format!("## {} ({})\n\n", tool, scope_label));
         output.push_str(&format!(
@@ -199,7 +199,7 @@ pub fn generate_uninstall_instructions_batch(
         output.push_str(&format!("## Skill: {}\n\n", skill_id));
 
         for tool in tools {
-            let skill_folder = get_skill_folder(tool, scope.clone(), skill_id);
+            let skill_folder = get_skill_folder(tool, scope, skill_id);
 
             output.push_str(&format!("### {} ({})\n\n", tool, scope_label));
             output.push_str(&format!(

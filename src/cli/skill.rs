@@ -222,7 +222,7 @@ async fn add_skill(id: String, global: bool, agent_mode: bool, _verbose: bool) -
         Some(InstallAction::Copy { .. }) | None => {
             let cache = ArchiveCache::new();
             let client = GitHubClient::new();
-            install_skill(skill, &tools, scope.clone(), &client, &cache).await?
+            install_skill(skill, &tools, scope, &client, &cache).await?
         }
         Some(InstallAction::MegaSkillCopy {
             source_folder,
@@ -235,7 +235,7 @@ async fn add_skill(id: String, global: bool, agent_mode: bool, _verbose: bool) -
                 source_folder,
                 dest_name,
                 &tools,
-                scope.clone(),
+                scope,
                 &client,
                 &cache,
             )
@@ -283,7 +283,6 @@ async fn add_skill(id: String, global: bool, agent_mode: bool, _verbose: bool) -
 }
 
 fn output_install_instructions(skill: &crate::models::Skill, tools: &[String], scope: Scope) {
-    let scope_clone = scope.clone();
     println!(
         "{}",
         generate_install_instructions(&skill.name, &skill.source_url, tools, scope,)
@@ -297,7 +296,7 @@ fn output_install_instructions(skill: &crate::models::Skill, tools: &[String], s
     {
         println!("\n## Npx Install (GSD)");
         println!("\nRun the following command:");
-        let scope_flag = match scope_clone {
+        let scope_flag = match scope {
             Scope::Global => "--global",
             Scope::Project => "--local",
         };
