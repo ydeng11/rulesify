@@ -1,4 +1,4 @@
-use crate::models::Skill;
+use crate::models::{Scope, Skill};
 use crate::tui::SortMode;
 use crossterm::{
     event::{self, Event, KeyCode},
@@ -19,7 +19,7 @@ use std::io;
 pub struct SelectionResult {
     pub selected: Vec<(String, Skill)>,
     pub added: Vec<(String, Skill)>,
-    pub removed: Vec<String>,
+    pub removed: Vec<(String, Scope)>,
 }
 
 pub(crate) struct SkillSelectorState {
@@ -65,7 +65,7 @@ impl SkillSelectorState {
 
         let selected_skill_ids: HashSet<String> = filtered_skills
             .iter()
-            .filter(|(id, _)| installed_ids.contains(id))
+            .filter(|(id, _)| installed_ids.contains(id) || global_ids.contains(id))
             .map(|(id, _)| id.clone())
             .collect();
 
@@ -383,12 +383,14 @@ impl SkillSelectorState {
             let is_selected = self.selected_skill_ids.contains(skill_id);
             let is_cursor = i == self.current_skill_index;
 
-            let marker = if is_global {
-                "[g]"
-            } else if is_installed {
-                "[i]"
-            } else if is_selected {
-                "[x]"
+            let marker = if is_selected {
+                if is_global {
+                    "[g]"
+                } else if is_installed {
+                    "[i]"
+                } else {
+                    "[x]"
+                }
             } else {
                 "[ ]"
             };
@@ -1026,12 +1028,20 @@ impl SkillSelector {
             .cloned()
             .collect();
 
-        let removed: Vec<String> = state
+        let mut removed: Vec<(String, Scope)> = state
             .installed_ids
             .iter()
             .filter(|id| !selected_ids.contains(*id))
-            .cloned()
+            .map(|id| (id.clone(), Scope::Project))
             .collect();
+
+        removed.extend(
+            state
+                .global_ids
+                .iter()
+                .filter(|id| !selected_ids.contains(*id))
+                .map(|id| (id.clone(), Scope::Global)),
+        );
 
         Ok(SelectionResult {
             selected,

@@ -26,14 +26,20 @@ pub async fn run(verbose: bool) -> Result<()> {
         println!("Existing tools: {:?}", context.existing_tools);
     }
 
-    let global_config = GlobalConfig::load();
+    let mut global_config = GlobalConfig::load();
 
     let existing_config = ProjectConfig::reconcile_and_load(config_path)?;
 
-    let existing_tools = existing_config
+    let mut existing_tools: Vec<String> = existing_config
         .as_ref()
         .map(|c| c.tools.clone())
         .unwrap_or_default();
+
+    for tool in &context.existing_tools {
+        if !existing_tools.contains(tool) {
+            existing_tools.push(tool.clone());
+        }
+    }
 
     println!("Select AI tools you use:");
     let tools = ToolPicker::run_with_selected(existing_tools)?;
@@ -50,12 +56,12 @@ pub async fn run(verbose: bool) -> Result<()> {
         return Ok(());
     }
 
-    let project_installed_ids: HashSet<String> = existing_config
+    let mut project_installed_ids: HashSet<String> = existing_config
         .as_ref()
         .map(|c| c.installed_skills.keys().cloned().collect())
         .unwrap_or_default();
 
-    let global_installed_ids: HashSet<String> = tools
+    let mut global_installed_ids: HashSet<String> = tools
         .iter()
         .flat_map(|tool| {
             global_config
@@ -64,6 +70,18 @@ pub async fn run(verbose: bool) -> Result<()> {
                 .map(|(id, _)| id)
         })
         .collect();
+
+    let disk_skills = scan_disk_skills(&tools, &registry);
+    for (id, scope) in &disk_skills {
+        match scope {
+            Scope::Project => {
+                project_installed_ids.insert(id.clone());
+            }
+            Scope::Global => {
+                global_installed_ids.insert(id.clone());
+            }
+        }
+    }
 
     let skills_to_show: Vec<_> = registry
         .skills
@@ -87,11 +105,21 @@ pub async fn run(verbose: bool) -> Result<()> {
 
     if !result.removed.is_empty() {
         println!("\nRemoving {} skills...", result.removed.len());
-        for id in &result.removed {
-            let results = uninstall_skill(id, &tools, Scope::Project);
+        for (id, scope) in &result.removed {
+            let results = uninstall_skill(id, &tools, scope.clone());
             print_uninstall_summary(&results, id);
-            config.remove_skill(id);
+            match scope {
+                Scope::Project => {
+                    config.remove_skill(id);
+                }
+                Scope::Global => {
+                    for tool in &tools {
+                        global_config.remove_skill(tool, id);
+                    }
+                }
+            }
         }
+        global_config.save()?;
     }
 
     if !result.added.is_empty() {
@@ -201,13 +229,31 @@ pub async fn run(verbose: bool) -> Result<()> {
     }
 
     if result.added.is_empty() && result.removed.is_empty() {
-        println!("\nNo changes to installed skills.");
+        println!("\nNo changes to skills.");
     }
 
     std::fs::write(config_path, toml::to_string_pretty(&config)?)?;
     println!("\nSaved configuration to .rulesify.toml");
 
     Ok(())
+}
+
+fn scan_disk_skills(tools: &[String], registry: &Registry) -> Vec<(String, Scope)> {
+    use crate::utils::skill_exists_on_disk;
+
+    let mut found = HashSet::new();
+
+    for skill_id in registry.skills.keys() {
+        for scope in [Scope::Project, Scope::Global] {
+            for tool in tools {
+                if skill_exists_on_disk(tool, scope.clone(), skill_id) {
+                    found.insert((skill_id.clone(), scope.clone()));
+                }
+            }
+        }
+    }
+
+    found.into_iter().collect()
 }
 
 async fn load_registry() -> Result<Registry> {

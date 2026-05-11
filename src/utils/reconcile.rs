@@ -3,7 +3,19 @@ use crate::models::{GlobalConfig, ProjectConfig, Scope};
 
 pub fn skill_exists_on_disk(tool: &str, scope: Scope, skill_id: &str) -> bool {
     let skill_folder = get_skill_folder(tool, scope, skill_id);
-    skill_folder.exists() && skill_folder.join("SKILL.md").exists()
+    if !skill_folder.exists() {
+        return false;
+    }
+    if skill_folder.join("SKILL.md").exists() {
+        return true;
+    }
+    std::fs::read_dir(&skill_folder)
+        .map(|entries| {
+            entries
+                .flatten()
+                .any(|e| e.path().join("SKILL.md").exists())
+        })
+        .unwrap_or(false)
 }
 
 pub fn reconcile_global_config(config: &mut GlobalConfig) -> Vec<(String, String)> {

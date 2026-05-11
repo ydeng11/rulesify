@@ -99,7 +99,7 @@ mod tests {
     }
 
     #[test]
-    fn test_global_ids_not_in_selected_skill_ids() {
+    fn test_global_ids_in_selected_skill_ids() {
         let skills = vec![
             ("skill-a".to_string(), make_skill("skill-a", "Skill A")),
             ("skill-b".to_string(), make_skill("skill-b", "Skill B")),
@@ -110,7 +110,7 @@ mod tests {
 
         let state = SkillSelectorState::new(skills, installed_ids.clone(), global_ids);
 
-        assert!(!state.selected_skill_ids.contains("skill-a"));
+        assert!(state.selected_skill_ids.contains("skill-a"));
     }
 
     #[test]
@@ -568,7 +568,7 @@ mod tests {
     }
 
     #[test]
-    fn test_globally_installed_skills_marked_when_running_tool() {
+    fn test_globally_installed_skills_selected_by_default() {
         let skills = vec![
             ("skill-a".to_string(), make_skill("skill-a", "Skill A")),
             ("skill-b".to_string(), make_skill("skill-b", "Skill B")),
@@ -588,12 +588,32 @@ mod tests {
         assert!(state.global_ids.contains("skill-b"));
         assert!(state.global_ids.contains("superpowers"));
 
-        assert!(!state.selected_skill_ids.contains("skill-b"));
-        assert!(!state.selected_skill_ids.contains("superpowers"));
+        assert!(state.selected_skill_ids.contains("skill-b"));
+        assert!(state.selected_skill_ids.contains("superpowers"));
 
         assert!(state.installed_ids.contains("skill-a"));
         assert!(state.selected_skill_ids.contains("skill-a"));
 
         assert!(!state.global_ids.contains("skill-a"));
+    }
+
+    #[test]
+    fn test_global_skill_can_be_deselected() {
+        let skills = vec![
+            ("skill-a".to_string(), make_skill("skill-a", "Skill A")),
+            ("skill-b".to_string(), make_skill("skill-b", "Skill B")),
+        ];
+
+        let installed_ids: HashSet<String> = HashSet::new();
+        let global_ids: HashSet<String> = ["skill-b".to_string()].into_iter().collect();
+
+        let mut state = SkillSelectorState::new(skills, installed_ids, global_ids.clone());
+
+        assert!(state.selected_skill_ids.contains("skill-b"));
+
+        state.selected_skill_ids.remove("skill-b");
+
+        assert!(!state.selected_skill_ids.contains("skill-b"));
+        assert!(state.global_ids.contains("skill-b"));
     }
 }
