@@ -1,31 +1,103 @@
 version = 1
-updated = "2026-05-10"
+updated = "2026-05-17"
 
-[skills.minimax-music-playlist]
-name = "minimax-music-playlist"
-description = """
-Generate personalized music playlists by analyzing the user's music taste and generation feedback history. Triggers on any request involving playlist generation, music taste profiling, or personalized music recommendations. Supports multilingual triggers — match equivalent phrases in any language.
-"""
-source_url = "https://github.com/MiniMax-AI/skills/tree/main/skills/minimax-music-playlist"
-stars = 11683
-commit_sha = "62870bece6d63c2e2fbd92f6c03ae26c4ee5cf8f"
-context_size = 3205
-domain = "development"
-last_updated = "2026-05-10"
+[skills.request-refactor-plan]
+name = "request-refactor-plan"
+description = "Create a detailed refactor plan with tiny commits via user interview, then file it as a GitHub issue. Use when user wants to plan a refactor, create a refactoring RFC, or break a refactor into safe incremental steps."
+source_url = "https://github.com/mattpocock/skills/tree/main/skills/deprecated/request-refactor-plan"
+stars = 87501
+commit_sha = "62f43a18177be6ec82da242e59ffbc490a4c22ea"
+context_size = 677
+domain = "planning-and-orchestration"
+last_updated = "2026-05-17"
 tags = [
-    "playlist-generation",
-    "music-recommendation",
-    "taste-profiling",
+    "refactor-planning",
+    "git-issue",
+    "incremental-steps",
+]
+score = 100.0
+is_mega_skill = false
+dependencies = []
+
+[skills.request-refactor-plan.install_action]
+type = "copy"
+
+[skills.request-refactor-plan.install_action.value]
+folder = "skills/deprecated/request-refactor-plan"
+
+[skills.skills]
+name = "pr-review"
+description = """
+Review pull requests for the MiniMax Skills repository. Use when reviewing PRs, validating new skill submissions, or checking existing skills for compliance. Run the validation script first for hard checks, then apply quality guidelines for content review. Triggers: PR review, pull request, validate skill, check skill.
+"""
+source_url = "https://github.com/MiniMax-AI/skills/tree/main/.claude/skills/pr-review"
+stars = 11881
+commit_sha = "dd8ddcd099a484c40f70ca132f3266c43dfb8557"
+context_size = 619
+domain = "collaboration"
+last_updated = "2026-05-17"
+tags = [
+    "pull-request",
+    "validation",
+    "review",
 ]
 score = 90.49180603027344
 is_mega_skill = false
 dependencies = []
 
-[skills.minimax-music-playlist.install_action]
+[skills.skills.install_action]
 type = "copy"
 
-[skills.minimax-music-playlist.install_action.value]
-folder = "skills/minimax-music-playlist"
+[skills.skills.install_action.value]
+folder = ".claude/skills/pr-review"
+
+[skills.git-guardrails-claude-code]
+name = "git-guardrails-claude-code"
+description = "Set up Claude Code hooks to block dangerous git commands (push, reset --hard, clean, branch -D, etc.) before they execute. Use when user wants to prevent destructive git operations, add git safety hooks, or block git push/reset in Claude Code."
+source_url = "https://github.com/mattpocock/skills/tree/main/skills/misc/git-guardrails-claude-code"
+stars = 87501
+commit_sha = "62f43a18177be6ec82da242e59ffbc490a4c22ea"
+context_size = 578
+domain = "security"
+last_updated = "2026-05-17"
+tags = [
+    "git-safety",
+    "prevent-destructive-operations",
+    "hooks-setup",
+]
+score = 100.0
+is_mega_skill = false
+dependencies = []
+
+[skills.git-guardrails-claude-code.install_action]
+type = "copy"
+
+[skills.git-guardrails-claude-code.install_action.value]
+folder = "skills/misc/git-guardrails-claude-code"
+
+[skills.review]
+name = "review"
+description = """Review the changes since a fixed point (commit, branch, tag, or merge-base) along two axes — Standards (does the code follow this repo's documented coding standards?) and Spec (does the code match what the originating issue/PRD asked for?). Runs both reviews in parallel sub-agents and reports them side by side. Use when the user wants to review a branch, a PR, work-in-progress changes, or asks to "review since X"."""
+source_url = "https://github.com/mattpocock/skills/tree/main/skills/in-progress/review"
+stars = 87501
+commit_sha = "9fecab929abb904c68ce3366a1781df31ab22832"
+context_size = 1106
+domain = "testing"
+last_updated = "2026-05-17"
+tags = [
+    "code-review",
+    "standards-check",
+    "spec-validation",
+]
+score = 100.0
+is_mega_skill = false
+dependencies = []
+
+[skills.review.install_action]
+type = "copy"
+
+[skills.review.install_action.value]
+folder = "skills/in-progress/review"
 
 [skills.flutter-dev]
 name = "flutter-dev"
@@ -34,11 +106,11 @@ Flutter cross-platform development guide covering widget patterns, Riverpod/Bloc
 Use when: building Flutter apps, implementing state management (Riverpod/Bloc), setting up GoRouter navigation, creating custom widgets, optimizing performance, writing widget tests, cross-platform development.
 """
 source_url = "https://github.com/MiniMax-AI/skills/tree/main/skills/flutter-dev"
-stars = 11683
+stars = 11881
 commit_sha = "402078747a8e8c1a7beae487e9e2c50c5e9df07e"
 context_size = 1307
 domain = "development"
-last_updated = "2026-05-10"
+last_updated = "2026-05-17"
 tags = [
     "flutter",
     "cross-platform",
@@ -54,170 +126,87 @@ type = "copy"
 [skills.flutter-dev.install_action.value]
 folder = "skills/flutter-dev"
 
-[skills.android-native-dev]
-name = "android-native-dev"
-description = "Android native application development and UI design guide. Covers Material Design 3, Kotlin/Compose development, project configuration, accessibility, and build troubleshooting. Read this before Android native application development."
-source_url = "https://github.com/MiniMax-AI/skills/tree/main/skills/android-native-dev"
-stars = 11683
-commit_sha = "fb18ac5aa161002e5f5fbdd14d7ce65da1cdb270"
-context_size = 7155
+[skills.caveman]
+name = "caveman"
+description = 'Ultra-compressed communication mode. Cuts token usage ~75% by dropping filler, articles, and pleasantries while keeping full technical accuracy. Use when user says "caveman mode", "talk like caveman", "use caveman", "less tokens", "be brief", or invokes /caveman.'
+source_url = "https://github.com/mattpocock/skills/tree/main/skills/productivity/caveman"
+stars = 87501
+commit_sha = "62f43a18177be6ec82da242e59ffbc490a4c22ea"
+context_size = 479
 domain = "development"
-last_updated = "2026-05-10"
+last_updated = "2026-05-17"
 tags = [
-    "android",
-    "native",
-    "kotlin",
+    "concise",
+    "technical",
+    "compressed",
 ]
-score = 90.49180603027344
+score = 100.0
 is_mega_skill = false
 dependencies = []
 
-[skills.android-native-dev.install_action]
+[skills.caveman.install_action]
 type = "copy"
 
-[skills.android-native-dev.install_action.value]
-folder = "skills/android-native-dev"
+[skills.caveman.install_action.value]
+folder = "skills/productivity/caveman"
 
-[skills.minimax-pdf]
-name = "minimax-pdf"
-description = """
-Use this skill when visual quality and design identity matter for a PDF. CREATE (generate from scratch): "make a PDF", "generate a report", "write a proposal", "create a resume", "beautiful PDF", "professional document", "cover page", "polished PDF", "client-ready document". FILL (complete form fields): "fill in the form", "fill out this PDF", "complete the form fields", "write values into PDF", "what fields does this PDF have". REFORMAT (apply design to an existing doc): "reformat this document", "apply our style", "convert this Markdown/text to PDF", "make this doc look good", "re-style this PDF". This skill uses a token-based design system: color, typography, and spacing are derived from the document type and flow through every page. The output is print-ready. Prefer this skill when appearance matters, not just when any PDF output is needed.
-"""
-source_url = "https://github.com/MiniMax-AI/skills/tree/main/skills/minimax-pdf"
-stars = 11683
-commit_sha = "4006c2661305ed221f957a08e1d3429cb525de67"
-context_size = 2156
-domain = "documentation"
-last_updated = "2026-05-10"
+[skills.zoom-out]
+name = "zoom-out"
+description = "Tell the agent to zoom out and give broader context or a higher-level perspective. Use when you're unfamiliar with a section of code or need to understand how it fits into the bigger picture."
+source_url = "https://github.com/mattpocock/skills/tree/main/skills/engineering/zoom-out"
+stars = 87501
+commit_sha = "7afa86d3a5dd96edde06ffa014e16c64e733681e"
+context_size = 107
+domain = "planning-and-orchestration"
+last_updated = "2026-05-17"
 tags = [
-    "pdf-creation",
-    "document-formatting",
-    "design-quality",
+    "contextual-understanding",
+    "higher-level-perspective",
+    "code-relations",
 ]
-score = 90.49180603027344
+score = 100.0
 is_mega_skill = false
 dependencies = []
 
-[skills.minimax-pdf.install_action]
+[skills.zoom-out.install_action]
 type = "copy"
 
-[skills.minimax-pdf.install_action.value]
-folder = "skills/minimax-pdf"
+[skills.zoom-out.install_action.value]
+folder = "skills/engineering/zoom-out"
 
-[skills.superpowers]
-name = "superpowers"
-description = "Complete software development methodology for coding agents - brainstorming, test-driven development, systematic debugging, writing plans, executing plans, and more. Skills trigger automatically for mandatory workflows."
-source_url = "https://github.com/obra/superpowers/tree/main/"
-stars = 184646
-commit_sha = ""
-context_size = 0
+[skills.write-a-skill]
+name = "write-a-skill"
+description = "Create new agent skills with proper structure, progressive disclosure, and bundled resources. Use when user wants to create, write, or build a new skill."
+source_url = "https://github.com/mattpocock/skills/tree/main/skills/productivity/write-a-skill"
+stars = 87501
+commit_sha = "62f43a18177be6ec82da242e59ffbc490a4c22ea"
+context_size = 764
 domain = "development"
-last_updated = "2026-05-10"
-tags = ["mega-skill"]
-score = 112.5999984741211
-is_mega_skill = true
-dependencies = []
-
-[skills.superpowers.install_action]
-type = "mega-skill-copy"
-
-[skills.superpowers.install_action.value]
-source_folder = "skills"
-dest_name = "superpowers"
-
-[skills.ios-application-dev]
-name = "ios-application-dev"
-description = """
-iOS application development guide covering UIKit, SnapKit, and SwiftUI. Includes touch targets, safe areas, navigation patterns, Dynamic Type, Dark Mode, accessibility, collection views, common UI components, and SwiftUI design guidelines. For detailed references on specific topics, see the reference files.
-Use when: developing iOS apps, implementing UI, reviewing iOS code, working with UIKit/SnapKit/SwiftUI layouts, building iPhone interfaces, Swift mobile development, Apple HIG compliance, iOS accessibility implementation.
-"""
-source_url = "https://github.com/MiniMax-AI/skills/tree/main/skills/ios-application-dev"
-stars = 11683
-commit_sha = "815a0523248b27ce610ceb6cfc0358f9533e776a"
-context_size = 1801
-domain = "development"
-last_updated = "2026-05-10"
+last_updated = "2026-05-17"
 tags = [
-    "ios",
-    "swift",
-    "ui",
+    "skill-creation",
+    "structure",
+    "resources",
 ]
-score = 90.49180603027344
+score = 100.0
 is_mega_skill = false
 dependencies = []
 
-[skills.ios-application-dev.install_action]
+[skills.write-a-skill.install_action]
 type = "copy"
 
-[skills.ios-application-dev.install_action.value]
-folder = "skills/ios-application-dev"
-
-[skills.react-native-dev]
-name = "react-native-dev"
-description = """
-React Native and Expo development guide covering components, styling, animations, navigation,
-state management, forms, networking, performance optimization, testing, native capabilities,
-and engineering (project structure, deployment, SDK upgrades, CI/CD).
-Use when: building React Native or Expo apps, implementing animations or native UI, managing
-state, fetching data, writing tests, optimizing performance, deploying to App Store/Play Store,
-setting up CI/CD, upgrading Expo SDK, or configuring Tailwind/NativeWind.
-"""
-source_url = "https://github.com/MiniMax-AI/skills/tree/main/skills/react-native-dev"
-stars = 11683
-commit_sha = "402078747a8e8c1a7beae487e9e2c50c5e9df07e"
-context_size = 1818
-domain = "development"
-last_updated = "2026-05-10"
-tags = [
-    "app-development",
-    "ui-optimization",
-    "ci-cd",
-]
-score = 90.49180603027344
-is_mega_skill = false
-dependencies = []
-
-[skills.react-native-dev.install_action]
-type = "copy"
-
-[skills.react-native-dev.install_action.value]
-folder = "skills/react-native-dev"
-
-[skills.buddy-sings]
-name = "buddy-sings"
-description = """
-Use when user wants their Claude Code pet (/buddy) to sing a song. Triggers on any request that combines the concept of their Claude Code buddy, pet, or companion with singing or music. Supports multilingual triggers — match equivalent phrases in any language.
-"""
-source_url = "https://github.com/MiniMax-AI/skills/tree/main/skills/buddy-sings"
-stars = 11683
-commit_sha = "a7bb7f2278ab00b623146a2a72d64555115f1478"
-context_size = 4095
-domain = "collaboration"
-last_updated = "2026-05-10"
-tags = [
-    "singing",
-    "music",
-    "multilingual",
-]
-score = 90.49180603027344
-is_mega_skill = false
-dependencies = []
-
-[skills.buddy-sings.install_action]
-type = "copy"
-
-[skills.buddy-sings.install_action.value]
-folder = "skills/buddy-sings"
+[skills.write-a-skill.install_action.value]
+folder = "skills/productivity/write-a-skill"
 
 [skills.gsd]
 name = "gsd"
 description = "Get Shit Done - A comprehensive project management system for solo developers using Claude agents. Spec-driven development with context engineering and meta-prompting."
 source_url = "https://github.com/gsd-build/get-shit-done/tree/main/"
-stars = 61202
+stars = 62628
 commit_sha = ""
 context_size = 0
 domain = "development"
-last_updated = "2026-05-10"
+last_updated = "2026-05-17"
 tags = ["mega-skill"]
 score = 119.0
 is_mega_skill = true
@@ -233,58 +222,297 @@ type = "npx"
 package = "get-shit-done-cc"
 args = ["@latest"]
 
-[skills.gif-sticker-maker]
-name = "gif-sticker-maker"
+[skills.minimax-music-gen]
+name = "minimax-music-gen"
 description = """
-Convert photos (people, pets, objects, logos) into 4 animated GIF stickers with captions.
-Use when: user wants to create cartoon stickers, GIF expressions, emoji packs, animated avatars,
-or convert photos to Funko Pop / Pop Mart blind box style animations.
-Triggers: sticker, GIF, cartoon, emoji, expression pack, avatar animation.
+Use when user wants to generate music, songs, or audio tracks. Triggers on any request involving music creation, song writing, lyrics generation, audio production, or covers. Also triggers when user provides lyrics and wants them turned into a song, or describes a mood/scene and wants background music. Supports multilingual triggers — match equivalent phrases in any language. Do NOT use for music playback of existing files, music theory questions, or music recommendation without generation.
 """
-source_url = "https://github.com/MiniMax-AI/skills/tree/main/skills/gif-sticker-maker"
-stars = 11683
-commit_sha = "34c6cf05d7a2b68076bafa00e6f360bc9506bba6"
-context_size = 1251
-domain = "design"
-last_updated = "2026-05-10"
-tags = [
-    "gif",
-    "stickers",
-    "animation",
-]
-score = 90.49180603027344
-is_mega_skill = false
-dependencies = []
-
-[skills.gif-sticker-maker.install_action]
-type = "copy"
-
-[skills.gif-sticker-maker.install_action.value]
-folder = "skills/gif-sticker-maker"
-
-[skills.minimax-multimodal-toolkit]
-name = "mmx-cli"
-description = "Use mmx to generate text, images, video, speech, and music via the MiniMax AI platform. Use when the user wants to create media content, chat with MiniMax models, perform web search, or manage MiniMax API resources from the terminal."
-source_url = "https://github.com/MiniMax-AI/skills/tree/main/skills/minimax-multimodal-toolkit"
-stars = 11683
-commit_sha = "e0fdeefe7b1e36a7d5b4c06c22a4371ad31f101c"
-context_size = 2740
+source_url = "https://github.com/MiniMax-AI/skills/tree/main/skills/minimax-music-gen"
+stars = 11881
+commit_sha = "a7bb7f2278ab00b623146a2a72d64555115f1478"
+context_size = 3514
 domain = "development"
-last_updated = "2026-05-10"
+last_updated = "2026-05-17"
 tags = [
-    "media-creation",
-    "api-management",
-    "content-generation",
+    "music-generation",
+    "audio-production",
+    "song-writing",
 ]
 score = 90.49180603027344
 is_mega_skill = false
 dependencies = []
 
-[skills.minimax-multimodal-toolkit.install_action]
+[skills.minimax-music-gen.install_action]
 type = "copy"
 
-[skills.minimax-multimodal-toolkit.install_action.value]
-folder = "skills/minimax-multimodal-toolkit"
+[skills.minimax-music-gen.install_action.value]
+folder = "skills/minimax-music-gen"
+
+[skills.minimax-music-playlist]
+name = "minimax-music-playlist"
+description = """
+Generate personalized music playlists by analyzing the user's music taste and generation feedback history. Triggers on any request involving playlist generation, music taste profiling, or personalized music recommendations. Supports multilingual triggers — match equivalent phrases in any language.
+"""
+source_url = "https://github.com/MiniMax-AI/skills/tree/main/skills/minimax-music-playlist"
+stars = 11881
+commit_sha = "62870bece6d63c2e2fbd92f6c03ae26c4ee5cf8f"
+context_size = 3205
+domain = "data"
+last_updated = "2026-05-17"
+tags = [
+    "playlist-generation",
+    "music-recommendation",
+    "taste-profiling",
+]
+score = 90.49180603027344
+is_mega_skill = false
+dependencies = []
+
+[skills.minimax-music-playlist.install_action]
+type = "copy"
+
+[skills.minimax-music-playlist.install_action.value]
+folder = "skills/minimax-music-playlist"
+
+[skills.qa]
+name = "qa"
+description = 'Interactive QA session where user reports bugs or issues conversationally, and the agent files GitHub issues. Explores the codebase in the background for context and domain language. Use when user wants to report bugs, do QA, file issues conversationally, or mentions "QA session".'
+source_url = "https://github.com/mattpocock/skills/tree/main/skills/deprecated/qa"
+stars = 87501
+commit_sha = "62f43a18177be6ec82da242e59ffbc490a4c22ea"
+context_size = 1241
+domain = "testing"
+last_updated = "2026-05-17"
+tags = [
+    "bug-reporting",
+    "issue-tracking",
+    "interactive-qa",
+]
+score = 100.0
+is_mega_skill = false
+dependencies = []
+
+[skills.qa.install_action]
+type = "copy"
+
+[skills.qa.install_action.value]
+folder = "skills/deprecated/qa"
+
+[skills.handoff]
+name = "handoff"
+description = "Compact the current conversation into a handoff document for another agent to pick up."
+source_url = "https://github.com/mattpocock/skills/tree/main/skills/productivity/handoff"
+stars = 87501
+commit_sha = "b6250ed602f8a2b401d49274eb31e15695a0637f"
+context_size = 179
+domain = "collaboration"
+last_updated = "2026-05-17"
+tags = [
+    "documentation",
+    "handoff",
+    "summary",
+]
+score = 100.0
+is_mega_skill = false
+dependencies = []
+
+[skills.handoff.install_action]
+type = "copy"
+
+[skills.handoff.install_action.value]
+folder = "skills/productivity/handoff"
+
+[skills.edit-article]
+name = "edit-article"
+description = "Edit and improve articles by restructuring sections, improving clarity, and tightening prose. Use when user wants to edit, revise, or improve an article draft."
+source_url = "https://github.com/mattpocock/skills/tree/main/skills/personal/edit-article"
+stars = 87501
+commit_sha = "62f43a18177be6ec82da242e59ffbc490a4c22ea"
+context_size = 180
+domain = "documentation"
+last_updated = "2026-05-17"
+tags = [
+    "editing",
+    "clarity",
+    "improvement",
+]
+score = 100.0
+is_mega_skill = false
+dependencies = []
+
+[skills.edit-article.install_action]
+type = "copy"
+
+[skills.edit-article.install_action.value]
+folder = "skills/personal/edit-article"
+
+[skills.writing-shape]
+name = "writing-shape"
+description = "Take a markdown file of raw material and shape it into an article through a conversational session — drafting candidate openings, growing the piece paragraph by paragraph, arguing about format (lists, tables, callouts, quotes) at each step. Use when the user has a pile of notes, fragments, or a rough draft and wants help turning it into something publishable."
+source_url = "https://github.com/mattpocock/skills/tree/main/skills/in-progress/writing-shape"
+stars = 87501
+commit_sha = "ff3ee1dda50d636b4e25b1ba269d25d6d5784164"
+context_size = 1148
+domain = "documentation"
+last_updated = "2026-05-17"
+tags = [
+    "article-shaping",
+    "drafting-assistance",
+    "content-organization",
+]
+score = 100.0
+is_mega_skill = false
+dependencies = []
+
+[skills.writing-shape.install_action]
+type = "copy"
+
+[skills.writing-shape.install_action.value]
+folder = "skills/in-progress/writing-shape"
+
+[skills.pptx-generator]
+name = "pptx-generator"
+description = "Generate, edit, and read PowerPoint presentations. Create from scratch with PptxGenJS (cover, TOC, content, section divider, summary slides), edit existing PPTX via XML workflows, or extract text with markitdown. Triggers: PPT, PPTX, PowerPoint, presentation, slide, deck, slides."
+source_url = "https://github.com/MiniMax-AI/skills/tree/main/skills/pptx-generator"
+stars = 11881
+commit_sha = "4006c2661305ed221f957a08e1d3429cb525de67"
+context_size = 1982
+domain = "documentation"
+last_updated = "2026-05-17"
+tags = [
+    "presentation-creation",
+    "editing",
+    "powerpoint",
+]
+score = 90.49180603027344
+is_mega_skill = false
+dependencies = []
+
+[skills.pptx-generator.install_action]
+type = "copy"
+
+[skills.pptx-generator.install_action.value]
+folder = "skills/pptx-generator"
+
+[skills.setup-pre-commit]
+name = "setup-pre-commit"
+description = "Set up Husky pre-commit hooks with lint-staged (Prettier), type checking, and tests in the current repo. Use when user wants to add pre-commit hooks, set up Husky, configure lint-staged, or add commit-time formatting/typechecking/testing."
+source_url = "https://github.com/mattpocock/skills/tree/main/skills/misc/setup-pre-commit"
+stars = 87501
+commit_sha = "62f43a18177be6ec82da242e59ffbc490a4c22ea"
+context_size = 565
+domain = "development"
+last_updated = "2026-05-17"
+tags = [
+    "git",
+    "hooks",
+    "linting",
+]
+score = 100.0
+is_mega_skill = false
+dependencies = []
+
+[skills.setup-pre-commit.install_action]
+type = "copy"
+
+[skills.setup-pre-commit.install_action.value]
+folder = "skills/misc/setup-pre-commit"
+
+[skills.obsidian-vault]
+name = "obsidian-vault"
+description = "Search, create, and manage notes in the Obsidian vault with wikilinks and index notes. Use when user wants to find, create, or organize notes in Obsidian."
+source_url = "https://github.com/mattpocock/skills/tree/main/skills/personal/obsidian-vault"
+stars = 87501
+commit_sha = "62f43a18177be6ec82da242e59ffbc490a4c22ea"
+context_size = 377
+domain = "data"
+last_updated = "2026-05-17"
+tags = [
+    "note-management",
+    "organization",
+    "wikilinks",
+]
+score = 100.0
+is_mega_skill = false
+dependencies = []
+
+[skills.obsidian-vault.install_action]
+type = "copy"
+
+[skills.obsidian-vault.install_action.value]
+folder = "skills/personal/obsidian-vault"
+
+[skills.scaffold-exercises]
+name = "scaffold-exercises"
+description = "Create exercise directory structures with sections, problems, solutions, and explainers that pass linting. Use when user wants to scaffold exercises, create exercise stubs, or set up a new course section."
+source_url = "https://github.com/mattpocock/skills/tree/main/skills/misc/scaffold-exercises"
+stars = 87501
+commit_sha = "62f43a18177be6ec82da242e59ffbc490a4c22ea"
+context_size = 897
+domain = "development"
+last_updated = "2026-05-17"
+tags = [
+    "exercises",
+    "scaffolding",
+    "education",
+]
+score = 100.0
+is_mega_skill = false
+dependencies = []
+
+[skills.scaffold-exercises.install_action]
+type = "copy"
+
+[skills.scaffold-exercises.install_action.value]
+folder = "skills/misc/scaffold-exercises"
+
+[skills.prototype]
+name = "prototype"
+description = 'Build a throwaway prototype to flesh out a design before committing to it. Routes between two branches — a runnable terminal app for state/business-logic questions, or several radically different UI variations toggleable from one route. Use when the user wants to prototype, sanity-check a data model or state machine, mock up a UI, explore design options, or says "prototype this", "let me play with it", "try a few designs".'
+source_url = "https://github.com/mattpocock/skills/tree/main/skills/engineering/prototype"
+stars = 87501
+commit_sha = "f304057d61d3df3c9fd992ac2b6e3833cb9325fb"
+context_size = 812
+domain = "design"
+last_updated = "2026-05-17"
+tags = [
+    "prototype-building",
+    "ui-variation",
+    "mockup-exploration",
+]
+score = 100.0
+is_mega_skill = false
+dependencies = []
+
+[skills.prototype.install_action]
+type = "copy"
+
+[skills.prototype.install_action.value]
+folder = "skills/engineering/prototype"
+
+[skills.design-an-interface]
+name = "design-an-interface"
+description = 'Generate multiple radically different interface designs for a module using parallel sub-agents. Use when user wants to design an API, explore interface options, compare module shapes, or mentions "design it twice".'
+source_url = "https://github.com/mattpocock/skills/tree/main/skills/deprecated/design-an-interface"
+stars = 87501
+commit_sha = "3e3ca9b9fa007614c65fab70469127b25841881d"
+context_size = 841
+domain = "design"
+last_updated = "2026-05-17"
+tags = [
+    "interface-design",
+    "api-design",
+    "module-variation",
+]
+score = 100.0
+is_mega_skill = false
+dependencies = []
+
+[skills.design-an-interface.install_action]
+type = "copy"
+
+[skills.design-an-interface.install_action.value]
+folder = "skills/deprecated/design-an-interface"
 
 [skills.fullstack-dev]
 name = "fullstack-dev"
@@ -299,11 +527,11 @@ adding real-time features (SSE/WebSocket), hardening for production.
 DO NOT TRIGGER when: pure frontend UI work, pure CSS/styling, database schema only.
 """
 source_url = "https://github.com/MiniMax-AI/skills/tree/main/skills/fullstack-dev"
-stars = 11683
+stars = 11881
 commit_sha = "d35bfead71c1c749dc6e1f8c35e97e2e0f086cb1"
 context_size = 8702
 domain = "development"
-last_updated = "2026-05-10"
+last_updated = "2026-05-17"
 tags = [
     "fullstack",
     "api",
@@ -319,31 +547,182 @@ type = "copy"
 [skills.fullstack-dev.install_action.value]
 folder = "skills/fullstack-dev"
 
-[skills.skills]
-name = "pr-review"
+[skills.minimax-pdf]
+name = "minimax-pdf"
 description = """
-Review pull requests for the MiniMax Skills repository. Use when reviewing PRs, validating new skill submissions, or checking existing skills for compliance. Run the validation script first for hard checks, then apply quality guidelines for content review. Triggers: PR review, pull request, validate skill, check skill.
+Use this skill when visual quality and design identity matter for a PDF. CREATE (generate from scratch): "make a PDF", "generate a report", "write a proposal", "create a resume", "beautiful PDF", "professional document", "cover page", "polished PDF", "client-ready document". FILL (complete form fields): "fill in the form", "fill out this PDF", "complete the form fields", "write values into PDF", "what fields does this PDF have". REFORMAT (apply design to an existing doc): "reformat this document", "apply our style", "convert this Markdown/text to PDF", "make this doc look good", "re-style this PDF". This skill uses a token-based design system: color, typography, and spacing are derived from the document type and flow through every page. The output is print-ready. Prefer this skill when appearance matters, not just when any PDF output is needed.
 """
-source_url = "https://github.com/MiniMax-AI/skills/tree/main/.claude/skills/pr-review"
-stars = 11683
-commit_sha = "dd8ddcd099a484c40f70ca132f3266c43dfb8557"
-context_size = 619
-domain = "collaboration"
-last_updated = "2026-05-10"
+source_url = "https://github.com/MiniMax-AI/skills/tree/main/skills/minimax-pdf"
+stars = 11881
+commit_sha = "4006c2661305ed221f957a08e1d3429cb525de67"
+context_size = 2156
+domain = "documentation"
+last_updated = "2026-05-17"
 tags = [
-    "review",
-    "pull-request",
-    "validation",
+    "pdf-creation",
+    "design-quality",
+    "reformatting",
 ]
 score = 90.49180603027344
 is_mega_skill = false
 dependencies = []
 
-[skills.skills.install_action]
+[skills.minimax-pdf.install_action]
 type = "copy"
 
-[skills.skills.install_action.value]
-folder = ".claude/skills/pr-review"
+[skills.minimax-pdf.install_action.value]
+folder = "skills/minimax-pdf"
+
+[skills.migrate-to-shoehorn]
+name = "migrate-to-shoehorn"
+description = "Migrate test files from `as` type assertions to @total-typescript/shoehorn. Use when user mentions shoehorn, wants to replace `as` in tests, or needs partial test data."
+source_url = "https://github.com/mattpocock/skills/tree/main/skills/misc/migrate-to-shoehorn"
+stars = 87501
+commit_sha = "62f43a18177be6ec82da242e59ffbc490a4c22ea"
+context_size = 698
+domain = "development"
+last_updated = "2026-05-17"
+tags = [
+    "test-file-migration",
+    "type-assertions",
+    "partial-test-data",
+]
+score = 100.0
+is_mega_skill = false
+dependencies = []
+
+[skills.migrate-to-shoehorn.install_action]
+type = "copy"
+
+[skills.migrate-to-shoehorn.install_action.value]
+folder = "skills/misc/migrate-to-shoehorn"
+
+[skills.buddy-sings]
+name = "buddy-sings"
+description = """
+Use when user wants their Claude Code pet (/buddy) to sing a song. Triggers on any request that combines the concept of their Claude Code buddy, pet, or companion with singing or music. Supports multilingual triggers — match equivalent phrases in any language.
+"""
+source_url = "https://github.com/MiniMax-AI/skills/tree/main/skills/buddy-sings"
+stars = 11881
+commit_sha = "a7bb7f2278ab00b623146a2a72d64555115f1478"
+context_size = 4095
+domain = "collaboration"
+last_updated = "2026-05-17"
+tags = [
+    "music",
+    "interaction",
+    "multilingual",
+]
+score = 90.49180603027344
+is_mega_skill = false
+dependencies = []
+
+[skills.buddy-sings.install_action]
+type = "copy"
+
+[skills.buddy-sings.install_action.value]
+folder = "skills/buddy-sings"
+
+[skills.gif-sticker-maker]
+name = "gif-sticker-maker"
+description = """
+Convert photos (people, pets, objects, logos) into 4 animated GIF stickers with captions.
+Use when: user wants to create cartoon stickers, GIF expressions, emoji packs, animated avatars,
+or convert photos to Funko Pop / Pop Mart blind box style animations.
+Triggers: sticker, GIF, cartoon, emoji, expression pack, avatar animation.
+"""
+source_url = "https://github.com/MiniMax-AI/skills/tree/main/skills/gif-sticker-maker"
+stars = 11881
+commit_sha = "34c6cf05d7a2b68076bafa00e6f360bc9506bba6"
+context_size = 1251
+domain = "development"
+last_updated = "2026-05-17"
+tags = [
+    "gif",
+    "sticker",
+    "animation",
+]
+score = 90.49180603027344
+is_mega_skill = false
+dependencies = []
+
+[skills.gif-sticker-maker.install_action]
+type = "copy"
+
+[skills.gif-sticker-maker.install_action.value]
+folder = "skills/gif-sticker-maker"
+
+[skills.triage]
+name = "triage"
+description = "Triage issues through a state machine driven by triage roles. Use when user wants to create an issue, triage issues, review incoming bugs or feature requests, prepare issues for an AFK agent, or manage issue workflow."
+source_url = "https://github.com/mattpocock/skills/tree/main/skills/engineering/triage"
+stars = 87501
+commit_sha = "179a14e721034706ffce7abae75b877c922b4ae8"
+context_size = 1220
+domain = "collaboration"
+last_updated = "2026-05-17"
+tags = [
+    "issue-triage",
+    "bug-review",
+    "workflow-management",
+]
+score = 100.0
+is_mega_skill = false
+dependencies = []
+
+[skills.triage.install_action]
+type = "copy"
+
+[skills.triage.install_action.value]
+folder = "skills/engineering/triage"
+
+[skills.writing-fragments]
+name = "writing-fragments"
+description = 'Grilling session that mines the user for fragments — heterogeneous nuggets of writing (claims, vignettes, sharp sentences, half-thoughts) — and appends them to a single document as raw material for a future article. Use when the user wants to develop ideas before imposing structure, or mentions "fragments", "ideate", or "raw material" for writing.'
+source_url = "https://github.com/mattpocock/skills/tree/main/skills/in-progress/writing-fragments"
+stars = 87501
+commit_sha = "9f2e0bd0ea776eb6372eb81fa8a4a47814a8404a"
+context_size = 831
+domain = "documentation"
+last_updated = "2026-05-17"
+tags = [
+    "idea-development",
+    "raw-material",
+    "writing-exploration",
+]
+score = 100.0
+is_mega_skill = false
+dependencies = []
+
+[skills.writing-fragments.install_action]
+type = "copy"
+
+[skills.writing-fragments.install_action.value]
+folder = "skills/in-progress/writing-fragments"
+
+[skills.grill-with-docs]
+name = "grill-with-docs"
+description = "Grilling session that challenges your plan against the existing domain model, sharpens terminology, and updates documentation (CONTEXT.md, ADRs) inline as decisions crystallise. Use when user wants to stress-test a plan against their project's language and documented decisions."
+source_url = "https://github.com/mattpocock/skills/tree/main/skills/engineering/grill-with-docs"
+stars = 87501
+commit_sha = "e74f0061bb67222181640effa98c675bdb2fdaa7"
+context_size = 909
+domain = "documentation"
+last_updated = "2026-05-17"
+tags = [
+    "plan-evaluation",
+    "documentation-update",
+    "terminology-refinement",
+]
+score = 100.0
+is_mega_skill = false
+dependencies = []
+
+[skills.grill-with-docs.install_action]
+type = "copy"
+
+[skills.grill-with-docs.install_action.value]
+folder = "skills/engineering/grill-with-docs"
 
 [skills.minimax-docx]
 name = "minimax-docx"
@@ -351,15 +730,15 @@ description = """
 Professional DOCX document creation, editing, and formatting using OpenXML SDK (.NET). Three pipelines: (A) create new documents from scratch, (B) fill/edit content in existing documents, (C) apply template formatting with XSD validation gate-check. MUST use this skill whenever the user wants to produce, modify, or format a Word document — including when they say "write a report", "draft a proposal", "make a contract", "fill in this form", "reformat to match this template", or any task whose final output is a .docx file. Even if the user doesn't mention "docx" explicitly, if the task implies a printable/formal document, use this skill.
 """
 source_url = "https://github.com/MiniMax-AI/skills/tree/main/skills/minimax-docx"
-stars = 11683
+stars = 11881
 commit_sha = "ce4855d12931f58514c21ba22b76b8e36a4b1668"
 context_size = 3954
 domain = "documentation"
-last_updated = "2026-05-10"
+last_updated = "2026-05-17"
 tags = [
     "docx-creation",
-    "document-editing",
-    "template-formatting",
+    "editing",
+    "formatting",
 ]
 score = 90.49180603027344
 is_mega_skill = false
@@ -371,96 +750,87 @@ type = "copy"
 [skills.minimax-docx.install_action.value]
 folder = "skills/minimax-docx"
 
-[skills.minimax-xlsx]
-name = "minimax-xlsx"
-description = "Open, create, read, analyze, edit, or validate Excel/spreadsheet files (.xlsx, .xlsm, .csv, .tsv). Use when the user asks to create, build, modify, analyze, read, validate, or format any Excel spreadsheet, financial model, pivot table, or tabular data file. Covers: creating new xlsx from scratch, reading and analyzing existing files, editing existing xlsx with zero format loss, formula recalculation and validation, and applying professional financial formatting standards. Triggers on 'spreadsheet', 'Excel', '.xlsx', '.csv', 'pivot table', 'financial model', 'formula', or any request to produce tabular data in Excel format."
-source_url = "https://github.com/MiniMax-AI/skills/tree/main/skills/minimax-xlsx"
-stars = 11683
-commit_sha = "e674758f8780c1bf0f40175d8d9188af45d9546c"
-context_size = 2099
-domain = "data"
-last_updated = "2026-05-10"
+[skills.to-prd]
+name = "to-prd"
+description = "Turn the current conversation context into a PRD and publish it to the project issue tracker. Use when user wants to create a PRD from the current context."
+source_url = "https://github.com/mattpocock/skills/tree/main/skills/engineering/to-prd"
+stars = 87501
+commit_sha = "70141119e9fe47430b62b93bcf166a73e6580048"
+context_size = 778
+domain = "documentation"
+last_updated = "2026-05-17"
 tags = [
-    "spreadsheet-creation",
-    "data-analysis",
-    "excel-formatting",
+    "prd-creation",
+    "context-publishing",
+    "documentation-tracking",
 ]
-score = 90.49180603027344
+score = 100.0
 is_mega_skill = false
 dependencies = []
 
-[skills.minimax-xlsx.install_action]
+[skills.to-prd.install_action]
 type = "copy"
 
-[skills.minimax-xlsx.install_action.value]
-folder = "skills/minimax-xlsx"
+[skills.to-prd.install_action.value]
+folder = "skills/engineering/to-prd"
 
-[skills.minimax-music-gen]
-name = "minimax-music-gen"
-description = """
-Use when user wants to generate music, songs, or audio tracks. Triggers on any request involving music creation, song writing, lyrics generation, audio production, or covers. Also triggers when user provides lyrics and wants them turned into a song, or describes a mood/scene and wants background music. Supports multilingual triggers — match equivalent phrases in any language. Do NOT use for music playback of existing files, music theory questions, or music recommendation without generation.
-"""
-source_url = "https://github.com/MiniMax-AI/skills/tree/main/skills/minimax-music-gen"
-stars = 11683
-commit_sha = "a7bb7f2278ab00b623146a2a72d64555115f1478"
-context_size = 3514
+[skills.ubiquitous-language]
+name = "ubiquitous-language"
+description = 'Extract a DDD-style ubiquitous language glossary from the current conversation, flagging ambiguities and proposing canonical terms. Saves to UBIQUITOUS_LANGUAGE.md. Use when user wants to define domain terms, build a glossary, harden terminology, create a ubiquitous language, or mentions "domain model" or "DDD".'
+source_url = "https://github.com/mattpocock/skills/tree/main/skills/deprecated/ubiquitous-language"
+stars = 87501
+commit_sha = "62f43a18177be6ec82da242e59ffbc490a4c22ea"
+context_size = 1222
+domain = "documentation"
+last_updated = "2026-05-17"
+tags = [
+    "glossary-extraction",
+    "term-definition",
+    "ddd-terminology",
+]
+score = 100.0
+is_mega_skill = false
+dependencies = []
+
+[skills.ubiquitous-language.install_action]
+type = "copy"
+
+[skills.ubiquitous-language.install_action.value]
+folder = "skills/deprecated/ubiquitous-language"
+
+[skills.tdd]
+name = "tdd"
+description = 'Test-driven development with red-green-refactor loop. Use when user wants to build features or fix bugs using TDD, mentions "red-green-refactor", wants integration tests, or asks for test-first development.'
+source_url = "https://github.com/mattpocock/skills/tree/main/skills/engineering/tdd"
+stars = 87501
+commit_sha = "7afa86d3a5dd96edde06ffa014e16c64e733681e"
+context_size = 1098
 domain = "development"
-last_updated = "2026-05-10"
+last_updated = "2026-05-17"
 tags = [
-    "music-generation",
-    "song-writing",
-    "audio-production",
+    "test-driven-development",
+    "red-green-refactor",
+    "integration-tests",
 ]
-score = 90.49180603027344
+score = 100.0
 is_mega_skill = false
 dependencies = []
 
-[skills.minimax-music-gen.install_action]
+[skills.tdd.install_action]
 type = "copy"
 
-[skills.minimax-music-gen.install_action.value]
-folder = "skills/minimax-music-gen"
-
-[skills.frontend-dev]
-name = "frontend-dev"
-description = """
-Full-stack frontend development combining premium UI design, cinematic animations,
-AI-generated media assets, persuasive copywriting, and visual art. Builds complete,
-visually striking web pages with real media, advanced motion, and compelling copy.
-Use when: building landing pages, marketing sites, product pages, dashboards,
-generating media assets (image/video/audio/music), writing conversion copy,
-creating generative art, or implementing cinematic scroll animations.
-"""
-source_url = "https://github.com/MiniMax-AI/skills/tree/main/skills/frontend-dev"
-stars = 11683
-commit_sha = "402078747a8e8c1a7beae487e9e2c50c5e9df07e"
-context_size = 5236
-domain = "development"
-last_updated = "2026-05-10"
-tags = [
-    "frontend",
-    "ui-design",
-    "visual-art",
-]
-score = 90.49180603027344
-is_mega_skill = false
-dependencies = []
-
-[skills.frontend-dev.install_action]
-type = "copy"
-
-[skills.frontend-dev.install_action.value]
-folder = "skills/frontend-dev"
+[skills.tdd.install_action.value]
+folder = "skills/engineering/tdd"
 
 [skills.pptx-plugin]
 name = "slide-making-skill"
 description = "Implement single-slide PowerPoint pages with PptxGenJS. Use when writing or fixing slide JS files: dimensions, positioning, text/image/chart APIs, styling rules, and export expectations for native .pptx output."
 source_url = "https://github.com/MiniMax-AI/skills/tree/main/plugins/pptx-plugin/skills/slide-making-skill"
-stars = 11683
+stars = 11881
 commit_sha = "6154dd369918dff47bb0167794a995ceb38bc98a"
 context_size = 1815
 domain = "development"
-last_updated = "2026-05-10"
+last_updated = "2026-05-17"
 tags = [
     "pptx",
     "presentation",
@@ -476,26 +846,297 @@ type = "copy"
 [skills.pptx-plugin.install_action.value]
 folder = "plugins/pptx-plugin/skills/slide-making-skill"
 
-[skills.pptx-generator]
-name = "pptx-generator"
-description = "Generate, edit, and read PowerPoint presentations. Create from scratch with PptxGenJS (cover, TOC, content, section divider, summary slides), edit existing PPTX via XML workflows, or extract text with markitdown. Triggers: PPT, PPTX, PowerPoint, presentation, slide, deck, slides."
-source_url = "https://github.com/MiniMax-AI/skills/tree/main/skills/pptx-generator"
-stars = 11683
-commit_sha = "4006c2661305ed221f957a08e1d3429cb525de67"
-context_size = 1982
-domain = "documentation"
-last_updated = "2026-05-10"
+[skills.improve-codebase-architecture]
+name = "improve-codebase-architecture"
+description = "Find deepening opportunities in a codebase, informed by the domain language in CONTEXT.md and the decisions in docs/adr/. Use when the user wants to improve architecture, find refactoring opportunities, consolidate tightly-coupled modules, or make a codebase more testable and AI-navigable."
+source_url = "https://github.com/mattpocock/skills/tree/main/skills/engineering/improve-codebase-architecture"
+stars = 87501
+commit_sha = "7afa86d3a5dd96edde06ffa014e16c64e733681e"
+context_size = 1285
+domain = "development"
+last_updated = "2026-05-17"
 tags = [
-    "presentation-creation",
-    "slide-editing",
-    "deck-management",
+    "architecture-improvement",
+    "refactoring-opportunities",
+    "codebase-navigate",
+]
+score = 100.0
+is_mega_skill = false
+dependencies = []
+
+[skills.improve-codebase-architecture.install_action]
+type = "copy"
+
+[skills.improve-codebase-architecture.install_action.value]
+folder = "skills/engineering/improve-codebase-architecture"
+
+[skills.setup-matt-pocock-skills]
+name = "setup-matt-pocock-skills"
+description = "Sets up an `## Agent skills` block in AGENTS.md/CLAUDE.md and `docs/agents/` so the engineering skills know this repo's issue tracker (GitHub or local markdown), triage label vocabulary, and domain doc layout. Run before first use of `to-issues`, `to-prd`, `triage`, `diagnose`, `tdd`, `improve-codebase-architecture`, or `zoom-out` — or if those skills appear to be missing context about the issue tracker, triage labels, or domain docs."
+source_url = "https://github.com/mattpocock/skills/tree/main/skills/engineering/setup-matt-pocock-skills"
+stars = 87501
+commit_sha = "3bb0b1b917b25c3c413c5d9df3df7fcfbb34e7ba"
+context_size = 1715
+domain = "documentation"
+last_updated = "2026-05-17"
+tags = [
+    "setup-guidelines",
+    "agent-skills",
+    "context-establishment",
+]
+score = 100.0
+is_mega_skill = false
+dependencies = []
+
+[skills.setup-matt-pocock-skills.install_action]
+type = "copy"
+
+[skills.setup-matt-pocock-skills.install_action.value]
+folder = "skills/engineering/setup-matt-pocock-skills"
+
+[skills.android-native-dev]
+name = "android-native-dev"
+description = "Android native application development and UI design guide. Covers Material Design 3, Kotlin/Compose development, project configuration, accessibility, and build troubleshooting. Read this before Android native application development."
+source_url = "https://github.com/MiniMax-AI/skills/tree/main/skills/android-native-dev"
+stars = 11881
+commit_sha = "fb18ac5aa161002e5f5fbdd14d7ce65da1cdb270"
+context_size = 7155
+domain = "development"
+last_updated = "2026-05-17"
+tags = [
+    "android",
+    "kotlin",
+    "ui-design",
 ]
 score = 90.49180603027344
 is_mega_skill = false
 dependencies = []
 
-[skills.pptx-generator.install_action]
+[skills.android-native-dev.install_action]
 type = "copy"
 
-[skills.pptx-generator.install_action.value]
-folder = "skills/pptx-generator"
+[skills.android-native-dev.install_action.value]
+folder = "skills/android-native-dev"
+
+[skills.minimax-multimodal-toolkit]
+name = "mmx-cli"
+description = "Use mmx to generate text, images, video, speech, and music via the MiniMax AI platform. Use when the user wants to create media content, chat with MiniMax models, perform web search, or manage MiniMax API resources from the terminal."
+source_url = "https://github.com/MiniMax-AI/skills/tree/main/skills/minimax-multimodal-toolkit"
+stars = 11881
+commit_sha = "e0fdeefe7b1e36a7d5b4c06c22a4371ad31f101c"
+context_size = 2740
+domain = "development"
+last_updated = "2026-05-17"
+tags = [
+    "media-generation",
+    "api-management",
+    "content-creation",
+]
+score = 90.49180603027344
+is_mega_skill = false
+dependencies = []
+
+[skills.minimax-multimodal-toolkit.install_action]
+type = "copy"
+
+[skills.minimax-multimodal-toolkit.install_action.value]
+folder = "skills/minimax-multimodal-toolkit"
+
+[skills.minimax-xlsx]
+name = "minimax-xlsx"
+description = "Open, create, read, analyze, edit, or validate Excel/spreadsheet files (.xlsx, .xlsm, .csv, .tsv). Use when the user asks to create, build, modify, analyze, read, validate, or format any Excel spreadsheet, financial model, pivot table, or tabular data file. Covers: creating new xlsx from scratch, reading and analyzing existing files, editing existing xlsx with zero format loss, formula recalculation and validation, and applying professional financial formatting standards. Triggers on 'spreadsheet', 'Excel', '.xlsx', '.csv', 'pivot table', 'financial model', 'formula', or any request to produce tabular data in Excel format."
+source_url = "https://github.com/MiniMax-AI/skills/tree/main/skills/minimax-xlsx"
+stars = 11881
+commit_sha = "e674758f8780c1bf0f40175d8d9188af45d9546c"
+context_size = 2099
+domain = "data"
+last_updated = "2026-05-17"
+tags = [
+    "spreadsheet-management",
+    "excel-editing",
+    "data-analysis",
+]
+score = 90.49180603027344
+is_mega_skill = false
+dependencies = []
+
+[skills.minimax-xlsx.install_action]
+type = "copy"
+
+[skills.minimax-xlsx.install_action.value]
+folder = "skills/minimax-xlsx"
+
+[skills.diagnose]
+name = "diagnose"
+description = 'Disciplined diagnosis loop for hard bugs and performance regressions. Reproduce → minimise → hypothesise → instrument → fix → regression-test. Use when user says "diagnose this" / "debug this", reports a bug, says something is broken/throwing/failing, or describes a performance regression.'
+source_url = "https://github.com/mattpocock/skills/tree/main/skills/engineering/diagnose"
+stars = 87501
+commit_sha = "7afa86d3a5dd96edde06ffa014e16c64e733681e"
+context_size = 1790
+domain = "testing"
+last_updated = "2026-05-17"
+tags = [
+    "bug-diagnosis",
+    "performance-regression",
+    "debugging",
+]
+score = 100.0
+is_mega_skill = false
+dependencies = []
+
+[skills.diagnose.install_action]
+type = "copy"
+
+[skills.diagnose.install_action.value]
+folder = "skills/engineering/diagnose"
+
+[skills.frontend-dev]
+name = "frontend-dev"
+description = """
+Full-stack frontend development combining premium UI design, cinematic animations,
+AI-generated media assets, persuasive copywriting, and visual art. Builds complete,
+visually striking web pages with real media, advanced motion, and compelling copy.
+Use when: building landing pages, marketing sites, product pages, dashboards,
+generating media assets (image/video/audio/music), writing conversion copy,
+creating generative art, or implementing cinematic scroll animations.
+"""
+source_url = "https://github.com/MiniMax-AI/skills/tree/main/skills/frontend-dev"
+stars = 11881
+commit_sha = "402078747a8e8c1a7beae487e9e2c50c5e9df07e"
+context_size = 5236
+domain = "development"
+last_updated = "2026-05-17"
+tags = [
+    "frontend",
+    "ui-design",
+    "animations",
+]
+score = 90.49180603027344
+is_mega_skill = false
+dependencies = []
+
+[skills.frontend-dev.install_action]
+type = "copy"
+
+[skills.frontend-dev.install_action.value]
+folder = "skills/frontend-dev"
+
+[skills.superpowers]
+name = "superpowers"
+description = "Complete software development methodology for coding agents - brainstorming, test-driven development, systematic debugging, writing plans, executing plans, and more. Skills trigger automatically for mandatory workflows."
+source_url = "https://github.com/obra/superpowers/tree/main/"
+stars = 194432
+commit_sha = ""
+context_size = 0
+domain = "development"
+last_updated = "2026-05-17"
+tags = ["mega-skill"]
+score = 113.0
+is_mega_skill = true
+dependencies = []
+
+[skills.superpowers.install_action]
+type = "mega-skill-copy"
+
+[skills.superpowers.install_action.value]
+source_folder = "skills"
+dest_name = "superpowers"
+
+[skills.grill-me]
+name = "grill-me"
+description = 'Interview the user relentlessly about a plan or design until reaching shared understanding, resolving each branch of the decision tree. Use when user wants to stress-test a plan, get grilled on their design, or mentions "grill me".'
+source_url = "https://github.com/mattpocock/skills/tree/main/skills/productivity/grill-me"
+stars = 87501
+commit_sha = "62f43a18177be6ec82da242e59ffbc490a4c22ea"
+context_size = 158
+domain = "collaboration"
+last_updated = "2026-05-17"
+tags = [
+    "interview",
+    "understanding",
+    "design",
+]
+score = 100.0
+is_mega_skill = false
+dependencies = []
+
+[skills.grill-me.install_action]
+type = "copy"
+
+[skills.grill-me.install_action.value]
+folder = "skills/productivity/grill-me"
+
+[skills.to-issues]
+name = "to-issues"
+description = "Break a plan, spec, or PRD into independently-grabbable issues on the project issue tracker using tracer-bullet vertical slices. Use when user wants to convert a plan into issues, create implementation tickets, or break down work into issues."
+source_url = "https://github.com/mattpocock/skills/tree/main/skills/engineering/to-issues"
+stars = 87501
+commit_sha = "ff3ee1dda50d636b4e25b1ba269d25d6d5784164"
+context_size = 894
+domain = "planning-and-orchestration"
+last_updated = "2026-05-17"
+tags = [
+    "issue-creation",
+    "task-breaking",
+    "implementation-tickets",
+]
+score = 100.0
+is_mega_skill = false
+dependencies = []
+
+[skills.to-issues.install_action]
+type = "copy"
+
+[skills.to-issues.install_action.value]
+folder = "skills/engineering/to-issues"
+
+[skills.ios-application-dev]
+name = "ios-application-dev"
+description = """
+iOS application development guide covering UIKit, SnapKit, and SwiftUI. Includes touch targets, safe areas, navigation patterns, Dynamic Type, Dark Mode, accessibility, collection views, common UI components, and SwiftUI design guidelines. For detailed references on specific topics, see the reference files.
+Use when: developing iOS apps, implementing UI, reviewing iOS code, working with UIKit/SnapKit/SwiftUI layouts, building iPhone interfaces, Swift mobile development, Apple HIG compliance, iOS accessibility implementation.
+"""
+source_url = "https://github.com/MiniMax-AI/skills/tree/main/skills/ios-application-dev"
+stars = 11881
+commit_sha = "815a0523248b27ce610ceb6cfc0358f9533e776a"
+context_size = 1801
+domain = "development"
+last_updated = "2026-05-17"
+tags = [
+    "ios-development",
+    "ui-design",
+    "swift",
+]
+score = 90.49180603027344
+is_mega_skill = false
+dependencies = []
+
+[skills.ios-application-dev.install_action]
+type = "copy"
+
+[skills.ios-application-dev.install_action.value]
+folder = "skills/ios-application-dev"
+
+[skills.writing-beats]
+name = "writing-beats"
+description = "Shape an article as a journey of beats, choose-your-own-adventure style. The user picks a starting beat from the raw material, you write only that beat, then offer options for where to pivot next, beat by beat, until the article reaches a natural end. Use when the user has raw material and wants to assemble it as a narrative rather than an argument."
+source_url = "https://github.com/mattpocock/skills/tree/main/skills/in-progress/writing-beats"
+stars = 87501
+commit_sha = "9f2e0bd0ea776eb6372eb81fa8a4a47814a8404a"
+context_size = 709
+domain = "documentation"
+last_updated = "2026-05-17"
+tags = [
+    "narrative-structure",
+    "article-assembly",
+    "choose-your-own-adventure",
+]
+score = 100.0
+is_mega_skill = false
+dependencies = []
+
+[skills.writing-beats.install_action]
+type = "copy"
+
+[skills.writing-beats.install_action.value]
+folder = "skills/in-progress/writing-beats"
