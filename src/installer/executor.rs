@@ -2,9 +2,12 @@ use crate::fetcher::ArchiveCache;
 use crate::installer::tool_paths::get_skill_folder;
 use crate::models::{Scope, Skill};
 use crate::registry::github::GitHubClient;
+use crate::registry::parser::SkillParser;
 use crate::utils::{Result, RulesifyError};
+use std::collections::BTreeSet;
 use std::path::{Path, PathBuf};
 use std::process::Command;
+use walkdir::WalkDir;
 
 #[derive(Debug)]
 pub struct InstallResult {
@@ -12,6 +15,7 @@ pub struct InstallResult {
     pub files_created: usize,
     pub success: bool,
     pub error: Option<String>,
+    pub warning: Option<String>,
 }
 
 #[derive(Debug)]
@@ -25,7 +29,25 @@ pub struct SkillSource {
     pub owner: String,
     pub repo: String,
     pub branch: String,
+    pub archive_ref: String,
     pub folder: String,
+}
+
+impl SkillSource {
+    pub fn archive_ref(&self) -> &str {
+        if self.archive_ref.trim().is_empty() {
+            &self.branch
+        } else {
+            &self.archive_ref
+        }
+    }
+
+    fn use_commit_sha(&mut self, commit_sha: &str) {
+        let commit_sha = commit_sha.trim();
+        if !commit_sha.is_empty() {
+            self.archive_ref = commit_sha.to_string();
+        }
+    }
 }
 
 pub fn parse_source_url(source_url: &str) -> Result<SkillSource> {
@@ -55,6 +77,7 @@ pub fn parse_source_url(source_url: &str) -> Result<SkillSource> {
     Ok(SkillSource {
         owner,
         repo,
+        archive_ref: branch.clone(),
         branch,
         folder,
     })
@@ -67,11 +90,12 @@ pub async fn install_skill<T: AsRef<str>>(
     _client: &GitHubClient,
     cache: &ArchiveCache,
 ) -> Result<Vec<InstallResult>> {
-    let source = parse_source_url(&skill.source_url)?;
+    let mut source = parse_source_url(&skill.source_url)?;
+    source.use_commit_sha(&skill.commit_sha);
 
-    let extracted_folder = cache.get_extracted_folder(&source).await?;
+    let resolved = resolve_skill_folder(skill, &source, cache).await?;
 
-    let entries: Vec<_> = std::fs::read_dir(&extracted_folder)
+    let entries: Vec<_> = std::fs::read_dir(&resolved.path)
         .map_err(|e| RulesifyError::SkillParse(format!("Failed to read extracted folder: {}", e)))?
         .filter_map(|e| e.ok())
         .collect();
@@ -80,11 +104,131 @@ pub async fn install_skill<T: AsRef<str>>(
 
     for tool in tools {
         let skill_folder = get_skill_folder(tool.as_ref(), scope, &skill.name);
-        let result = install_for_tool(&extracted_folder, &entries, &skill_folder, tool.as_ref());
+        let result = install_for_tool(
+            &resolved.path,
+            &entries,
+            &skill_folder,
+            tool.as_ref(),
+            resolved.warning.clone(),
+        );
         results.push(result);
     }
 
     Ok(results)
+}
+
+#[derive(Debug)]
+pub(crate) struct ResolvedSkillFolder {
+    pub(crate) path: PathBuf,
+    pub(crate) warning: Option<String>,
+}
+
+pub(crate) async fn resolve_skill_folder(
+    skill: &Skill,
+    source: &SkillSource,
+    cache: &ArchiveCache,
+) -> Result<ResolvedSkillFolder> {
+    match cache.get_extracted_folder(source).await {
+        Ok(path) => Ok(ResolvedSkillFolder {
+            path,
+            warning: None,
+        }),
+        Err(original_error) => {
+            let repo_root = cache.get_extracted_repo_root(source).await?;
+            let matches = find_skill_folders_by_name(&repo_root, &skill.name)?;
+
+            match matches.as_slice() {
+                [] => Err(original_error),
+                [path] => {
+                    let resolved_folder = relative_path(&repo_root, path);
+                    Ok(ResolvedSkillFolder {
+                        path: path.clone(),
+                        warning: Some(format!(
+                            "Source path moved; installing '{}' from {} instead of {}",
+                            skill.name, resolved_folder, source.folder
+                        )),
+                    })
+                }
+                _ => Err(RulesifyError::SkillParse(format!(
+                    "Multiple folders named '{}' found in archive: {}",
+                    skill.name,
+                    format_candidate_paths(&repo_root, &matches)
+                ))
+                .into()),
+            }
+        }
+    }
+}
+
+#[cfg(test)]
+pub(crate) fn find_skill_folder_by_name(
+    repo_root: &Path,
+    skill_name: &str,
+) -> Result<Option<PathBuf>> {
+    let matches = find_skill_folders_by_name(repo_root, skill_name)?;
+
+    match matches.as_slice() {
+        [] => Ok(None),
+        [path] => Ok(Some(path.clone())),
+        _ => Err(RulesifyError::SkillParse(format!(
+            "Multiple folders named '{}' found in archive: {}",
+            skill_name,
+            format_candidate_paths(repo_root, &matches)
+        ))
+        .into()),
+    }
+}
+
+pub(crate) fn find_skill_folders_by_name(
+    repo_root: &Path,
+    skill_name: &str,
+) -> Result<Vec<PathBuf>> {
+    let mut matches = Vec::new();
+
+    for entry in WalkDir::new(repo_root)
+        .into_iter()
+        .filter_entry(|entry| !is_hidden_or_build_dir(entry.path()))
+        .filter_map(|entry| entry.ok())
+        .filter(|entry| entry.file_type().is_file() && entry.file_name() == "SKILL.md")
+    {
+        let content = std::fs::read_to_string(entry.path()).map_err(|e| {
+            RulesifyError::SkillParse(format!("Failed to read skill metadata: {}", e))
+        })?;
+
+        match SkillParser::parse(&content) {
+            Ok(parsed) if parsed.name == skill_name => {
+                if let Some(parent) = entry.path().parent() {
+                    matches.push(parent.to_path_buf());
+                }
+            }
+            Ok(_) => {}
+            Err(_) => {}
+        }
+    }
+
+    Ok(matches)
+}
+
+fn relative_path(repo_root: &Path, path: &Path) -> String {
+    path.strip_prefix(repo_root)
+        .unwrap_or(path)
+        .to_string_lossy()
+        .to_string()
+}
+
+fn format_candidate_paths(repo_root: &Path, paths: &[PathBuf]) -> String {
+    paths
+        .iter()
+        .map(|path| relative_path(repo_root, path))
+        .collect::<Vec<_>>()
+        .join(", ")
+}
+
+fn is_hidden_or_build_dir(path: &Path) -> bool {
+    path.file_name()
+        .and_then(|name| name.to_str())
+        .map(|name| matches!(name, ".git" | "target" | "node_modules"))
+        .unwrap_or(false)
 }
 
 pub async fn install_mega_skill<T: AsRef<str>>(
@@ -96,7 +240,8 @@ pub async fn install_mega_skill<T: AsRef<str>>(
     _client: &GitHubClient,
     cache: &ArchiveCache,
 ) -> Result<Vec<InstallResult>> {
-    let source = parse_source_url(&skill.source_url)?;
+    let mut source = parse_source_url(&skill.source_url)?;
+    source.use_commit_sha(&skill.commit_sha);
 
     let extracted_root = cache.get_extracted_folder(&source).await?;
 
@@ -119,7 +264,7 @@ pub async fn install_mega_skill<T: AsRef<str>>(
 
     for tool in tools {
         let skill_folder = get_skill_folder(tool.as_ref(), scope, dest_name);
-        let result = install_for_tool(&source_path, &entries, &skill_folder, tool.as_ref());
+        let result = install_for_tool(&source_path, &entries, &skill_folder, tool.as_ref(), None);
         results.push(result);
     }
 
@@ -131,6 +276,7 @@ fn install_for_tool(
     entries: &[std::fs::DirEntry],
     skill_folder: &Path,
     tool: &str,
+    warning: Option<String>,
 ) -> InstallResult {
     if skill_folder.exists() {
         if let Err(e) = std::fs::remove_dir_all(skill_folder) {
@@ -139,6 +285,7 @@ fn install_for_tool(
                 files_created: 0,
                 success: false,
                 error: Some(format!("Failed to clear existing folder: {}", e)),
+                warning,
             };
         }
     }
@@ -149,6 +296,7 @@ fn install_for_tool(
             files_created: 0,
             success: false,
             error: Some(format!("Failed to create folder: {}", e)),
+            warning,
         };
     }
 
@@ -184,6 +332,7 @@ fn install_for_tool(
         } else {
             Some(errors.join("; "))
         },
+        warning,
     }
 }
 
@@ -246,6 +395,7 @@ pub fn execute_npx_install<T: AsRef<str>>(
                     files_created: 0,
                     success: true,
                     error: None,
+                    warning: None,
                 });
             }
             Ok(o) => {
@@ -255,6 +405,7 @@ pub fn execute_npx_install<T: AsRef<str>>(
                     files_created: 0,
                     success: false,
                     error: Some(stderr),
+                    warning: None,
                 });
             }
             Err(e) => {
@@ -263,6 +414,7 @@ pub fn execute_npx_install<T: AsRef<str>>(
                     files_created: 0,
                     success: false,
                     error: Some(format!("Failed to run npx: {}", e)),
+                    warning: None,
                 });
             }
         }
@@ -372,6 +524,14 @@ fn uninstall_for_tool(skill_folder: PathBuf, tool: String) -> UninstallResult {
 pub fn print_install_summary(results: &[InstallResult], skill_name: &str) {
     let successful = results.iter().filter(|r| r.success).count();
     let failed = results.len() - successful;
+    let warnings: BTreeSet<&str> = results
+        .iter()
+        .filter_map(|r| r.warning.as_deref())
+        .collect();
+
+    for warning in warnings {
+        println!("  ! {}", warning);
+    }
 
     if failed == 0 {
         println!(

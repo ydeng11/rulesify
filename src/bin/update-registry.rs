@@ -2,7 +2,7 @@ use anyhow::Result;
 use clap::Parser;
 use rulesify::{
     llm::{Classifier, SkillClassification},
-    models::{InstallAction, Registry, RepoMetrics, SkillMetadata},
+    models::{InstallAction, Registry, RepoMetrics, Skill, SkillMetadata},
     registry::{GitHubClient, RegistryGenerator, Scorer, SkillParser, SourceRepo},
 };
 use std::collections::HashMap;
@@ -174,6 +174,40 @@ fn apply_cache(meta: &mut SkillMetadata, cached: &HashMap<String, (String, Vec<S
     false
 }
 
+fn validate_registry_candidate(meta: &SkillMetadata) -> std::result::Result<(), String> {
+    match &meta.install_action {
+        InstallAction::Copy { folder } => {
+            if folder.trim().is_empty() || meta.source_folder.trim().is_empty() {
+                return Err("copy skill is missing a source folder".to_string());
+            }
+            if meta.commit_sha.trim().is_empty() {
+                return Err("copy skill is missing commit_sha".to_string());
+            }
+        }
+        InstallAction::MegaSkillCopy { source_folder, .. } => {
+            if source_folder.trim().is_empty() {
+                return Err("mega-skill copy is missing a source folder".to_string());
+            }
+        }
+        InstallAction::Command { .. } | InstallAction::Npx { .. } => {}
+    }
+
+    Ok(())
+}
+
+fn insert_valid_skill(final_skills: &mut HashMap<String, Skill>, meta: SkillMetadata, score: f32) {
+    if let Err(error) = validate_registry_candidate(&meta) {
+        log::warn!(
+            "Skipping invalid registry candidate '{}': {}",
+            meta.skill_id,
+            error
+        );
+        return;
+    }
+
+    final_skills.insert(meta.skill_id.clone(), meta.to_skill(score));
+}
+
 #[tokio::main]
 async fn main() -> Result<()> {
     let args = Args::parse();
@@ -341,7 +375,7 @@ async fn main() -> Result<()> {
 
     for (mut meta, score) in top {
         if meta.is_mega_skill {
-            final_skills.insert(meta.skill_id.clone(), meta.to_skill(score));
+            insert_valid_skill(&mut final_skills, meta, score);
             continue;
         }
 
@@ -355,7 +389,7 @@ async fn main() -> Result<()> {
                 meta.domain,
                 meta.tags
             );
-            final_skills.insert(meta.skill_id.clone(), meta.to_skill(score));
+            insert_valid_skill(&mut final_skills, meta, score);
         } else {
             log::debug!("Skill {} needs classification (no cache)", meta.skill_id);
             skills_to_classify.push((meta.skill_id.clone(), meta.description.clone()));
@@ -398,7 +432,7 @@ async fn main() -> Result<()> {
             );
             if let Some((mut meta, score)) = pending_skills.remove(&skill_id) {
                 apply_classification(&mut meta, &classification);
-                final_skills.insert(skill_id, meta.to_skill(score));
+                insert_valid_skill(&mut final_skills, meta, score);
             }
         }
 
@@ -407,7 +441,7 @@ async fn main() -> Result<()> {
             let mut updated_meta = meta;
             updated_meta.domain = "development".to_string();
             updated_meta.tags = vec![];
-            final_skills.insert(skill_id, updated_meta.to_skill(score));
+            insert_valid_skill(&mut final_skills, updated_meta, score);
         }
     }
 
@@ -419,4 +453,81 @@ async fn main() -> Result<()> {
 
     log::info!("Written to registry.toml");
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn make_meta() -> SkillMetadata {
+        SkillMetadata {
+            skill_id: "handoff".to_string(),
+            name: "handoff".to_string(),
+            description: "Compact the current conversation into a handoff document.".to_string(),
+            source_repo: "mattpocock/skills".to_string(),
+            source_folder: "skills/in-progress/handoff".to_string(),
+            source_url: "https://github.com/mattpocock/skills/tree/main/skills/in-progress/handoff"
+                .to_string(),
+            commit_sha: "abc123".to_string(),
+            tags: vec!["old-tag".to_string()],
+            stars: 10,
+            context_size: 100,
+            domain: "development".to_string(),
+            last_updated: "2026-05-20".to_string(),
+            install_action: InstallAction::Copy {
+                folder: "skills/in-progress/handoff".to_string(),
+            },
+            is_mega_skill: false,
+            dependencies: Vec::new(),
+        }
+    }
+
+    #[test]
+    fn test_apply_cache_preserves_source_metadata() {
+        let mut meta = make_meta();
+        let source_url = meta.source_url.clone();
+        let commit_sha = meta.commit_sha.clone();
+        let install_action = meta.install_action.clone();
+        let mut cached = HashMap::new();
+        cached.insert(
+            "handoff".to_string(),
+            ("productivity".to_string(), vec!["cached-tag".to_string()]),
+        );
+
+        assert!(apply_cache(&mut meta, &cached));
+
+        assert_eq!(meta.domain, "productivity");
+        assert_eq!(meta.tags, vec!["cached-tag".to_string()]);
+        assert_eq!(meta.source_url, source_url);
+        assert_eq!(meta.commit_sha, commit_sha);
+        assert!(matches!(meta.install_action, InstallAction::Copy { .. }));
+        assert_eq!(
+            toml::to_string(&meta.install_action).unwrap(),
+            toml::to_string(&install_action).unwrap()
+        );
+    }
+
+    #[test]
+    fn test_invalid_copy_candidate_is_skipped() {
+        let mut meta = make_meta();
+        meta.commit_sha = String::new();
+        let mut final_skills = HashMap::new();
+
+        insert_valid_skill(&mut final_skills, meta, 80.0);
+
+        assert!(final_skills.is_empty());
+    }
+
+    #[test]
+    fn test_generated_registry_entry_retains_commit_sha() {
+        let meta = make_meta();
+        let mut final_skills = HashMap::new();
+
+        insert_valid_skill(&mut final_skills, meta, 80.0);
+
+        assert_eq!(
+            final_skills.get("handoff").unwrap().commit_sha,
+            "abc123".to_string()
+        );
+    }
 }

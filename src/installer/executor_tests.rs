@@ -1,6 +1,7 @@
-use crate::fetcher::ArchiveCache;
+use crate::fetcher::{get_cache_key, ArchiveCache};
 use crate::installer::executor::{
-    install_mega_skill, install_skill, parse_source_url, uninstall_skill,
+    find_skill_folder_by_name, install_mega_skill, install_skill, parse_source_url,
+    resolve_skill_folder, uninstall_skill,
 };
 use crate::models::{InstallAction, Scope, Skill};
 use crate::registry::github::GitHubClient;
@@ -16,6 +17,7 @@ fn test_parse_source_url_valid() {
     assert_eq!(source.owner, "openai");
     assert_eq!(source.repo, "skills");
     assert_eq!(source.branch, "main");
+    assert_eq!(source.archive_ref, "main");
     assert_eq!(source.folder, "skills/.curated/render-deploy");
 }
 
@@ -41,7 +43,29 @@ fn test_parse_source_url_with_subfolder() {
     assert_eq!(source.owner, "anthropics");
     assert_eq!(source.repo, "skills");
     assert_eq!(source.branch, "v2");
+    assert_eq!(source.archive_ref, "v2");
     assert_eq!(source.folder, "skills/brainstorming");
+}
+
+#[test]
+fn test_find_skill_folder_by_name_resolves_moved_skill() {
+    let temp_dir = TempDir::new().unwrap();
+    let stale_folder = temp_dir.path().join("skills/productivity/handoff");
+    let actual_folder = temp_dir.path().join("skills/in-progress/handoff");
+
+    fs::create_dir_all(&stale_folder).unwrap();
+    fs::create_dir_all(&actual_folder).unwrap();
+    fs::write(
+        actual_folder.join("SKILL.md"),
+        "---\nname: handoff\ndescription: Compact the current conversation into a handoff document.\n---\n",
+    )
+    .unwrap();
+
+    let resolved = find_skill_folder_by_name(temp_dir.path(), "handoff")
+        .unwrap()
+        .unwrap();
+
+    assert_eq!(resolved, actual_folder);
 }
 
 #[test]
@@ -170,6 +194,138 @@ fn make_normal_skill(name: &str, source_url: &str) -> Skill {
         is_mega_skill: false,
         dependencies: Vec::new(),
     }
+}
+
+fn make_normal_skill_with_sha(name: &str, source_url: &str, commit_sha: &str) -> Skill {
+    let mut skill = make_normal_skill(name, source_url);
+    skill.commit_sha = commit_sha.to_string();
+    skill
+}
+
+fn write_skill(folder: &std::path::Path, name: &str) {
+    fs::create_dir_all(folder).unwrap();
+    fs::write(
+        folder.join("SKILL.md"),
+        format!(
+            "---\nname: {}\ndescription: Test skill with enough description text.\n---\n",
+            name
+        ),
+    )
+    .unwrap();
+}
+
+fn cached_repo_root(
+    cache_dir: &std::path::Path,
+    skill: &Skill,
+    repo_root_name: &str,
+) -> std::path::PathBuf {
+    let mut source = parse_source_url(&skill.source_url).unwrap();
+    source.archive_ref = if skill.commit_sha.is_empty() {
+        source.branch.clone()
+    } else {
+        skill.commit_sha.clone()
+    };
+    let cached_path = cache_dir.join(get_cache_key(&source));
+    let repo_root = cached_path.join(repo_root_name);
+    fs::create_dir_all(&repo_root).unwrap();
+    repo_root
+}
+
+fn source_for_skill(skill: &Skill) -> crate::installer::executor::SkillSource {
+    let mut source = parse_source_url(&skill.source_url).unwrap();
+    source.archive_ref = if skill.commit_sha.is_empty() {
+        source.branch.clone()
+    } else {
+        skill.commit_sha.clone()
+    };
+    source
+}
+
+#[tokio::test]
+async fn test_resolve_skill_uses_exact_folder_from_commit_cache() {
+    let cache_dir = TempDir::new().unwrap();
+    let skill = make_normal_skill_with_sha(
+        "handoff",
+        "https://github.com/mattpocock/skills/tree/main/skills/productivity/handoff",
+        "abc123",
+    );
+    let repo_root = cached_repo_root(cache_dir.path(), &skill, "skills-abc123");
+    let expected_path = repo_root.join("skills/productivity/handoff");
+    write_skill(&expected_path, "handoff");
+
+    let cache = ArchiveCache::with_cache_dir(cache_dir.path().to_path_buf());
+    let source = source_for_skill(&skill);
+    let resolved = resolve_skill_folder(&skill, &source, &cache).await.unwrap();
+
+    assert_eq!(resolved.path, expected_path);
+    assert!(resolved.warning.is_none());
+}
+
+#[tokio::test]
+async fn test_resolve_skill_falls_back_to_moved_folder_with_warning() {
+    let cache_dir = TempDir::new().unwrap();
+    let skill = make_normal_skill_with_sha(
+        "handoff",
+        "https://github.com/mattpocock/skills/tree/main/skills/productivity/handoff",
+        "abc123",
+    );
+    let repo_root = cached_repo_root(cache_dir.path(), &skill, "skills-abc123");
+    let expected_path = repo_root.join("skills/in-progress/handoff");
+    write_skill(&expected_path, "handoff");
+
+    let cache = ArchiveCache::with_cache_dir(cache_dir.path().to_path_buf());
+    let source = source_for_skill(&skill);
+    let resolved = resolve_skill_folder(&skill, &source, &cache).await.unwrap();
+
+    assert_eq!(resolved.path, expected_path);
+    assert!(resolved
+        .warning
+        .as_deref()
+        .unwrap()
+        .contains("skills/in-progress/handoff"));
+}
+
+#[tokio::test]
+async fn test_resolve_skill_missing_folder_and_no_match_fails_with_original_error() {
+    let cache_dir = TempDir::new().unwrap();
+    let skill = make_normal_skill_with_sha(
+        "handoff",
+        "https://github.com/mattpocock/skills/tree/main/skills/productivity/handoff",
+        "abc123",
+    );
+    let repo_root = cached_repo_root(cache_dir.path(), &skill, "skills-abc123");
+    write_skill(&repo_root.join("skills/in-progress/other"), "other");
+
+    let cache = ArchiveCache::with_cache_dir(cache_dir.path().to_path_buf());
+    let source = source_for_skill(&skill);
+    let err = resolve_skill_folder(&skill, &source, &cache)
+        .await
+        .unwrap_err();
+
+    assert!(err
+        .to_string()
+        .contains("Folder skills/productivity/handoff not found"));
+}
+
+#[tokio::test]
+async fn test_resolve_skill_multiple_matching_names_fails_as_ambiguous() {
+    let cache_dir = TempDir::new().unwrap();
+    let skill = make_normal_skill_with_sha(
+        "handoff",
+        "https://github.com/mattpocock/skills/tree/main/skills/productivity/handoff",
+        "abc123",
+    );
+    let repo_root = cached_repo_root(cache_dir.path(), &skill, "skills-abc123");
+    write_skill(&repo_root.join("skills/in-progress/handoff"), "handoff");
+    write_skill(&repo_root.join("skills/personal/handoff"), "handoff");
+
+    let cache = ArchiveCache::with_cache_dir(cache_dir.path().to_path_buf());
+    let source = source_for_skill(&skill);
+    let err = resolve_skill_folder(&skill, &source, &cache)
+        .await
+        .unwrap_err();
+
+    assert!(err.to_string().contains("Multiple folders named 'handoff'"));
 }
 
 fn make_mega_skill(name: &str, source_url: &str, source_folder: &str, dest_name: &str) -> Skill {
