@@ -1,7 +1,8 @@
 use crate::fetcher::ArchiveCache;
+use crate::installer::tool_paths::get_skills_parent_dir;
 use crate::installer::{
-    install_mega_skill, install_skill, print_install_summary, print_uninstall_summary,
-    uninstall_skill,
+    execute_npx_install, install_mega_skill, install_skill, print_install_summary,
+    print_uninstall_summary, uninstall_skill,
 };
 use crate::models::{GlobalConfig, InstallAction, ProjectConfig, Registry, Scope};
 use crate::registry::{fetch_registry, load_builtin, GitHubClient, RegistryCache};
@@ -42,7 +43,26 @@ pub async fn run(verbose: bool) -> Result<()> {
     }
 
     println!("Select AI tools you use:");
-    let tools = ToolPicker::run_with_selected(existing_tools)?;
+    let tools = ToolPicker::run_with_selected(existing_tools.clone())?;
+
+    let deselected_tools: Vec<_> = existing_tools
+        .iter()
+        .filter(|t| !tools.contains(t))
+        .cloned()
+        .collect();
+
+    if !deselected_tools.is_empty() {
+        println!("\nCleaning up skills for deselected tools...");
+        for tool in &deselected_tools {
+            let skills_dir = get_skills_parent_dir(tool);
+            if skills_dir.exists() {
+                match std::fs::remove_dir_all(&skills_dir) {
+                    Ok(_) => println!("  ✓ Removed {}/", skills_dir.display()),
+                    Err(e) => println!("  ✗ Failed to remove {}/: {}", skills_dir.display(), e),
+                }
+            }
+        }
+    }
 
     if tools.is_empty() {
         println!("No tools selected. Exiting.");
@@ -100,7 +120,7 @@ pub async fn run(verbose: bool) -> Result<()> {
 
     let client = GitHubClient::new();
     let cache = ArchiveCache::new();
-    let mut config = existing_config.unwrap_or(ProjectConfig::new());
+    let mut config = existing_config.unwrap_or_default();
     config.tools = tools.clone();
 
     if !result.removed.is_empty() {
@@ -131,11 +151,10 @@ pub async fn run(verbose: bool) -> Result<()> {
         let mut install_errors: Vec<(String, String)> = Vec::new();
 
         for (id, skill) in &result.added {
-            let tools_with_global = tools
+            let (tools_with_global, tools_to_install): (Vec<_>, Vec<_>) = tools
                 .iter()
-                .filter(|tool| global_config.is_skill_installed_for_tool(tool, id))
                 .cloned()
-                .collect::<Vec<_>>();
+                .partition(|tool| global_config.is_skill_installed_for_tool(tool, id));
 
             if !tools_with_global.is_empty() {
                 println!(
@@ -144,12 +163,6 @@ pub async fn run(verbose: bool) -> Result<()> {
                     tools_with_global.join(", ")
                 );
             }
-
-            let tools_to_install = tools
-                .iter()
-                .filter(|tool| !global_config.is_skill_installed_for_tool(tool, id))
-                .cloned()
-                .collect::<Vec<_>>();
 
             if tools_to_install.is_empty() {
                 continue;
@@ -196,7 +209,7 @@ pub async fn run(verbose: bool) -> Result<()> {
                     args,
                     uninstall_flag,
                 }) => {
-                    match crate::installer::execute_npx_install(
+                    match execute_npx_install(
                         package,
                         args,
                         uninstall_flag.as_deref(),
