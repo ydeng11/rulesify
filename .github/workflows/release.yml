@@ -11,8 +11,9 @@ on:
           - production-release
           - bump-version
           - update-homebrew
+          - bump up homebrew tab
       version:
-        description: 'Version (e.g., 0.5.0) - required for production-release and update-homebrew'
+        description: 'Version (e.g., 0.5.0) - required for production-release, update-homebrew, and bump up homebrew tab'
         required: false
         type: string
       next_version:
@@ -35,7 +36,7 @@ jobs:
     outputs:
       version: ${{ steps.ver.outputs.version }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
           fetch-tags: true
@@ -88,7 +89,7 @@ jobs:
     needs: validate
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - uses: dtolnay/rust-toolchain@stable
 
@@ -119,7 +120,7 @@ jobs:
             artifact: rulesify.exe
             asset: rulesify-windows-amd64.exe
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - uses: dtolnay/rust-toolchain@stable
         with:
@@ -139,7 +140,7 @@ jobs:
             shasum -a 256 ../../../${{ matrix.asset }}.tar.gz > ../../../${{ matrix.asset }}.tar.gz.sha256
           fi
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: ${{ matrix.asset }}
           path: |
@@ -153,11 +154,11 @@ jobs:
     needs: [validate, build]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
 
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v7
         with:
           path: artifacts
 
@@ -282,7 +283,7 @@ jobs:
 
   standalone-homebrew-update:
     name: Update Homebrew Tap (Standalone)
-    if: github.event.inputs.action == 'update-homebrew'
+    if: github.event.inputs.action == 'update-homebrew' || github.event.inputs.action == 'bump up homebrew tab'
     runs-on: ubuntu-latest
     environment: Prod
     steps:
@@ -295,7 +296,7 @@ jobs:
           set -euo pipefail
           VERSION="${{ github.event.inputs.version }}"
           if [ -z "$VERSION" ]; then
-            echo "Error: version input is required for update-homebrew"
+            echo "Error: version input is required for update-homebrew or bump up homebrew tab"
             exit 1
           fi
           TAG="v$VERSION"
@@ -381,7 +382,7 @@ jobs:
     if: github.event.inputs.action == 'bump-version'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
 
