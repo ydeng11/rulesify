@@ -1364,7 +1364,7 @@ dependencies = [
 
 [[package]]
 name = "rulesify"
-version = "0.5.5"
+version = "0.5.6"
 dependencies = [
  "anyhow",
  "chrono",

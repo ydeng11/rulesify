@@ -36,21 +36,31 @@ mod tests {
             source: "https://example.com".to_string(),
             commit_sha: "abc123".to_string(),
             scope: Scope::Global,
+            covered_tools: vec![],
         };
 
         let toml = toml::to_string_pretty(&skill).unwrap();
         assert!(toml.contains("scope = \"global\""));
+        // Empty covered_tools should be skipped in serialization
+        assert!(!toml.contains("covered_tools"));
     }
 
     #[test]
     fn test_config_add_skill_with_scope() {
         let mut config = ProjectConfig::new();
-        config.add_skill("my-skill", "https://example.com", "abc123", Scope::Project);
+        config.add_skill(
+            "my-skill",
+            "https://example.com",
+            "abc123",
+            Scope::Project,
+            vec![],
+        );
         config.add_skill(
             "global-skill",
             "https://example.com",
             "def456",
             Scope::Global,
+            vec![],
         );
 
         assert_eq!(config.installed_skills.len(), 2);
@@ -61,8 +71,20 @@ mod tests {
     #[test]
     fn test_config_serialization_with_scope() {
         let mut config = ProjectConfig::new();
-        config.add_skill("project-skill", "https://...", "abc123", Scope::Project);
-        config.add_skill("global-skill", "https://...", "def456", Scope::Global);
+        config.add_skill(
+            "project-skill",
+            "https://...",
+            "abc123",
+            Scope::Project,
+            vec![],
+        );
+        config.add_skill(
+            "global-skill",
+            "https://...",
+            "def456",
+            Scope::Global,
+            vec![],
+        );
 
         let toml = toml::to_string_pretty(&config).unwrap();
         assert!(toml.contains("scope = \"project\""));
@@ -89,5 +111,58 @@ commit_sha = "legacy123"
 
         let config: ProjectConfig = toml::from_str(toml_str).unwrap();
         assert_eq!(config.installed_skills["old-skill"].scope, Scope::Project);
+        // Old configs without covered_tools should default to empty vec
+        assert!(config.installed_skills["old-skill"]
+            .covered_tools
+            .is_empty());
+    }
+
+    #[test]
+    fn test_installed_skill_with_covered_tools_serialization() {
+        let skill = InstalledSkill {
+            added: "2026-05-22".to_string(),
+            source: "https://example.com/foo".to_string(),
+            commit_sha: "abc123".to_string(),
+            scope: Scope::Global,
+            covered_tools: vec!["pi".to_string()],
+        };
+
+        let toml = toml::to_string_pretty(&skill).unwrap();
+        assert!(toml.contains("covered_tools"));
+        assert!(toml.contains("pi".to_string().as_str()));
+    }
+
+    #[test]
+    fn test_add_skill_with_covered_tools() {
+        let mut config = ProjectConfig::new();
+        config.add_skill(
+            "test-skill",
+            "https://example.com",
+            "abc123",
+            Scope::Project,
+            vec!["pi".to_string()],
+        );
+
+        let entry = &config.installed_skills["test-skill"];
+        assert_eq!(entry.covered_tools, vec!["pi".to_string()]);
+    }
+
+    #[test]
+    fn test_covered_tools_skipped_when_empty_in_toml() {
+        // When covered_tools is empty, serialization should skip the field
+        let config_toml = r#"
+version = 1
+tools = []
+[installed_skills.test-skill]
+added = "2026-05-22"
+source = "https://example.com"
+commit_sha = "abc123"
+scope = "project"
+"#;
+
+        let config: ProjectConfig = toml::from_str(config_toml).unwrap();
+        assert!(config.installed_skills["test-skill"]
+            .covered_tools
+            .is_empty());
     }
 }

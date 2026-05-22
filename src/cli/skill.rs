@@ -3,7 +3,7 @@ use crate::fetcher::ArchiveCache;
 use crate::installer::{
     execute_npx_install, generate_install_instructions, generate_uninstall_instructions,
     install_mega_skill, install_skill, print_install_summary, print_uninstall_summary,
-    uninstall_skill,
+    resolve_pi_coverage, uninstall_skill,
 };
 use crate::models::{
     get_global_config_path, GlobalConfig, InstallAction, ProjectConfig, Registry, Scope,
@@ -30,6 +30,14 @@ pub async fn run(command: SkillCommands, verbose: bool) -> Result<()> {
     }
 }
 
+fn coverage_suffix(covered_tools: &[String]) -> String {
+    if covered_tools.is_empty() {
+        String::new()
+    } else {
+        format!(" [covers: {}]", covered_tools.join(", "))
+    }
+}
+
 fn list_skills(verbose: bool) -> Result<()> {
     let global_config = GlobalConfig::load();
     let project_config_path = Path::new(".rulesify.toml");
@@ -51,7 +59,13 @@ fn list_skills(verbose: bool) -> Result<()> {
     if !global_skills.is_empty() {
         println!("Global skills:");
         for (tool, id, info) in global_skills {
-            println!("  - {} [{}] (added: {})", id, tool, info.added);
+            println!(
+                "  - {} [{}] (added: {}){}",
+                id,
+                tool,
+                info.added,
+                coverage_suffix(&info.covered_tools)
+            );
             if verbose {
                 println!("    Source: {}", info.source);
             }
@@ -61,9 +75,17 @@ fn list_skills(verbose: bool) -> Result<()> {
     if !project_skills.is_empty() {
         println!("\nProject skills:");
         for (id, info) in project_skills {
-            println!("  - {} (added: {})", id, info.added);
+            println!(
+                "  - {} (added: {}){}",
+                id,
+                info.added,
+                coverage_suffix(&info.covered_tools)
+            );
             if verbose {
                 println!("    Source: {}", info.source);
+                if !info.covered_tools.is_empty() {
+                    println!("    Covered tools: {}", info.covered_tools.join(", "));
+                }
             }
         }
     }
@@ -191,6 +213,8 @@ async fn add_skill(id: String, global: bool, agent_mode: bool, _verbose: bool) -
         return Err(RulesifyError::ConfigNotFound.into());
     }
 
+    let (physical_tools, covered_tools) = resolve_pi_coverage(&tools);
+
     let registry = load_registry().await?;
 
     let skill = registry
@@ -211,6 +235,12 @@ async fn add_skill(id: String, global: bool, agent_mode: bool, _verbose: bool) -
         .into());
     }
 
+    if !covered_tools.is_empty() {
+        println!(
+            "Pi is covered by other agents — skipping physical install for pi, marking in registry."
+        );
+    }
+
     println!("Installing '{}'...", skill.name);
 
     let results = match &skill.install_action {
@@ -218,11 +248,17 @@ async fn add_skill(id: String, global: bool, agent_mode: bool, _verbose: bool) -
             package,
             args,
             uninstall_flag,
-        }) => execute_npx_install(package, args, uninstall_flag.as_deref(), &tools, scope)?,
+        }) => execute_npx_install(
+            package,
+            args,
+            uninstall_flag.as_deref(),
+            &physical_tools,
+            scope,
+        )?,
         Some(InstallAction::Copy { .. }) | None => {
             let cache = ArchiveCache::new();
             let client = GitHubClient::new();
-            install_skill(skill, &tools, scope, &client, &cache).await?
+            install_skill(skill, &physical_tools, scope, &client, &cache).await?
         }
         Some(InstallAction::MegaSkillCopy {
             source_folder,
@@ -234,7 +270,7 @@ async fn add_skill(id: String, global: bool, agent_mode: bool, _verbose: bool) -
                 skill,
                 source_folder,
                 dest_name,
-                &tools,
+                &physical_tools,
                 scope,
                 &client,
                 &cache,
@@ -243,6 +279,20 @@ async fn add_skill(id: String, global: bool, agent_mode: bool, _verbose: bool) -
         }
         Some(InstallAction::Command { value }) => {
             println!("Running custom install command: {}", value);
+            // Still register covered tool entries
+            if global {
+                let mut global_config = GlobalConfig::load();
+                for tool in &physical_tools {
+                    global_config.add_skill(
+                        tool,
+                        &id,
+                        &skill.source_url,
+                        &skill.commit_sha,
+                        covered_tools.clone(),
+                    );
+                }
+                global_config.save()?;
+            }
             return Ok(());
         }
     };
@@ -260,9 +310,15 @@ async fn add_skill(id: String, global: bool, agent_mode: bool, _verbose: bool) -
 
     if global {
         let mut global_config = GlobalConfig::load();
-        for tool in &tools {
+        for tool in &physical_tools {
             if results.iter().any(|r| r.tool == *tool && r.success) {
-                global_config.add_skill(tool, &id, &skill.source_url, &skill.commit_sha);
+                global_config.add_skill(
+                    tool,
+                    &id,
+                    &skill.source_url,
+                    &skill.commit_sha,
+                    covered_tools.clone(),
+                );
             }
         }
         global_config.save()?;
@@ -272,7 +328,13 @@ async fn add_skill(id: String, global: bool, agent_mode: bool, _verbose: bool) -
         );
     } else {
         let mut project_config = project_config.unwrap_or(ProjectConfig::new());
-        project_config.add_skill(&id, &skill.source_url, &skill.commit_sha, Scope::Project);
+        project_config.add_skill(
+            &id,
+            &skill.source_url,
+            &skill.commit_sha,
+            Scope::Project,
+            covered_tools.clone(),
+        );
         std::fs::write(
             project_config_path,
             toml::to_string_pretty(&project_config)?,
@@ -285,7 +347,7 @@ async fn add_skill(id: String, global: bool, agent_mode: bool, _verbose: bool) -
 fn output_install_instructions(skill: &crate::models::Skill, tools: &[String], scope: Scope) {
     println!(
         "{}",
-        generate_install_instructions(&skill.name, &skill.source_url, tools, scope,)
+        generate_install_instructions(&skill.name, &skill.source_url, tools, scope)
     );
 
     if let Some(InstallAction::Npx {
@@ -330,6 +392,8 @@ fn remove_skill(id: String, global: bool, agent_mode: bool, _verbose: bool) -> R
     let project_config_path = Path::new(".rulesify.toml");
 
     if global {
+        // `get_tools_for_skill` returns only tools with direct entries
+        // (not covered tools), which is the correct set for physical uninstall.
         let tools = global_config.get_tools_for_skill(&id);
         if tools.is_empty() {
             println!("'{}' is not installed globally.", id);
@@ -367,7 +431,11 @@ fn remove_skill(id: String, global: bool, agent_mode: bool, _verbose: bool) -> R
             return Ok(());
         }
 
-        let results = uninstall_skill(&id, &project_config.tools, scope);
+        // Resolve Pi coverage: only delete physical installs.
+        // Covered tools (e.g. Pi) have no files to clean up.
+        let (physical_tools, _) = resolve_pi_coverage(&project_config.tools);
+
+        let results = uninstall_skill(&id, &physical_tools, scope);
 
         print_uninstall_summary(&results, &id);
 
@@ -511,6 +579,7 @@ async fn update_registry(agent_mode: bool, verbose: bool) -> Result<()> {
             return Err(RulesifyError::ConfigNotFound.into());
         };
         let tools = config.tools.clone();
+        let (physical_tools, _) = resolve_pi_coverage(&tools);
         for (_id, skill) in &project_updated {
             println!("\nUpdating '{}' (project)...", skill.name);
 
@@ -523,7 +592,7 @@ async fn update_registry(agent_mode: bool, verbose: bool) -> Result<()> {
                     package,
                     args,
                     uninstall_flag.as_deref(),
-                    &tools,
+                    &physical_tools,
                     Scope::Project,
                 )?,
                 Some(InstallAction::MegaSkillCopy {
@@ -534,14 +603,16 @@ async fn update_registry(agent_mode: bool, verbose: bool) -> Result<()> {
                         skill,
                         source_folder,
                         dest_name,
-                        &tools,
+                        &physical_tools,
                         Scope::Project,
                         &client,
                         &cache,
                     )
                     .await?
                 }
-                _ => install_skill(skill, &tools, Scope::Project, &client, &cache).await?,
+                _ => {
+                    install_skill(skill, &physical_tools, Scope::Project, &client, &cache).await?
+                }
             };
             print_install_summary(&results, &skill.name);
         }

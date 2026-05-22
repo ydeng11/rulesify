@@ -2,7 +2,7 @@ use crate::fetcher::ArchiveCache;
 use crate::installer::tool_paths::get_skills_parent_dir;
 use crate::installer::{
     execute_npx_install, install_mega_skill, install_skill, print_install_summary,
-    print_uninstall_summary, uninstall_skill,
+    print_uninstall_summary, resolve_pi_coverage, uninstall_skill,
 };
 use crate::models::{GlobalConfig, InstallAction, ProjectConfig, Registry, Scope};
 use crate::registry::{fetch_registry, load_builtin, GitHubClient, RegistryCache};
@@ -151,10 +151,11 @@ pub async fn run(verbose: bool) -> Result<()> {
         let mut install_errors: Vec<(String, String)> = Vec::new();
 
         for (id, skill) in &result.added {
-            let (tools_with_global, tools_to_install): (Vec<_>, Vec<_>) = tools
-                .iter()
-                .cloned()
-                .partition(|tool| global_config.is_skill_installed_for_tool(tool, id));
+            let (tools_with_global, tools_to_install): (Vec<_>, Vec<_>) =
+                tools.iter().cloned().partition(|tool| {
+                    // Check both direct install and coverage (e.g. Pi covered by another agent)
+                    global_config.is_skill_covered_for_tool(tool, id)
+                });
 
             if !tools_with_global.is_empty() {
                 println!(
@@ -166,6 +167,16 @@ pub async fn run(verbose: bool) -> Result<()> {
 
             if tools_to_install.is_empty() {
                 continue;
+            }
+
+            // Resolve Pi coverage: skip physical install for Pi when other agents
+            // cover it, to avoid Pi finding skills in duplicate locations.
+            let (physical_tools, covered_tools) = resolve_pi_coverage(&tools_to_install);
+
+            if !covered_tools.is_empty() {
+                println!(
+                    "Pi is covered by other agents — skipping physical install for pi, marking in registry."
+                );
             }
 
             let missing_deps = check_all_dependencies(&skill.dependencies);
@@ -190,7 +201,7 @@ pub async fn run(verbose: bool) -> Result<()> {
                         skill,
                         source_folder,
                         dest_name,
-                        &tools_to_install,
+                        &physical_tools,
                         Scope::Project,
                         &client,
                         &cache,
@@ -213,7 +224,7 @@ pub async fn run(verbose: bool) -> Result<()> {
                         package,
                         args,
                         uninstall_flag.as_deref(),
-                        &tools_to_install,
+                        &physical_tools,
                         Scope::Project,
                     ) {
                         Ok(r) => r,
@@ -223,18 +234,26 @@ pub async fn run(verbose: bool) -> Result<()> {
                         }
                     }
                 }
-                _ => match install_skill(skill, &tools_to_install, Scope::Project, &client, &cache)
-                    .await
-                {
-                    Ok(r) => r,
-                    Err(e) => {
-                        install_errors.push((skill.name.clone(), e.to_string()));
-                        continue;
+                _ => {
+                    match install_skill(skill, &physical_tools, Scope::Project, &client, &cache)
+                        .await
+                    {
+                        Ok(r) => r,
+                        Err(e) => {
+                            install_errors.push((skill.name.clone(), e.to_string()));
+                            continue;
+                        }
                     }
-                },
+                }
             };
             print_install_summary(&results, &skill.name);
-            config.add_skill(id, &skill.source_url, &skill.commit_sha, Scope::Project);
+            config.add_skill(
+                id,
+                &skill.source_url,
+                &skill.commit_sha,
+                Scope::Project,
+                covered_tools.clone(),
+            );
         }
 
         if !install_errors.is_empty() {

@@ -86,12 +86,14 @@ mod tests {
             "https://test.com",
             "abc123",
             Scope::Project,
+            vec![],
         );
         config.add_skill(
             "existing-skill",
             "https://test.com",
             "def456",
             Scope::Project,
+            vec![],
         );
 
         let temp_dir = TempDir::new().unwrap();
@@ -122,6 +124,7 @@ mod tests {
             "https://test.com",
             "abc123",
             Scope::Project,
+            vec![],
         );
 
         let temp_dir = TempDir::new().unwrap();
@@ -144,8 +147,20 @@ mod tests {
         let mut config = ProjectConfig::new();
         config.tools = vec!["claude-code".to_string()];
 
-        config.add_skill("skill1", "https://test.com", "abc123", Scope::Project);
-        config.add_skill("skill2", "https://test.com", "def456", Scope::Project);
+        config.add_skill(
+            "skill1",
+            "https://test.com",
+            "abc123",
+            Scope::Project,
+            vec![],
+        );
+        config.add_skill(
+            "skill2",
+            "https://test.com",
+            "def456",
+            Scope::Project,
+            vec![],
+        );
 
         let temp_dir = TempDir::new().unwrap();
         setup_project_skill(temp_dir.path(), "claude-code", "skill1");
@@ -170,7 +185,13 @@ mod tests {
         config.tools = vec!["claude-code".to_string()];
 
         let skill_name = "mega-skill-keep-test";
-        config.add_skill(skill_name, "https://test.com", "abc123", Scope::Project);
+        config.add_skill(
+            skill_name,
+            "https://test.com",
+            "abc123",
+            Scope::Project,
+            vec![],
+        );
 
         let temp_dir = TempDir::new().unwrap();
         setup_project_skill(temp_dir.path(), "claude-code", skill_name);
@@ -197,7 +218,13 @@ mod tests {
         config.tools = vec!["claude-code".to_string()];
 
         let skill_name = "mega-skill-remove-test";
-        config.add_skill(skill_name, "https://test.com", "abc123", Scope::Project);
+        config.add_skill(
+            skill_name,
+            "https://test.com",
+            "abc123",
+            Scope::Project,
+            vec![],
+        );
 
         let temp_dir = TempDir::new().unwrap();
         let mega_folder = temp_dir.path().join(".claude/skills").join(skill_name);
@@ -226,12 +253,14 @@ mod tests {
             "missing-global",
             "https://test.com",
             "abc123",
+            vec![],
         );
         config.add_skill(
             "claude-code",
             "existing-global",
             "https://test.com",
             "def456",
+            vec![],
         );
 
         let home = dirs::home_dir().unwrap();
@@ -266,12 +295,14 @@ mod tests {
             "existing-global-1",
             "https://test.com",
             "abc123",
+            vec![],
         );
         config.add_skill(
             "claude-code",
             "existing-global-2",
             "https://test.com",
             "def456",
+            vec![],
         );
 
         let home = dirs::home_dir().unwrap();
@@ -307,13 +338,21 @@ mod tests {
             "global-multi-1",
             "https://test.com",
             "abc123",
+            vec![],
         );
-        config.add_skill("codex", "global-multi-1", "https://test.com", "abc123");
+        config.add_skill(
+            "codex",
+            "global-multi-1",
+            "https://test.com",
+            "abc123",
+            vec![],
+        );
         config.add_skill(
             "claude-code",
             "global-multi-2",
             "https://test.com",
             "def456",
+            vec![],
         );
 
         let home = dirs::home_dir().unwrap();
@@ -355,7 +394,13 @@ mod tests {
     #[test]
     fn test_reconcile_empty_config() {
         let mut config = GlobalConfig::new();
-        config.add_skill("claude-code", "missing-empty", "https://test.com", "abc123");
+        config.add_skill(
+            "claude-code",
+            "missing-empty",
+            "https://test.com",
+            "abc123",
+            vec![],
+        );
 
         let removed = reconcile_global_config(&mut config);
 

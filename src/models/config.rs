@@ -18,6 +18,11 @@ pub struct InstalledSkill {
     pub commit_sha: String,
     #[serde(default)]
     pub scope: Scope,
+    /// Tools for which this skill is "covered" without a physical install.
+    /// E.g., when Pi is configured alongside other agents, Pi is marked
+    /// as covered because it reads skills from other agent directories.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub covered_tools: Vec<String>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -42,7 +47,14 @@ impl ProjectConfig {
         Self::default()
     }
 
-    pub fn add_skill(&mut self, id: &str, source: &str, commit_sha: &str, scope: Scope) {
+    pub fn add_skill(
+        &mut self,
+        id: &str,
+        source: &str,
+        commit_sha: &str,
+        scope: Scope,
+        covered_tools: Vec<String>,
+    ) {
         self.installed_skills.insert(
             id.to_string(),
             InstalledSkill {
@@ -50,6 +62,7 @@ impl ProjectConfig {
                 source: source.to_string(),
                 commit_sha: commit_sha.to_string(),
                 scope,
+                covered_tools,
             },
         );
     }
