@@ -5,7 +5,7 @@ use crate::installer::{
     print_uninstall_summary, resolve_pi_coverage, uninstall_skill,
 };
 use crate::models::{GlobalConfig, InstallAction, ProjectConfig, Registry, Scope};
-use crate::registry::{fetch_registry, load_builtin, GitHubClient, RegistryCache};
+use crate::registry::{load_builtin, GitHubClient};
 use crate::scanner::scan_project;
 use crate::tui::{SelectionResult, SkillSelector, ToolPicker};
 use crate::utils::{check_all_dependencies, Result};
@@ -302,16 +302,8 @@ fn scan_disk_skills(tools: &[String], registry: &Registry) -> Vec<(String, Scope
 }
 
 async fn load_registry() -> Result<Registry> {
-    let cache = RegistryCache::new(Path::new("."));
-
-    if let Ok(registry) = fetch_registry().await {
-        cache.save(&registry)?;
-        return Ok(registry);
-    }
-
-    if let Some(registry) = cache.load()? {
-        return Ok(registry);
-    }
-
+    // Prefer built-in registry so local changes are immediately visible
+    // without requiring a remote fetch that overrides them.
+    // Run `rulesify skill update` to explicitly sync the latest remote.
     load_builtin()
 }

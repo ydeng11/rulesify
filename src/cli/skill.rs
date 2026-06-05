@@ -610,9 +610,7 @@ async fn update_registry(agent_mode: bool, verbose: bool) -> Result<()> {
                     )
                     .await?
                 }
-                _ => {
-                    install_skill(skill, &physical_tools, Scope::Project, &client, &cache).await?
-                }
+                _ => install_skill(skill, &physical_tools, Scope::Project, &client, &cache).await?,
             };
             print_install_summary(&results, &skill.name);
         }
@@ -635,17 +633,8 @@ async fn update_registry(agent_mode: bool, verbose: bool) -> Result<()> {
 }
 
 async fn load_registry() -> Result<Registry> {
-    let cache = RegistryCache::new(Path::new("."));
-
-    if let Ok(registry) = fetch_registry().await {
-        cache.save(&registry)?;
-        return Ok(registry);
-    }
-
-    if let Some(registry) = cache.load()? {
-        return Ok(registry);
-    }
-
+    // Prefer built-in registry so local changes are immediately visible.
+    // Run `rulesify skill update` to explicitly sync the latest remote.
     load_builtin()
 }
 
