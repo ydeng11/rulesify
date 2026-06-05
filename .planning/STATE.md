@@ -32,7 +32,7 @@
 | Phases Completed | 3/3 |
 | Requirements Delivered | 26/26 |
 | Registry Skills | ~60 (includes community sources) |
-| Sources | 11 (anthropics, openai, mattpocock, MiniMax-AI, obra, gsd-build, pbakaus, cyxzdev) |
+| Sources | 12 (anthropics, openai, mattpocock, MiniMax-AI, obra, gsd-build, pbakaus, cyxzdev, leonxlnx) |
 | Blocked Hours | 0 |
 
 ---
@@ -57,6 +57,8 @@
 - [x] Phase 3: Lifecycle & UX Polish
 - [x] Add cyxzdev/Uncodixfy to registry (2026-06-04)
 - [x] Add CyxzdevUncodixfy SourceRepo variant for weekly updates
+- [x] Add Leonxlnx/taste-skill mega-skill to registry (2026-06-04)
+- [x] Add LeonxlnxTasteSkill SourceRepo variant for weekly updates
 - [ ] Review and update STATE.md periodically
 
 ### Blockers
@@ -66,13 +68,13 @@
 
 ## Session Continuity
 
-**Last Session:** 2026-06-04 - Added cyxzdev/Uncodixfy to registry & update script
+**Last Session:** 2026-06-04 - Added Leonxlnx/taste-skill mega-skill
 
 **Carry Forward:**
 - All 26 requirements implemented across 3 phases
-- Registry has ~60 skills from 11 source repos
+- Registry has ~60 skills from 12 source repos
 - Weekly GitHub Action (update-registry.yml) keeps registry fresh
-- Added CyxzdevUncodixfy SourceRepo variant with root-level SKILL.md handling
+- Added CyxzdevUncodixfy and LeonxlnxTasteSkill SourceRepo variants
 - 147 tests passing, 0 clippy warnings
 
 ---
