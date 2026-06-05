@@ -13,6 +13,7 @@ pub enum SourceRepo {
     GsdSkills,
     PbakausImpeccable,
     CyxzdevUncodixfy,
+    LeonxlnxTasteSkill,
 }
 
 impl SourceRepo {
@@ -29,6 +30,7 @@ impl SourceRepo {
             SourceRepo::GsdSkills,
             SourceRepo::PbakausImpeccable,
             SourceRepo::CyxzdevUncodixfy,
+            SourceRepo::LeonxlnxTasteSkill,
         ]
     }
 
@@ -44,6 +46,7 @@ impl SourceRepo {
             SourceRepo::GsdSkills => "gsd-build",
             SourceRepo::PbakausImpeccable => "pbakaus",
             SourceRepo::CyxzdevUncodixfy => "cyxzdev",
+            SourceRepo::LeonxlnxTasteSkill => "Leonxlnx",
         }
     }
 
@@ -60,6 +63,7 @@ impl SourceRepo {
             SourceRepo::GsdSkills => "get-shit-done",
             SourceRepo::PbakausImpeccable => "impeccable",
             SourceRepo::CyxzdevUncodixfy => "Uncodixfy",
+            SourceRepo::LeonxlnxTasteSkill => "taste-skill",
         }
     }
 
@@ -83,6 +87,7 @@ impl SourceRepo {
             SourceRepo::GsdSkills => "",
             SourceRepo::PbakausImpeccable => "source/skills/impeccable/SKILL.md",
             SourceRepo::CyxzdevUncodixfy => "SKILL.md",
+            SourceRepo::LeonxlnxTasteSkill => "",
         }
     }
 
@@ -94,6 +99,7 @@ impl SourceRepo {
                 | SourceRepo::GsdSkills
                 | SourceRepo::PbakausImpeccable
                 | SourceRepo::CyxzdevUncodixfy
+                | SourceRepo::LeonxlnxTasteSkill
         )
     }
 
@@ -126,7 +132,8 @@ impl SourceRepo {
             }
             SourceRepo::ObraSuperpowers
             | SourceRepo::ObraSuperpowersLab
-            | SourceRepo::GsdSkills => None,
+            | SourceRepo::GsdSkills
+            | SourceRepo::LeonxlnxTasteSkill => None,
             SourceRepo::PbakausImpeccable => {
                 if path == "source/skills/impeccable/SKILL.md" {
                     Some("impeccable".to_string())
@@ -162,6 +169,7 @@ impl SourceRepo {
             SourceRepo::GsdSkills => "",
             SourceRepo::PbakausImpeccable => "source/skills",
             SourceRepo::CyxzdevUncodixfy => ".",
+            SourceRepo::LeonxlnxTasteSkill => "skills",
             _ => "",
         }
     }
@@ -173,6 +181,7 @@ impl SourceRepo {
             SourceRepo::GsdSkills => "gsd",
             SourceRepo::PbakausImpeccable => "impeccable",
             SourceRepo::CyxzdevUncodixfy => "uncodixfy",
+            SourceRepo::LeonxlnxTasteSkill => "taste-skill",
             _ => "",
         }
     }

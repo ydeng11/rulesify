@@ -110,6 +110,11 @@ fn create_synthetic_mega_skill(source: SourceRepo, repo_metrics: &RepoMetrics) -
             },
             vec!["node".to_string(), "npx".to_string()],
         ),
+        SourceRepo::LeonxlnxTasteSkill => (
+            "Taste-Skill - gives your AI good taste. Stops the AI from generating boring, generic slop. Collection of skills for image generation, minimalism, output quality, and taste-aware prompting.".to_string(),
+            InstallAction::mega_skill_copy("skills", "taste-skill"),
+            Vec::new(),
+        ),
         _ => (
             "Mega-skill collection".to_string(),
             InstallAction::mega_skill_copy(source_folder, &skill_id),
@@ -283,7 +288,8 @@ async fn main() -> Result<()> {
             match source {
                 SourceRepo::ObraSuperpowers
                 | SourceRepo::ObraSuperpowersLab
-                | SourceRepo::GsdSkills => {
+                | SourceRepo::GsdSkills
+                | SourceRepo::LeonxlnxTasteSkill => {
                     log::info!("Creating synthetic mega-skill for {}", source.full_name());
                     let meta = create_synthetic_mega_skill(source, &repo_metrics);
                     let score = scorer.calculate_for_mega_skill(&meta, &repo_metrics);

@@ -5,7 +5,7 @@ mod tests {
     #[test]
     fn test_all_sources() {
         let sources = SourceRepo::all();
-        assert!(sources.len() >= 11);
+        assert!(sources.len() >= 12);
     }
 
     #[test]
@@ -50,6 +50,14 @@ mod tests {
         assert_eq!(uncodixfy.skill_pattern(), "SKILL.md");
         assert_eq!(uncodixfy.mega_skill_source_folder(), ".");
         assert_eq!(uncodixfy.mega_skill_dest_name(), "uncodixfy");
+
+        let taste = SourceRepo::LeonxlnxTasteSkill;
+        assert!(taste.is_mega_skill_collection());
+        assert_eq!(taste.owner(), "Leonxlnx");
+        assert_eq!(taste.repo(), "taste-skill");
+        assert_eq!(taste.skill_pattern(), "");
+        assert_eq!(taste.mega_skill_source_folder(), "skills");
+        assert_eq!(taste.mega_skill_dest_name(), "taste-skill");
     }
 
     #[test]

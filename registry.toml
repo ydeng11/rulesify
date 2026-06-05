@@ -1174,6 +1174,27 @@ type = "copy"
 [skills.edit-article.install_action.value]
 folder = "skills/personal/edit-article"
 
+[skills.taste-skill]
+name = "taste-skill"
+description = "Taste-Skill - gives your AI good taste. Stops the AI from generating boring, generic slop. Collection of skills for image generation, minimalism, output quality, and taste-aware prompting."
+source_url = "https://github.com/Leonxlnx/taste-skill/tree/main/"
+stars = 33155
+commit_sha = ""
+context_size = 0
+domain = "development"
+last_updated = "2026-06-04"
+tags = ["mega-skill"]
+score = 105.0
+is_mega_skill = true
+dependencies = []
+
+[skills.taste-skill.install_action]
+type = "mega-skill-copy"
+
+[skills.taste-skill.install_action.value]
+source_folder = "skills"
+dest_name = "taste-skill"
+
 [skills.grill-me]
 name = "grill-me"
 description = 'Interview the user relentlessly about a plan or design until reaching shared understanding, resolving each branch of the decision tree. Use when user wants to stress-test a plan, get grilled on their design, or mentions "grill me".'
