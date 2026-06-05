@@ -12,6 +12,7 @@ pub enum SourceRepo {
     ObraSuperpowersLab,
     GsdSkills,
     PbakausImpeccable,
+    CyxzdevUncodixfy,
 }
 
 impl SourceRepo {
@@ -27,6 +28,7 @@ impl SourceRepo {
             SourceRepo::ObraSuperpowersLab,
             SourceRepo::GsdSkills,
             SourceRepo::PbakausImpeccable,
+            SourceRepo::CyxzdevUncodixfy,
         ]
     }
 
@@ -41,6 +43,7 @@ impl SourceRepo {
             SourceRepo::ObraSuperpowers | SourceRepo::ObraSuperpowersLab => "obra",
             SourceRepo::GsdSkills => "gsd-build",
             SourceRepo::PbakausImpeccable => "pbakaus",
+            SourceRepo::CyxzdevUncodixfy => "cyxzdev",
         }
     }
 
@@ -56,6 +59,7 @@ impl SourceRepo {
             SourceRepo::ObraSuperpowersLab => "superpowers-lab",
             SourceRepo::GsdSkills => "get-shit-done",
             SourceRepo::PbakausImpeccable => "impeccable",
+            SourceRepo::CyxzdevUncodixfy => "Uncodixfy",
         }
     }
 
@@ -78,6 +82,7 @@ impl SourceRepo {
             SourceRepo::ObraSuperpowers | SourceRepo::ObraSuperpowersLab => "",
             SourceRepo::GsdSkills => "",
             SourceRepo::PbakausImpeccable => "source/skills/impeccable/SKILL.md",
+            SourceRepo::CyxzdevUncodixfy => "SKILL.md",
         }
     }
 
@@ -88,6 +93,7 @@ impl SourceRepo {
                 | SourceRepo::ObraSuperpowersLab
                 | SourceRepo::GsdSkills
                 | SourceRepo::PbakausImpeccable
+                | SourceRepo::CyxzdevUncodixfy
         )
     }
 
@@ -128,6 +134,13 @@ impl SourceRepo {
                     None
                 }
             }
+            SourceRepo::CyxzdevUncodixfy => {
+                if path == "SKILL.md" {
+                    Some("uncodixfy".to_string())
+                } else {
+                    None
+                }
+            }
         }
     }
 
@@ -148,6 +161,7 @@ impl SourceRepo {
             SourceRepo::ObraSuperpowersLab => "skills",
             SourceRepo::GsdSkills => "",
             SourceRepo::PbakausImpeccable => "source/skills",
+            SourceRepo::CyxzdevUncodixfy => ".",
             _ => "",
         }
     }
@@ -158,6 +172,7 @@ impl SourceRepo {
             SourceRepo::ObraSuperpowersLab => "superpowers-lab",
             SourceRepo::GsdSkills => "gsd",
             SourceRepo::PbakausImpeccable => "impeccable",
+            SourceRepo::CyxzdevUncodixfy => "uncodixfy",
             _ => "",
         }
     }

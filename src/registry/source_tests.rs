@@ -5,7 +5,7 @@ mod tests {
     #[test]
     fn test_all_sources() {
         let sources = SourceRepo::all();
-        assert!(sources.len() >= 10);
+        assert!(sources.len() >= 11);
     }
 
     #[test]
@@ -42,6 +42,14 @@ mod tests {
             impeccable.skill_pattern(),
             "source/skills/impeccable/SKILL.md"
         );
+
+        let uncodixfy = SourceRepo::CyxzdevUncodixfy;
+        assert!(uncodixfy.is_mega_skill_collection());
+        assert_eq!(uncodixfy.owner(), "cyxzdev");
+        assert_eq!(uncodixfy.repo(), "Uncodixfy");
+        assert_eq!(uncodixfy.skill_pattern(), "SKILL.md");
+        assert_eq!(uncodixfy.mega_skill_source_folder(), ".");
+        assert_eq!(uncodixfy.mega_skill_dest_name(), "uncodixfy");
     }
 
     #[test]
@@ -61,6 +69,10 @@ mod tests {
         let impeccable = SourceRepo::PbakausImpeccable;
         let id = impeccable.parse_skill_id("source/skills/impeccable/SKILL.md");
         assert_eq!(id, Some("impeccable".to_string()));
+
+        let uncodixfy = SourceRepo::CyxzdevUncodixfy;
+        let id = uncodixfy.parse_skill_id("SKILL.md");
+        assert_eq!(id, Some("uncodixfy".to_string()));
     }
 
     #[test]
@@ -87,5 +99,9 @@ mod tests {
 
         let gsd = SourceRepo::GsdSkills;
         assert_eq!(gsd.parse_skill_id("commands/debug/SKILL.md"), None);
+
+        let uncodixfy = SourceRepo::CyxzdevUncodixfy;
+        assert_eq!(uncodixfy.parse_skill_id("subdir/SKILL.md"), None);
+        assert_eq!(uncodixfy.parse_skill_id("README.md"), None);
     }
 }
