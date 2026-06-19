@@ -1194,3 +1194,153 @@ type = "copy"
 
 [skills.gh-fix-ci.install_action.value]
 folder = "skills/.curated/gh-fix-ci"
+
+[skills.humanizer-zh]
+name = "humanizer-zh"
+description = "Humanizer 的汉化版本，Claude Code Skills，旨在消除文本中 AI 生成的痕迹。Chinese version of Humanizer, aims to eliminate AI-generated traces in text."
+source_url = "https://github.com/op7418/Humanizer-zh"
+stars = 10708
+commit_sha = "91f3d394db8419c20d67ebe22a96cf8fee0a404b"
+context_size = 0
+domain = "writing"
+last_updated = "2026-06-18"
+tags = [
+    "ai-detection-bypass",
+    "chinese",
+    "humanization",
+    "writing",
+]
+score = 90.0
+is_mega_skill = false
+dependencies = []
+
+[skills.humanizer-zh.install_action]
+type = "copy"
+
+[skills.humanizer-zh.install_action.value]
+folder = "."
+
+[skills.stop-slop]
+name = "stop-slop"
+description = "A skill file for removing AI tells from prose. Removes AI writing patterns from prose."
+source_url = "https://github.com/hardikpandya/stop-slop"
+stars = 11305
+commit_sha = "8da1f030185bdfe8471220585162991eaeb970e9"
+context_size = 0
+domain = "writing"
+last_updated = "2026-06-18"
+tags = [
+    "ai-detection-bypass",
+    "prose-rewriting",
+    "humanization",
+    "writing",
+]
+score = 92.0
+is_mega_skill = false
+dependencies = []
+
+[skills.stop-slop.install_action]
+type = "copy"
+
+[skills.stop-slop.install_action.value]
+folder = "."
+
+[skills.ai-flavor-remover]
+name = "ai-flavor-remover"
+description = "AI 味去除 - 仅在 Gemini 2.5 Pro 上测试通过。AI flavor remover - tested on Gemini 2.5 Pro."
+source_url = "https://github.com/hylarucoder/ai-flavor-remover"
+stars = 1035
+commit_sha = "919386756cf568edf0ac9bd40ae96a9eeea6e21e"
+context_size = 0
+domain = "writing"
+last_updated = "2026-06-18"
+tags = [
+    "ai-detection-bypass",
+    "chinese",
+    "humanization",
+    "writing",
+]
+score = 75.0
+is_mega_skill = false
+dependencies = []
+
+[skills.ai-flavor-remover.install_action]
+type = "copy"
+
+[skills.ai-flavor-remover.install_action.value]
+folder = "."
+
+[skills.nuwa-skill]
+name = "nuwa-skill"
+description = "你想蒸馏的下一个员工，何必是同事。蒸馏任何人的思维方式——心智模型、决策启发式、表达DNA。Distill how anyone thinks."
+source_url = "https://github.com/alchaincyf/nuwa-skill"
+stars = 24882
+commit_sha = "f4c9bc3f8df2cc036f9bed47ac2fecf56c366555"
+context_size = 0
+domain = "writing"
+last_updated = "2026-06-18"
+tags = [
+    "persona-distillation",
+    "thinking-patterns",
+    "writing-style",
+    "chinese",
+]
+score = 95.0
+is_mega_skill = false
+dependencies = []
+
+[skills.nuwa-skill.install_action]
+type = "copy"
+
+[skills.nuwa-skill.install_action.value]
+folder = "."
+
+[skills.shuorenhua]
+name = "shuorenhua"
+description = "说人话｜中文优先的去 AI 味改写 skill：保事实、分场景、改完可直接发。Chinese-first rewrite skill for Codex / Claude Code / Cursor / ChatGPT — removes AI tone, preserves facts."
+source_url = "https://github.com/MrGeDiao/shuorenhua"
+stars = 422
+commit_sha = "0d214c8f0b44ce5e2c923b38ee00ea5356f91a60"
+context_size = 0
+domain = "writing"
+last_updated = "2026-06-18"
+tags = [
+    "ai-detection-bypass",
+    "chinese",
+    "humanization",
+    "writing",
+]
+score = 70.0
+is_mega_skill = false
+dependencies = []
+
+[skills.shuorenhua.install_action]
+type = "copy"
+
+[skills.shuorenhua.install_action.value]
+folder = "."
+
+[skills.writing-agent]
+name = "writing-agent"
+description = "一个基于 Claude Code (Skills + Subagents) 的去AI味全栈写作系统。不仅防套路，更通过专属规则强制注入人类观点与细节，搭配读者测试评估与自动图文排版。"
+source_url = "https://github.com/dongbeixiaohuo/writing-agent"
+stars = 270
+commit_sha = "16611649786c6d5fa089dfd620a9892ed37b4ddb"
+context_size = 0
+domain = "writing"
+last_updated = "2026-06-18"
+tags = [
+    "ai-detection-bypass",
+    "chinese",
+    "writing-system",
+    "automation",
+]
+score = 68.0
+is_mega_skill = false
+dependencies = []
+
+[skills.writing-agent.install_action]
+type = "copy"
+
+[skills.writing-agent.install_action.value]
+folder = "."
