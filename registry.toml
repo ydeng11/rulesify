@@ -1,5 +1,5 @@
 version = 1
-updated = "2026-06-14"
+updated = "2026-06-25"
 
 [skills.triage]
 name = "triage"
@@ -1343,4 +1343,37 @@ dependencies = []
 type = "copy"
 
 [skills.writing-agent.install_action.value]
+folder = "."
+
+[skills.guizang-social-card-skill]
+name = "guizang-social-card-skill"
+description = "Generate Guizang-style social card image sets and WeChat official account cover pairs from articles, scripts, screenshots, product notes, subtitles, or photos. Use when the user asks for 小红书图文, Rednote/Xiaohongshu images, social cards, carousel images, 3:4 covers, 微信公众号封面, WeChat 21:9 + 1:1 covers, Swiss Style, or magazine-style social images."
+source_url = "https://github.com/op7418/guizang-social-card-skill"
+stars = 4000
+commit_sha = ""
+context_size = 0
+domain = "design"
+last_updated = "2026-06-25"
+tags = [
+    "html-template",
+    "wechat",
+    "image-generation",
+    "xiaohongshu",
+    "social-cards",
+    "swiss-design",
+    "editorial-design",
+    "playwright",
+    "claude-code",
+]
+score = 75.0
+is_mega_skill = false
+dependencies = [
+    "node",
+    "npx",
+]
+
+[skills.guizang-social-card-skill.install_action]
+type = "copy"
+
+[skills.guizang-social-card-skill.install_action.value]
 folder = "."

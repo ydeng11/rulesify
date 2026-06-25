@@ -14,6 +14,7 @@ pub enum SourceRepo {
     PbakausImpeccable,
     CyxzdevUncodixfy,
     LeonxlnxTasteSkill,
+    Op7418GuizangSocialCardSkill,
 }
 
 impl SourceRepo {
@@ -31,6 +32,7 @@ impl SourceRepo {
             SourceRepo::PbakausImpeccable,
             SourceRepo::CyxzdevUncodixfy,
             SourceRepo::LeonxlnxTasteSkill,
+            SourceRepo::Op7418GuizangSocialCardSkill,
         ]
     }
 
@@ -47,6 +49,7 @@ impl SourceRepo {
             SourceRepo::PbakausImpeccable => "pbakaus",
             SourceRepo::CyxzdevUncodixfy => "cyxzdev",
             SourceRepo::LeonxlnxTasteSkill => "Leonxlnx",
+            SourceRepo::Op7418GuizangSocialCardSkill => "op7418",
         }
     }
 
@@ -64,6 +67,7 @@ impl SourceRepo {
             SourceRepo::PbakausImpeccable => "impeccable",
             SourceRepo::CyxzdevUncodixfy => "Uncodixfy",
             SourceRepo::LeonxlnxTasteSkill => "taste-skill",
+            SourceRepo::Op7418GuizangSocialCardSkill => "guizang-social-card-skill",
         }
     }
 
@@ -88,6 +92,7 @@ impl SourceRepo {
             SourceRepo::PbakausImpeccable => "source/skills/impeccable/SKILL.md",
             SourceRepo::CyxzdevUncodixfy => "SKILL.md",
             SourceRepo::LeonxlnxTasteSkill => "",
+            SourceRepo::Op7418GuizangSocialCardSkill => "SKILL.md",
         }
     }
 
@@ -144,6 +149,13 @@ impl SourceRepo {
             SourceRepo::CyxzdevUncodixfy => {
                 if path == "SKILL.md" {
                     Some("uncodixfy".to_string())
+                } else {
+                    None
+                }
+            }
+            SourceRepo::Op7418GuizangSocialCardSkill => {
+                if path == "SKILL.md" {
+                    Some("guizang-social-card-skill".to_string())
                 } else {
                     None
                 }

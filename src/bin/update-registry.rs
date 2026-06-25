@@ -392,6 +392,64 @@ async fn main() -> Result<()> {
                         }
                     }
                 }
+                SourceRepo::Op7418GuizangSocialCardSkill => {
+                    let pattern = source.skill_pattern();
+                    match client
+                        .fetch_file(source.owner(), source.repo(), pattern)
+                        .await
+                    {
+                        Ok(content) => match SkillParser::parse(&content) {
+                            Ok(parsed) => {
+                                let skill_id = source
+                                    .parse_skill_id(pattern)
+                                    .unwrap_or("guizang-social-card-skill".into());
+                                let context_size = SkillParser::estimate_context_size(&content);
+                                let source_url =
+                                    format!("https://github.com/{}/tree/main", source.full_name());
+
+                                let commit_sha = client
+                                    .fetch_commit_for_path(
+                                        source.owner(),
+                                        source.repo(),
+                                        "SKILL.md",
+                                    )
+                                    .await
+                                    .unwrap_or_default();
+
+                                let meta = SkillMetadata {
+                                    skill_id,
+                                    name: parsed.name,
+                                    description: parsed.description,
+                                    source_repo: source.full_name(),
+                                    source_folder: ".".to_string(),
+                                    source_url,
+                                    commit_sha,
+                                    tags: parsed.tags,
+                                    stars: repo_metrics.stars,
+                                    context_size,
+                                    domain: String::new(),
+                                    last_updated: chrono::Utc::now().format("%Y-%m-%d").to_string(),
+                                    install_action: InstallAction::Copy {
+                                        folder: ".".to_string(),
+                                    },
+                                    is_mega_skill: false,
+                                    dependencies: Vec::new(),
+                                };
+                                let score = scorer.calculate_for_skill(&meta, &repo_metrics);
+                                all_skills.push((meta, score));
+                            }
+                            Err(e) => {
+                                log::warn!(
+                                    "Failed to parse guizang-social-card-skill SKILL.md: {}",
+                                    e
+                                )
+                            }
+                        },
+                        Err(e) => {
+                            log::warn!("Failed to fetch guizang-social-card-skill SKILL.md: {}", e)
+                        }
+                    }
+                }
                 _ => {}
             }
             continue;
