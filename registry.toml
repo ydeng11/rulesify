@@ -1,5 +1,29 @@
 version = 1
-updated = "2026-06-25"
+updated = "2026-06-30"
+
+[skills.hermes-tweet]
+name = "hermes-tweet"
+description = "Use Hermes Tweet from Hermes Agent for X/Twitter search, authenticated reads, approved actions, monitors, media workflows, and social automation through Xquik."
+source_url = "https://github.com/Xquik-dev/hermes-tweet/tree/master/skills/hermes-tweet"
+stars = 15
+commit_sha = "1eed801ca7fe1ad9dac93774421392e59f9705da"
+context_size = 1367
+domain = "integrations"
+last_updated = "2026-06-30"
+tags = [
+    "x-twitter",
+    "social-media",
+    "hermes-agent",
+]
+score = 85.4000015258789
+is_mega_skill = false
+dependencies = []
+
+[skills.hermes-tweet.install_action]
+type = "copy"
+
+[skills.hermes-tweet.install_action.value]
+folder = "skills/hermes-tweet"
 
 [skills.triage]
 name = "triage"
