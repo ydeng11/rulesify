@@ -23,33 +23,85 @@ jobs:
 
       - uses: actions-rust-lang/setup-rust-toolchain@v1
 
-      - name: Save manual skills
-        run: |
-          awk '/^\[skills\.hermes-tweet\]$/ { p=1; print; next }
-               /^\[skills\.[^.]+]$/ { p=0 }
-               p { print }' registry.toml > /tmp/hermes-tweet.toml
+      - name: Save original registry before auto-generation
+        run: cp registry.toml /tmp/registry-original.toml
 
       - run: cargo run --bin update-registry -- --force --verbose
 
-      - name: Restore manual skills
+      - name: Restore manually-added skills removed by auto-generator
         run: |
-          if [ -s /tmp/hermes-tweet.toml ] && ! grep -q '^\[skills\.hermes-tweet\]$' registry.toml; then
-            printf '\n' >> registry.toml
-            cat /tmp/hermes-tweet.toml >> registry.toml
-            echo "Restored manually-added skill: hermes-tweet"
-          fi
+          python3 << 'PYEOF'
+import re
 
-      - name: Verify manual skills preserved
+with open('/tmp/registry-original.toml') as f:
+    old = f.read()
+with open('registry.toml') as f:
+    new = f.read()
+
+# Extract all top-level skill IDs ([skills.<name>]) from both files
+old_ids = set(re.findall(r'^\[skills\.([^.]+)\]$', old, re.MULTILINE))
+new_ids = set(re.findall(r'^\[skills\.([^.]+)\]$', new, re.MULTILINE))
+
+missing = sorted(old_ids - new_ids)
+if not missing:
+    print('All skills preserved by auto-generator')
+    exit(0)
+
+# Parse old file into per-skill TOML blocks using a state machine
+# A block starts at [skills.<id>] and runs until the next top-level [skills.<other>]
+lines = old.split('\n')
+blocks = {}
+current_id = None
+current_lines = []
+
+for line in lines:
+    m = re.match(r'^\[skills\.([^.]+)\]$', line)
+    if m:
+        if current_id and current_lines:
+            blocks[current_id] = '\n'.join(current_lines)
+        current_id = m.group(1)
+        current_lines = [line]
+    elif current_id:
+        current_lines.append(line)
+
+if current_id and current_lines:
+    blocks[current_id] = '\n'.join(current_lines)
+
+# Restore missing blocks to the auto-generated file
+with open('registry.toml', 'a') as f:
+    for sid in missing:
+        if sid in blocks:
+            f.write('\n' + blocks[sid] + '\n')
+            print(f'Restored: {sid}')
+        else:
+            print(f'WARNING: {sid} missing from original backup — cannot restore')
+
+print(f'Restored {len(missing)} manually-added skill(s)')
+PYEOF
+
+      - name: Verify no skills lost
         run: |
-          grep -q '^\[skills\.hermes-tweet\]$' registry.toml || {
-            echo "FAIL: [skills.hermes-tweet] section missing from registry.toml"
-            exit 1
-          }
-          grep -q 'Xquik-dev/hermes-tweet' registry.toml || {
-            echo "FAIL: hermes-tweet source_url missing from registry.toml"
-            exit 1
-          }
-          echo "OK: hermes-tweet skill preserved in registry.toml"
+          python3 << 'PYEOF'
+import re
+
+with open('/tmp/registry-original.toml') as f:
+    old = f.read()
+with open('registry.toml') as f:
+    merged = f.read()
+
+old_ids = set(re.findall(r'^\[skills\.([^.]+)\]$', old, re.MULTILINE))
+merged_ids = set(re.findall(r'^\[skills\.([^.]+)\]$', merged, re.MULTILINE))
+
+still_missing = sorted(old_ids - merged_ids)
+if still_missing:
+    print(f'FAIL: {len(still_missing)} skill(s) still missing from registry.toml:')
+    for s in still_missing:
+        print(f'  - {s}')
+    exit(1)
+
+print(f'OK: All {len(old_ids)} skills from original registry are preserved')
+print(f'Total skills now: {len(merged_ids)}')
+PYEOF
 
       - id: changes
         run: |
