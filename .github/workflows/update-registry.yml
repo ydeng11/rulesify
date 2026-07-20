@@ -20,16 +20,42 @@ jobs:
     
     steps:
       - uses: actions/checkout@v5
-      
+
       - uses: actions-rust-lang/setup-rust-toolchain@v1
-      
+
+      - name: Save manual skills
+        run: |
+          awk '/^\[skills\.hermes-tweet\]$/ { p=1; print; next }
+               /^\[skills\.[^.]+]$/ { p=0 }
+               p { print }' registry.toml > /tmp/hermes-tweet.toml
+
       - run: cargo run --bin update-registry -- --force --verbose
-      
+
+      - name: Restore manual skills
+        run: |
+          if [ -s /tmp/hermes-tweet.toml ] && ! grep -q '^\[skills\.hermes-tweet\]$' registry.toml; then
+            printf '\n' >> registry.toml
+            cat /tmp/hermes-tweet.toml >> registry.toml
+            echo "Restored manually-added skill: hermes-tweet"
+          fi
+
+      - name: Verify manual skills preserved
+        run: |
+          grep -q '^\[skills\.hermes-tweet\]$' registry.toml || {
+            echo "FAIL: [skills.hermes-tweet] section missing from registry.toml"
+            exit 1
+          }
+          grep -q 'Xquik-dev/hermes-tweet' registry.toml || {
+            echo "FAIL: hermes-tweet source_url missing from registry.toml"
+            exit 1
+          }
+          echo "OK: hermes-tweet skill preserved in registry.toml"
+
       - id: changes
         run: |
           git diff --quiet registry.toml && echo "has_changes=false" >> $GITHUB_OUTPUT
           git diff --quiet registry.toml || echo "has_changes=true" >> $GITHUB_OUTPUT
-      
+
       - if: steps.changes.outputs.has_changes == 'true'
         uses: peter-evans/create-pull-request@v6
         with:
