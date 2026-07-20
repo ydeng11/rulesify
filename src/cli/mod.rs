@@ -58,11 +58,14 @@ pub enum SkillCommands {
         agent_mode: bool,
     },
 
-    /// Update registry cache
+    /// Update local registry from remote
     Update {
         /// Output instructions for AI agent instead of executing
         #[arg(long)]
         agent_mode: bool,
+        /// Skip date freshness check and overwrite local registry
+        #[arg(long)]
+        force: bool,
     },
 }
 

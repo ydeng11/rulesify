@@ -26,7 +26,10 @@ pub async fn run(command: SkillCommands, verbose: bool) -> Result<()> {
             global,
             agent_mode,
         } => remove_skill(id, global, agent_mode, verbose),
-        SkillCommands::Update { agent_mode } => update_registry(agent_mode, verbose).await,
+        SkillCommands::Update {
+            agent_mode,
+            force,
+        } => update_directory_registry(agent_mode, force, verbose).await,
     }
 }
 
@@ -450,14 +453,40 @@ fn remove_skill(id: String, global: bool, agent_mode: bool, _verbose: bool) -> R
     Ok(())
 }
 
-async fn update_registry(agent_mode: bool, verbose: bool) -> Result<()> {
-    println!("Updating registry cache...");
+async fn update_directory_registry(agent_mode: bool, force: bool, verbose: bool) -> Result<()> {
+    // 1. Check local registry.toml date
+    let local_path = Path::new("registry.toml");
+    let local_updated = if local_path.exists() {
+        let content = std::fs::read_to_string(local_path)?;
+        let local: Registry = toml::from_str(&content)?;
+        local.updated
+    } else {
+        String::new()
+    };
 
+    // 2. Fetch remote registry
+    println!("Fetching remote registry...");
     let registry = fetch_registry().await?;
+
+    // 3. Compare dates — skip if local is already current
+    if needs_registry_update(force, &local_updated, &registry.updated) {
+        if force {
+            println!("Force updating local registry...");
+        } else {
+            println!(
+                "Updating local registry ({} \u{2192} {})...",
+                local_updated, registry.updated
+            );
+        }
+
+        let content = toml::to_string_pretty(&registry)?;
+        std::fs::write(local_path, content)?;
+        println!("Local registry updated ({} skills)", registry.skills.len());
+    }
+
+    // 4. Save to local cache (always, so installed-skill update can use it)
     let cache = RegistryCache::new(Path::new("."));
     cache.save(&registry)?;
-
-    println!("Registry updated ({} skills)", registry.skills.len());
 
     if verbose {
         println!("Updated date: {}", registry.updated);
@@ -527,7 +556,7 @@ async fn update_registry(agent_mode: bool, verbose: bool) -> Result<()> {
         println!("  - {} (project: {} → {})", id, old_sha, skill.commit_sha);
     }
 
-    let cache = ArchiveCache::new();
+    let archive_cache = ArchiveCache::new();
     let client = GitHubClient::new();
 
     for (tool, _id, skill) in &global_updated {
@@ -556,7 +585,7 @@ async fn update_registry(agent_mode: bool, verbose: bool) -> Result<()> {
                     std::slice::from_ref(&tool),
                     Scope::Global,
                     &client,
-                    &cache,
+                    &archive_cache,
                 )
                 .await?
             }
@@ -566,7 +595,7 @@ async fn update_registry(agent_mode: bool, verbose: bool) -> Result<()> {
                     std::slice::from_ref(&tool),
                     Scope::Global,
                     &client,
-                    &cache,
+                    &archive_cache,
                 )
                 .await?
             }
@@ -606,11 +635,20 @@ async fn update_registry(agent_mode: bool, verbose: bool) -> Result<()> {
                         &physical_tools,
                         Scope::Project,
                         &client,
-                        &cache,
+                        &archive_cache,
                     )
                     .await?
                 }
-                _ => install_skill(skill, &physical_tools, Scope::Project, &client, &cache).await?,
+                _ => {
+                    install_skill(
+                        skill,
+                        &physical_tools,
+                        Scope::Project,
+                        &client,
+                        &archive_cache,
+                    )
+                    .await?
+                }
             };
             print_install_summary(&results, &skill.name);
         }
@@ -638,6 +676,48 @@ async fn load_registry() -> Result<Registry> {
     load_builtin()
 }
 
+fn needs_registry_update(force: bool, local_updated: &str, remote_updated: &str) -> bool {
+    if force {
+        return true;
+    }
+    if local_updated.is_empty() {
+        return true;
+    }
+    remote_updated > local_updated
+}
+
 fn load_project_config(path: &Path) -> Result<Option<ProjectConfig>> {
     ProjectConfig::reconcile_and_load(path)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_needs_update_when_remote_is_newer() {
+        assert!(needs_registry_update(false, "2026-01-01", "2026-06-15"));
+    }
+
+    #[test]
+    fn test_needs_update_when_local_is_current() {
+        assert!(!needs_registry_update(false, "2026-06-15", "2026-06-15"));
+    }
+
+    #[test]
+    fn test_needs_update_when_local_is_newer() {
+        assert!(!needs_registry_update(false, "2026-07-20", "2026-06-15"));
+    }
+
+    #[test]
+    fn test_needs_update_when_no_local_file() {
+        assert!(needs_registry_update(false, "", "2026-06-15"));
+    }
+
+    #[test]
+    fn test_force_overrides_freshness_check() {
+        assert!(needs_registry_update(true, "2026-07-20", "2026-06-15"));
+        assert!(needs_registry_update(true, "2026-06-15", "2026-06-15"));
+        assert!(needs_registry_update(true, "", "2026-06-15"));
+    }
 }
