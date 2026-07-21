@@ -26,10 +26,9 @@ pub async fn run(command: SkillCommands, verbose: bool) -> Result<()> {
             global,
             agent_mode,
         } => remove_skill(id, global, agent_mode, verbose),
-        SkillCommands::Update {
-            agent_mode,
-            force,
-        } => update_directory_registry(agent_mode, force, verbose).await,
+        SkillCommands::Update { agent_mode, force } => {
+            update_directory_registry(agent_mode, force, verbose).await
+        }
     }
 }
 

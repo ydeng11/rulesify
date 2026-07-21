@@ -5,6 +5,57 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.0] - 2026-07-21
+
+### Added
+- **Per-Repo Exclude List**: Repository-wise exclude paths for the registry generator
+  - Skills under `mattpocock/skills/skills/deprecated/` are now excluded from registry generation
+  - `SourceRepo::excluded_paths()` returns path prefixes to skip per source repo
+  - Excluded skills are never fetched, scored, or classified — reduces API calls too
+  - Easy to extend: adding exclusions for any other source is a one-line change
+- **Smarter Registry Update**: `rulesify skill update` now compares local `registry.toml` dates with remote before overwriting
+- **New Registry Skills**: Added Chinese AI writing skills, guizang-social-card-skill, Hermes Tweet skill, taste-skill mega-skill, Uncodixfy skill
+- **Manual Skills Preservation**: Weekly auto-regenerator now preserves manually-added skills in registry.toml
+
+### Fixed
+- **Missing Commit SHAs**: Added `/tree/` branch component to 6 skill source URLs in registry
+- **Duplicate Registry Entries**: Removed duplicate entries and prefer local built-in registry
+- **Improperly Escaped Workflow Scripts**: Use committed Python scripts to avoid YAML heredoc parse errors in CI
+
+### Technical Improvements
+- `SourceRepo::excluded_paths()` returns `&'static [&'static str]` instead of allocating per-call
+- Combined identical `parse_skill_id` match arms for OpenAISkills and MattPocockSkills
+- Named magic constants for score threshold (30.0) and max skills (50) in update-registry
+- Simplified `create_synthetic_mega_skill` — removed unnecessary intermediate variable
+
+## [0.5.7] - 2026-07-14
+
+### Added
+- **Pi Coverage Deduplication**: When Pi is alongside other agents (`codex`, `cursor`), skip physical Pi installation
+  - Pi is covered by other agents — only mark it in the registry config
+  - No duplicated files or wasted disk space
+  - Transparent: `add` command reports "Pi is covered by other agents"
+
+## [0.5.6] - 2026-06-30
+
+### Fixed
+- **Tool Deselection Cleanup**: Skill directories are now removed when tools are deselected from project config
+  - Re-running `init` with fewer tools cleans up orphaned skill folders
+
+### CI
+- Simplified release workflow with up-to-date action versions
+
+## [0.5.5] - 2026-06-15
+
+### Fixed
+- **Harden Skill Archive Installs**: More robust archive extraction and error handling during skill installation
+
+## [0.5.4] - 2026-05-10
+
+### Fixed
+- **MattPocock Skill Pattern**: Updated pattern for nested repo structure (`skills/*/*/SKILL.md`)
+- **Tool/Skill Detection**: Detect existing tools and skills from the filesystem, allow global skill removal even when no project config exists
+
 ## [0.5.3] - 2026-04-30
 
 ### Added

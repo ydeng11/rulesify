@@ -98,6 +98,18 @@ mod tests {
     }
 
     #[test]
+    fn test_excluded_paths() {
+        let mattpocock = SourceRepo::MattPocockSkills;
+        assert_eq!(mattpocock.excluded_paths(), &["skills/deprecated/"]);
+
+        let anthropic = SourceRepo::AnthropicSkills;
+        assert!(anthropic.excluded_paths().is_empty());
+
+        let superpowers = SourceRepo::ObraSuperpowers;
+        assert!(superpowers.excluded_paths().is_empty());
+    }
+
+    #[test]
     fn test_mega_skill_sources_parse_none() {
         let superpowers = SourceRepo::ObraSuperpowers;
         assert_eq!(

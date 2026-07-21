@@ -121,14 +121,8 @@ impl SourceRepo {
             }
             SourceRepo::OpenAISkillsCurated
             | SourceRepo::OpenAISkillsSystem
-            | SourceRepo::OpenAISkillsExperimental => {
-                if parts.len() >= 4 && parts.last() == Some(&"SKILL.md") {
-                    Some(parts[2].to_string())
-                } else {
-                    None
-                }
-            }
-            SourceRepo::MattPocockSkills => {
+            | SourceRepo::OpenAISkillsExperimental
+            | SourceRepo::MattPocockSkills => {
                 if parts.len() >= 4 && parts.last() == Some(&"SKILL.md") {
                     Some(parts[2].to_string())
                 } else {
@@ -183,6 +177,13 @@ impl SourceRepo {
             SourceRepo::CyxzdevUncodixfy => ".",
             SourceRepo::LeonxlnxTasteSkill => "skills",
             _ => "",
+        }
+    }
+
+    pub fn excluded_paths(&self) -> &'static [&'static str] {
+        match self {
+            SourceRepo::MattPocockSkills => &["skills/deprecated/"],
+            _ => &[],
         }
     }
 

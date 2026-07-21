@@ -122,11 +122,9 @@ fn create_synthetic_mega_skill(source: SourceRepo, repo_metrics: &RepoMetrics) -
         ),
     };
 
-    let name = skill_id.clone();
-
     SkillMetadata {
-        skill_id,
-        name,
+        skill_id: skill_id.clone(),
+        name: skill_id,
         description,
         source_repo: source.full_name(),
         source_folder: source_folder.to_string(),
@@ -466,7 +464,13 @@ async fn main() -> Result<()> {
             }
         };
 
-        for entry in tree.tree.iter().filter(|e| source.matches_pattern(&e.path)) {
+        for entry in tree.tree.iter().filter(|e| {
+            source.matches_pattern(&e.path)
+                && !source
+                    .excluded_paths()
+                    .iter()
+                    .any(|p| e.path.starts_with(p))
+        }) {
             match fetch_skill(&client, source, &entry.path, &repo_metrics).await {
                 Ok(meta) => {
                     let score = scorer.calculate_for_skill(&meta, &repo_metrics);
@@ -478,12 +482,14 @@ async fn main() -> Result<()> {
         }
     }
 
-    let filtered = scorer.filter_above_threshold(all_skills, 30.0);
-    let top = scorer.sort_and_limit(filtered, 50);
+    let filtered = scorer.filter_above_threshold(all_skills, SCORE_THRESHOLD);
+    let top = scorer.sort_and_limit(filtered, MAX_SKILLS);
 
     log::info!(
-        "Found {} skills after filtering (threshold: 30.0, limit: 50)",
-        top.len()
+        "Found {} skills after filtering (threshold: {}, limit: {})",
+        top.len(),
+        SCORE_THRESHOLD,
+        MAX_SKILLS,
     );
 
     let mut pending_skills: HashMap<String, (SkillMetadata, f32)> = HashMap::new();
@@ -572,6 +578,9 @@ async fn main() -> Result<()> {
     log::info!("Written to registry.toml");
     Ok(())
 }
+
+const SCORE_THRESHOLD: f32 = 30.0;
+const MAX_SKILLS: usize = 50;
 
 #[cfg(test)]
 mod tests {
