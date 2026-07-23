@@ -2,6 +2,8 @@
 
 Rulesify is a **skill management tool for AI agents**. Discover, browse, and install pre-built skills from curated GitHub repositories to enhance your AI assistant's capabilities.
 
+![Rulesify interactive skill discovery and installation demo](docs/rulesify-demo.gif)
+
 ## What are Skills?
 
 Skills are pre-built workflows, methodologies, and instructions that enhance AI agent capabilities. Each skill is a self-contained module that guides AI assistants through complex tasks like:
