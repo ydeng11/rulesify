@@ -36,12 +36,7 @@ async fn fetch_skill(
     let context_size = SkillParser::estimate_context_size(&content);
     let folder = source.parse_skill_folder(path).unwrap_or_default();
 
-    let source_url = format!(
-        "https://github.com/{}/skills/tree/{}/{}",
-        source.owner(),
-        source.branch(),
-        folder
-    );
+    let source_url = source.source_url_for(&folder);
 
     let commit_sha = client
         .fetch_commit_for_path(source.owner(), source.repo(), &folder)

@@ -15,6 +15,7 @@ pub enum SourceRepo {
     CyxzdevUncodixfy,
     LeonxlnxTasteSkill,
     Op7418GuizangSocialCardSkill,
+    Agentskills,
 }
 
 impl SourceRepo {
@@ -33,6 +34,7 @@ impl SourceRepo {
             SourceRepo::CyxzdevUncodixfy,
             SourceRepo::LeonxlnxTasteSkill,
             SourceRepo::Op7418GuizangSocialCardSkill,
+            SourceRepo::Agentskills,
         ]
     }
 
@@ -50,6 +52,7 @@ impl SourceRepo {
             SourceRepo::CyxzdevUncodixfy => "cyxzdev",
             SourceRepo::LeonxlnxTasteSkill => "Leonxlnx",
             SourceRepo::Op7418GuizangSocialCardSkill => "op7418",
+            SourceRepo::Agentskills => "ydeng11",
         }
     }
 
@@ -68,6 +71,7 @@ impl SourceRepo {
             SourceRepo::CyxzdevUncodixfy => "Uncodixfy",
             SourceRepo::LeonxlnxTasteSkill => "taste-skill",
             SourceRepo::Op7418GuizangSocialCardSkill => "guizang-social-card-skill",
+            SourceRepo::Agentskills => "agentskills",
         }
     }
 
@@ -93,6 +97,7 @@ impl SourceRepo {
             SourceRepo::CyxzdevUncodixfy => "SKILL.md",
             SourceRepo::LeonxlnxTasteSkill => "",
             SourceRepo::Op7418GuizangSocialCardSkill => "SKILL.md",
+            SourceRepo::Agentskills => "skills/*/SKILL.md",
         }
     }
 
@@ -112,7 +117,7 @@ impl SourceRepo {
         let parts: Vec<&str> = path.split('/').collect();
 
         match self {
-            SourceRepo::AnthropicSkills | SourceRepo::MiniMaxSkills => {
+            SourceRepo::AnthropicSkills | SourceRepo::MiniMaxSkills | SourceRepo::Agentskills => {
                 if parts.len() >= 3 && parts.last() == Some(&"SKILL.md") {
                     Some(parts[1].to_string())
                 } else {
@@ -197,5 +202,15 @@ impl SourceRepo {
             SourceRepo::LeonxlnxTasteSkill => "taste-skill",
             _ => "",
         }
+    }
+
+    pub fn source_url_for(&self, folder: &str) -> String {
+        format!(
+            "https://github.com/{}/{}/tree/{}/{}",
+            self.owner(),
+            self.repo(),
+            self.branch(),
+            folder
+        )
     }
 }

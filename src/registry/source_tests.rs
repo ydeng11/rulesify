@@ -5,7 +5,7 @@ mod tests {
     #[test]
     fn test_all_sources() {
         let sources = SourceRepo::all();
-        assert!(sources.len() >= 12);
+        assert!(sources.len() >= 13);
     }
 
     #[test]
@@ -66,6 +66,10 @@ mod tests {
         let id = anthropic.parse_skill_id("skills/tdd/SKILL.md");
         assert_eq!(id, Some("tdd".to_string()));
 
+        let agentskills = SourceRepo::Agentskills;
+        let id = agentskills.parse_skill_id("skills/consult-advisor/SKILL.md");
+        assert_eq!(id, Some("consult-advisor".to_string()));
+
         let mattpocock = SourceRepo::MattPocockSkills;
         let id = mattpocock.parse_skill_id("skills/productivity/caveman/SKILL.md");
         assert_eq!(id, Some("caveman".to_string()));
@@ -123,5 +127,36 @@ mod tests {
         let uncodixfy = SourceRepo::CyxzdevUncodixfy;
         assert_eq!(uncodixfy.parse_skill_id("subdir/SKILL.md"), None);
         assert_eq!(uncodixfy.parse_skill_id("README.md"), None);
+    }
+
+    #[test]
+    fn test_agentskills_source_properties() {
+        let agentskills = SourceRepo::Agentskills;
+        assert_eq!(agentskills.owner(), "ydeng11");
+        assert_eq!(agentskills.repo(), "agentskills");
+        assert_eq!(agentskills.branch(), "main");
+        assert_eq!(agentskills.skill_pattern(), "skills/*/SKILL.md");
+        assert!(!agentskills.is_mega_skill_collection());
+        assert!(agentskills.matches_pattern("skills/consult-advisor/SKILL.md"));
+        assert!(!agentskills.matches_pattern("skills/consult-advisor/README.md"));
+        assert_eq!(
+            agentskills.parse_skill_folder("skills/consult-advisor/SKILL.md"),
+            Some("skills/consult-advisor".to_string())
+        );
+    }
+
+    #[test]
+    fn test_source_url_for_uses_repo_name() {
+        let agentskills = SourceRepo::Agentskills;
+        assert_eq!(
+            agentskills.source_url_for("skills/consult-advisor"),
+            "https://github.com/ydeng11/agentskills/tree/main/skills/consult-advisor"
+        );
+
+        let mattpocock = SourceRepo::MattPocockSkills;
+        assert_eq!(
+            mattpocock.source_url_for("skills/deprecated/qa"),
+            "https://github.com/mattpocock/skills/tree/main/skills/deprecated/qa"
+        );
     }
 }

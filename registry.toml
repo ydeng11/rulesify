@@ -1908,5 +1908,28 @@ type = "copy"
 [skills.zoom-out.install_action.value]
 folder = "skills/engineering/zoom-out"
 
+[skills.consult-advisor]
+name = "consult-advisor"
+description = 'Launch a separate Codex or Claude session for independent, read-only advice on planning, review, implementation, debugging, architecture, research, or testing, with configurable model and reasoning effort. Use only when the user explicitly invokes `$consult-advisor`, including explicit setup or configuration requests; never invoke it implicitly.'
+source_url = "https://github.com/ydeng11/agentskills/tree/main/skills/consult-advisor"
+stars = 0
+commit_sha = "841513ce97742f2436e88ba90dcec4f41d16bb2f"
+context_size = 1456
+domain = "planning-and-orchestration"
+last_updated = "2026-08-02"
+tags = [
+    "advisor",
+    "planning",
+    "review",
+]
+score = 45.0
+is_mega_skill = false
+dependencies = [
+    "python3",
+]
 
+[skills.consult-advisor.install_action]
+type = "copy"
 
+[skills.consult-advisor.install_action.value]
+folder = "skills/consult-advisor"
