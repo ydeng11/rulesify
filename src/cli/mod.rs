@@ -1,11 +1,15 @@
 pub mod init;
 pub mod skill;
 
+#[cfg(test)]
+mod cli_tests;
+
 use clap::{Parser, Subcommand};
 
 #[derive(Parser)]
 #[command(name = "rulesify")]
 #[command(about = "Discover and install AI agent skills")]
+#[command(version)]
 pub struct Cli {
     #[command(subcommand)]
     pub command: Option<Commands>,

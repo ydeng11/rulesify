@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Manual Skills Preservation**: Weekly auto-regenerator now preserves manually-added skills in registry.toml
 
 ### Fixed
+- **`--version` flag**: `rulesify --version` now prints the version and exits 0 (required for Homebrew packaging)
 - **Missing Commit SHAs**: Added `/tree/` branch component to 6 skill source URLs in registry
 - **Duplicate Registry Entries**: Removed duplicate entries and prefer local built-in registry
 - **Improperly Escaped Workflow Scripts**: Use committed Python scripts to avoid YAML heredoc parse errors in CI
