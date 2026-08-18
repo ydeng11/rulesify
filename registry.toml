@@ -1,308 +1,45 @@
 version = 1
-updated = "2026-08-09"
+updated = "2026-08-16"
 
-[skills.ask-matt]
-name = "ask-matt"
-description = "Ask which skill or flow fits your situation. A router over the skills in this repo."
-source_url = "https://github.com/mattpocock/skills/tree/main/skills/engineering/ask-matt"
-stars = 210322
-commit_sha = "61accb0e66652cfe71da1266d49f1cbd129e3ae1"
-context_size = 2872
-domain = "collaboration"
-last_updated = "2026-08-09"
-tags = [
-    "skill-router",
-    "conversation-guidance",
-]
-score = 99.3548355102539
-is_mega_skill = false
-dependencies = []
-
-[skills.ask-matt.install_action]
-type = "copy"
-
-[skills.ask-matt.install_action.value]
-folder = "skills/engineering/ask-matt"
-
-[skills.wait-what]
-name = "wait-what"
-description = "Stop. That last message did not land — re-pitch it."
-source_url = "https://github.com/mattpocock/skills/tree/main/skills/productivity/wait-what"
-stars = 210322
-commit_sha = "50777fcc0982d5867997a75a1e0731b9daac94eb"
-context_size = 81
-domain = "collaboration"
-last_updated = "2026-08-09"
-tags = [
-    "clarification",
-    "communication",
-    "understanding",
-]
-score = 99.3548355102539
-is_mega_skill = false
-dependencies = []
-
-[skills.wait-what.install_action]
-type = "copy"
-
-[skills.wait-what.install_action.value]
-folder = "skills/productivity/wait-what"
-
-[skills.diagnosing-bugs]
-name = "diagnosing-bugs"
-description = 'Diagnosis loop for hard bugs and performance regressions. Use when the user says "diagnose"/"debug this", or reports something broken/throwing/failing/slow.'
-source_url = "https://github.com/mattpocock/skills/tree/main/skills/engineering/diagnosing-bugs"
-stars = 210322
-commit_sha = "bda79a3c3ca23d19d9ca483808580b5b4cc3d8e2"
-context_size = 2242
-domain = "testing"
-last_updated = "2026-08-09"
-tags = [
-    "bug-diagnosis",
-    "performance-regression",
-    "debugging",
-]
-score = 99.3548355102539
-is_mega_skill = false
-dependencies = []
-
-[skills.diagnosing-bugs.install_action]
-type = "copy"
-
-[skills.diagnosing-bugs.install_action.value]
-folder = "skills/engineering/diagnosing-bugs"
-
-[skills.prototype]
-name = "prototype"
-description = "Build a throwaway prototype to answer a design question. Use when the user wants to sanity-check whether a state model or logic feels right, or explore what a UI should look like."
-source_url = "https://github.com/mattpocock/skills/tree/main/skills/engineering/prototype"
-stars = 210322
-commit_sha = "6bcbcb09e2f1ed5fa20b4e890c732ecbb58c6b64"
-context_size = 738
-domain = "design"
-last_updated = "2026-08-09"
-tags = [
-    "throwaway-prototype",
-    "design-validation",
-    "ui-exploration",
-]
-score = 99.3548355102539
-is_mega_skill = false
-dependencies = []
-
-[skills.prototype.install_action]
-type = "copy"
-
-[skills.prototype.install_action.value]
-folder = "skills/engineering/prototype"
-
-[skills.figma-create-new-file]
-name = "figma-create-new-file"
-description = "Create a new blank Figma file. Use when the user wants to create a new Figma design or FigJam file, or when you need a new file before calling use_figma. Handles plan resolution via whoami if needed. Usage — /figma-create-new-file [editorType] [fileName] (e.g. /figma-create-new-file figjam My Whiteboard)"
-source_url = "https://github.com/openai/skills/tree/main/skills/.curated/figma-create-new-file"
-stars = 24645
-commit_sha = "736f600bf6ecbc000c04f1d2710b990899f28903"
-context_size = 682
-domain = "design"
-last_updated = "2026-08-09"
-tags = [
-    "file-creation",
-    "figma-setup",
-    "editor-management",
-]
-score = 90.0
-is_mega_skill = false
-dependencies = []
-
-[skills.figma-create-new-file.install_action]
-type = "copy"
-
-[skills.figma-create-new-file.install_action.value]
-folder = "skills/.curated/figma-create-new-file"
-
-[skills.figma-use]
-name = "figma-use"
-description = "**MANDATORY prerequisite** — you MUST invoke this skill BEFORE every `use_figma` tool call. NEVER call `use_figma` directly without loading this skill first. Skipping it causes common, hard-to-debug failures. Trigger whenever the user wants to perform a write action or a unique read action that requires JavaScript execution in the Figma file context — e.g. create/edit/delete nodes, set up variables or tokens, build components and variants, modify auto-layout or fills, bind variables to properties, or inspect file structure programmatically."
-source_url = "https://github.com/openai/skills/tree/main/skills/.curated/figma-use"
-stars = 24645
-commit_sha = "736f600bf6ecbc000c04f1d2710b990899f28903"
-context_size = 4449
-domain = "design"
-last_updated = "2026-08-09"
-tags = [
-    "figma-context",
-    "write-action",
-    "node-management",
-]
-score = 90.0
-is_mega_skill = false
-dependencies = []
-
-[skills.figma-use.install_action]
-type = "copy"
-
-[skills.figma-use.install_action.value]
-folder = "skills/.curated/figma-use"
-
-[skills.grilling]
-name = "grilling"
-description = "Grill the user relentlessly about a plan, decision, or idea. Use when the user wants to stress-test their thinking, or uses any 'grill' trigger phrases."
-source_url = "https://github.com/mattpocock/skills/tree/main/skills/productivity/grilling"
-stars = 210322
-commit_sha = "bfdaef8e989a5c81160e74bc5043bd434da49cac"
-context_size = 468
-domain = "planning-and-orchestration"
-last_updated = "2026-08-09"
-tags = [
-    "interrogation",
-    "idea-testing",
-    "design-review",
-]
-score = 99.3548355102539
-is_mega_skill = false
-dependencies = []
-
-[skills.grilling.install_action]
-type = "copy"
-
-[skills.grilling.install_action.value]
-folder = "skills/productivity/grilling"
-
-[skills.handoff]
-name = "handoff"
-description = "Compact the current conversation into a handoff document for another agent to pick up."
-source_url = "https://github.com/mattpocock/skills/tree/main/skills/productivity/handoff"
-stars = 210322
-commit_sha = "697d4ce9742da558fd1ba6697c8e9775e2e302dd"
-context_size = 219
+[skills.writing-for-agents]
+name = "writing-for-agents"
+description = "Writing documents for agents. Use when creating or editing skills, or modifying AGENTS.md or CLAUDE.md."
+source_url = "https://github.com/mattpocock/skills/tree/main/skills/productivity/writing-for-agents"
+stars = 218599
+commit_sha = "4aaccb58d40559d7e3c59a029b2290ae5ba538de"
+context_size = 2741
 domain = "documentation"
-last_updated = "2026-08-09"
+last_updated = "2026-08-16"
 tags = [
-    "handoff",
-    "summary",
-    "documentation",
+    "agent-docs",
+    "skill-creation",
+    "editing",
 ]
-score = 99.3548355102539
+score = 98.98989868164063
 is_mega_skill = false
 dependencies = []
 
-[skills.handoff.install_action]
+[skills.writing-for-agents.install_action]
 type = "copy"
 
-[skills.handoff.install_action.value]
-folder = "skills/productivity/handoff"
-
-[skills.to-questionnaire]
-name = "to-questionnaire"
-description = "Turn a decision you can't fully answer into a questionnaire for someone else to fill in."
-source_url = "https://github.com/mattpocock/skills/tree/main/skills/productivity/to-questionnaire"
-stars = 210322
-commit_sha = "0f2bdbdb06220d2df3718b8f0483157c6c8a8600"
-context_size = 730
-domain = "planning-and-orchestration"
-last_updated = "2026-08-09"
-tags = [
-    "questionnaire",
-    "decision-making",
-    "information-gathering",
-]
-score = 99.3548355102539
-is_mega_skill = false
-dependencies = []
-
-[skills.to-questionnaire.install_action]
-type = "copy"
-
-[skills.to-questionnaire.install_action.value]
-folder = "skills/productivity/to-questionnaire"
-
-[skills.wayfinder]
-name = "wayfinder"
-description = "Plan a huge chunk of work — more than one agent session can hold — as a shared map of decision tickets on your issue tracker, and resolve them one at a time until the way to the destination is clear."
-source_url = "https://github.com/mattpocock/skills/tree/main/skills/engineering/wayfinder"
-stars = 210322
-commit_sha = "38d62e71ed01fc05d5ae63b0807172e9546049d5"
-context_size = 2971
-domain = "planning-and-orchestration"
-last_updated = "2026-08-09"
-tags = [
-    "work-planning",
-    "decision-map",
-    "issue-tracker",
-]
-score = 99.3548355102539
-is_mega_skill = false
-dependencies = []
-
-[skills.wayfinder.install_action]
-type = "copy"
-
-[skills.wayfinder.install_action.value]
-folder = "skills/engineering/wayfinder"
-
-[skills.figma-generate-design]
-name = "figma-generate-design"
-description = "Use this skill alongside figma-use when the task involves translating an application page, view, or multi-section layout into Figma. Triggers: 'write to Figma', 'create in Figma from code', 'push page to Figma', 'take this app/page and build it in Figma', 'create a screen', 'build a landing page in Figma', 'update the Figma screen to match code'. This is the preferred workflow skill whenever the user wants to build or update a full page, screen, or view in Figma from code or a description. Discovers design system components, variables, and styles via search_design_system, imports them, and assembles screens incrementally section-by-section using design system tokens instead of hardcoded values."
-source_url = "https://github.com/openai/skills/tree/main/skills/.curated/figma-generate-design"
-stars = 24645
-commit_sha = "736f600bf6ecbc000c04f1d2710b990899f28903"
-context_size = 5041
-domain = "design"
-last_updated = "2026-08-09"
-tags = [
-    "design-generation",
-    "figma-code-integration",
-    "screen-building",
-]
-score = 90.0
-is_mega_skill = false
-dependencies = []
-
-[skills.figma-generate-design.install_action]
-type = "copy"
-
-[skills.figma-generate-design.install_action.value]
-folder = "skills/.curated/figma-generate-design"
-
-[skills.figma-generate-library]
-name = "figma-generate-library"
-description = "Build or update a professional-grade design system in Figma from a codebase. Use when the user wants to create variables/tokens, build component libraries, set up theming (light/dark modes), document foundations, or reconcile gaps between code and Figma. This skill teaches WHAT to build and in WHAT ORDER — it complements the `figma-use` skill which teaches HOW to call the Plugin API. Both skills should be loaded together."
-source_url = "https://github.com/openai/skills/tree/main/skills/.curated/figma-generate-library"
-stars = 24645
-commit_sha = "736f600bf6ecbc000c04f1d2710b990899f28903"
-context_size = 4463
-domain = "design"
-last_updated = "2026-08-09"
-tags = [
-    "design-library",
-    "system-building",
-    "figma-integration",
-]
-score = 90.0
-is_mega_skill = false
-dependencies = []
-
-[skills.figma-generate-library.install_action]
-type = "copy"
-
-[skills.figma-generate-library.install_action.value]
-folder = "skills/.curated/figma-generate-library"
+[skills.writing-for-agents.install_action.value]
+folder = "skills/productivity/writing-for-agents"
 
 [skills.research]
 name = "research"
 description = "Investigate a question against high-trust primary sources and capture the findings as a Markdown file in the repo. Use when the user wants a topic researched, docs or API facts gathered, or reading legwork delegated to a background agent."
 source_url = "https://github.com/mattpocock/skills/tree/main/skills/engineering/research"
-stars = 210322
+stars = 218599
 commit_sha = "697d4ce9742da558fd1ba6697c8e9775e2e302dd"
 context_size = 199
 domain = "documentation"
-last_updated = "2026-08-09"
+last_updated = "2026-08-16"
 tags = [
-    "topic-research",
-    "primary-sources",
+    "investigation",
+    "high-trust-sources",
     "markdown-capture",
 ]
-score = 99.3548355102539
+score = 98.98989868164063
 is_mega_skill = false
 dependencies = []
 
@@ -312,69 +49,45 @@ type = "copy"
 [skills.research.install_action.value]
 folder = "skills/engineering/research"
 
-[skills.domain-modeling]
-name = "domain-modeling"
-description = "Build and sharpen a project's domain model. Use when the user wants to pin down domain terminology or a ubiquitous language, record an architectural decision, or when another skill needs to maintain the domain model."
-source_url = "https://github.com/mattpocock/skills/tree/main/skills/engineering/domain-modeling"
-stars = 210322
-commit_sha = "697d4ce9742da558fd1ba6697c8e9775e2e302dd"
-context_size = 856
-domain = "design"
-last_updated = "2026-08-09"
+[skills.diagnosing-bugs]
+name = "diagnosing-bugs"
+description = 'Diagnosis loop for hard bugs and performance regressions. Use when the user says "diagnose"/"debug this", or reports something broken/throwing/failing/slow.'
+source_url = "https://github.com/mattpocock/skills/tree/main/skills/engineering/diagnosing-bugs"
+stars = 218599
+commit_sha = "1dab98299c3b81f560026c01b7ebf55ed5d91373"
+context_size = 2153
+domain = "testing"
+last_updated = "2026-08-16"
 tags = [
-    "domain-terminology",
-    "architectural-decision",
-    "ubiquitous-language",
+    "bug-diagnosis",
+    "performance-regression",
+    "debugging",
 ]
-score = 99.3548355102539
+score = 98.98989868164063
 is_mega_skill = false
 dependencies = []
 
-[skills.domain-modeling.install_action]
+[skills.diagnosing-bugs.install_action]
 type = "copy"
 
-[skills.domain-modeling.install_action.value]
-folder = "skills/engineering/domain-modeling"
-
-[skills.grill-with-docs]
-name = "grill-with-docs"
-description = "A relentless interview to sharpen a plan or design, which also creates docs (ADR's and glossary) as we go."
-source_url = "https://github.com/mattpocock/skills/tree/main/skills/engineering/grill-with-docs"
-stars = 210322
-commit_sha = "697d4ce9742da558fd1ba6697c8e9775e2e302dd"
-context_size = 61
-domain = "documentation"
-last_updated = "2026-08-09"
-tags = [
-    "design-interview",
-    "documentation-creation",
-    "adr-generation",
-]
-score = 99.3548355102539
-is_mega_skill = false
-dependencies = []
-
-[skills.grill-with-docs.install_action]
-type = "copy"
-
-[skills.grill-with-docs.install_action.value]
-folder = "skills/engineering/grill-with-docs"
+[skills.diagnosing-bugs.install_action.value]
+folder = "skills/engineering/diagnosing-bugs"
 
 [skills.improve-codebase-architecture]
 name = "improve-codebase-architecture"
 description = "Scan a codebase for deepening opportunities, present them as a visual HTML report, then grill through whichever one you pick."
 source_url = "https://github.com/mattpocock/skills/tree/main/skills/engineering/improve-codebase-architecture"
-stars = 210322
-commit_sha = "c0d69015e0cc8b66715beb3f93f9e53256e20f30"
-context_size = 1502
+stars = 218599
+commit_sha = "fcf0071560d32913c9d4f820e0d7ca467c881619"
+context_size = 1512
 domain = "design"
-last_updated = "2026-08-09"
+last_updated = "2026-08-16"
 tags = [
     "architecture-scan",
     "visual-report",
     "deepening-opportunities",
 ]
-score = 99.3548355102539
+score = 98.98989868164063
 is_mega_skill = false
 dependencies = []
 
@@ -384,21 +97,424 @@ type = "copy"
 [skills.improve-codebase-architecture.install_action.value]
 folder = "skills/engineering/improve-codebase-architecture"
 
+[skills.git-guardrails-claude-code]
+name = "git-guardrails-claude-code"
+description = "Set up Claude Code hooks to block dangerous git commands (push, reset --hard, clean, branch -D, etc.) before they execute. Use when user wants to prevent destructive git operations, add git safety hooks, or block git push/reset in Claude Code."
+source_url = "https://github.com/mattpocock/skills/tree/main/skills/misc/git-guardrails-claude-code"
+stars = 218599
+commit_sha = "697d4ce9742da558fd1ba6697c8e9775e2e302dd"
+context_size = 578
+domain = "security"
+last_updated = "2026-08-16"
+tags = [
+    "git-security",
+    "safety-hooks",
+    "prevent-destructive-commands",
+]
+score = 98.98989868164063
+is_mega_skill = false
+dependencies = []
+
+[skills.git-guardrails-claude-code.install_action]
+type = "copy"
+
+[skills.git-guardrails-claude-code.install_action.value]
+folder = "skills/misc/git-guardrails-claude-code"
+
+[skills.codebase-design]
+name = "codebase-design"
+description = "Shared vocabulary for designing deep modules. Use when the user wants to design or improve a module's interface, find deepening opportunities, decide where a seam goes, make code more testable or AI-navigable, or when another skill needs the deep-module vocabulary."
+source_url = "https://github.com/mattpocock/skills/tree/main/skills/engineering/codebase-design"
+stars = 218599
+commit_sha = "c0d69015e0cc8b66715beb3f93f9e53256e20f30"
+context_size = 1622
+domain = "design"
+last_updated = "2026-08-16"
+tags = [
+    "module-interface",
+    "deepening-opportunities",
+    "testable-code",
+]
+score = 98.98989868164063
+is_mega_skill = false
+dependencies = []
+
+[skills.codebase-design.install_action]
+type = "copy"
+
+[skills.codebase-design.install_action.value]
+folder = "skills/engineering/codebase-design"
+
+[skills.docx]
+name = "docx"
+description = "Use this skill whenever the user wants to create, read, edit, or manipulate Word documents (.docx files) or Word templates (.dotx files). Triggers include: any mention of 'Word doc', 'word document', '.docx', '.dotx', or requests to produce professional documents with formatting like tables of contents, headings, page numbers, or letterheads. Also use when extracting or reorganizing content from .docx or .dotx files, inserting or replacing images in documents, performing find-and-replace in Word files, working with tracked changes or comments, or converting content into a polished Word document. If the user asks for a 'report', 'memo', 'letter', 'template', or similar deliverable as a Word or .docx file, use this skill. Do NOT use for PDFs, spreadsheets, Google Docs, or general coding tasks unrelated to document generation."
+source_url = "https://github.com/anthropics/skills/tree/main/skills/docx"
+stars = 169596
+commit_sha = "fa0fa64bdc967915dc8399e803be67759e1e62b8"
+context_size = 1727
+domain = "documentation"
+last_updated = "2026-08-16"
+tags = [
+    "document-management",
+    "word-processor",
+    "content-editing",
+]
+score = 86.4000015258789
+is_mega_skill = false
+dependencies = []
+
+[skills.docx.install_action]
+type = "copy"
+
+[skills.docx.install_action.value]
+folder = "skills/docx"
+
+[skills.domain-modeling]
+name = "domain-modeling"
+description = "Build and sharpen a project's domain model. Use when discussing codebase terminology, writing or editing a CONTEXT.md, or recording or editing an ADR."
+source_url = "https://github.com/mattpocock/skills/tree/main/skills/engineering/domain-modeling"
+stars = 218599
+commit_sha = "54bc6b604075c18293d38e9e294a2c96f365f104"
+context_size = 840
+domain = "data"
+last_updated = "2026-08-16"
+tags = [
+    "domain-model",
+    "context-documentation",
+    "adr-editing",
+]
+score = 98.98989868164063
+is_mega_skill = false
+dependencies = []
+
+[skills.domain-modeling.install_action]
+type = "copy"
+
+[skills.domain-modeling.install_action.value]
+folder = "skills/engineering/domain-modeling"
+
+[skills.implement]
+name = "implement"
+description = "Implement a piece of work based on a spec or set of tickets."
+source_url = "https://github.com/mattpocock/skills/tree/main/skills/engineering/implement"
+stars = 218599
+commit_sha = "697d4ce9742da558fd1ba6697c8e9775e2e302dd"
+context_size = 108
+domain = "development"
+last_updated = "2026-08-16"
+tags = [
+    "spec-implementation",
+    "ticket-based",
+]
+score = 98.98989868164063
+is_mega_skill = false
+dependencies = []
+
+[skills.implement.install_action]
+type = "copy"
+
+[skills.implement.install_action.value]
+folder = "skills/engineering/implement"
+
+[skills.wait-what]
+name = "wait-what"
+description = "Stop. That last message did not land — re-pitch it."
+source_url = "https://github.com/mattpocock/skills/tree/main/skills/productivity/wait-what"
+stars = 218599
+commit_sha = "50777fcc0982d5867997a75a1e0731b9daac94eb"
+context_size = 81
+domain = "collaboration"
+last_updated = "2026-08-16"
+tags = [
+    "communication",
+    "clarification",
+    "re-pitch",
+]
+score = 98.98989868164063
+is_mega_skill = false
+dependencies = []
+
+[skills.wait-what.install_action]
+type = "copy"
+
+[skills.wait-what.install_action.value]
+folder = "skills/productivity/wait-what"
+
+[skills.taste-skill]
+name = "taste-skill"
+description = "Taste-Skill - gives your AI good taste. Stops the AI from generating boring, generic slop. Collection of skills for image generation, minimalism, output quality, and taste-aware prompting."
+source_url = "https://github.com/Leonxlnx/taste-skill/tree/main/"
+stars = 76910
+commit_sha = ""
+context_size = 0
+domain = "development"
+last_updated = "2026-08-16"
+tags = ["mega-skill"]
+score = 107.09677124023438
+is_mega_skill = true
+dependencies = []
+
+[skills.taste-skill.install_action]
+type = "mega-skill-copy"
+
+[skills.taste-skill.install_action.value]
+source_folder = "skills"
+dest_name = "taste-skill"
+
+[skills.internal-comms]
+name = "internal-comms"
+description = "A set of resources to help me write all kinds of internal communications, using the formats that my company likes to use. Claude should use this skill whenever asked to write some sort of internal communications (status reports, leadership updates, 3P updates, company newsletters, FAQs, incident reports, project updates, etc.)."
+source_url = "https://github.com/anthropics/skills/tree/main/skills/internal-comms"
+stars = 169596
+commit_sha = "b9e19e6f44773509fbdd7001d77ff41a49a486c1"
+context_size = 377
+domain = "documentation"
+last_updated = "2026-08-16"
+tags = [
+    "communication",
+    "status-report",
+    "internal-messaging",
+]
+score = 86.4000015258789
+is_mega_skill = false
+dependencies = []
+
+[skills.internal-comms.install_action]
+type = "copy"
+
+[skills.internal-comms.install_action.value]
+folder = "skills/internal-comms"
+
+[skills.resolving-merge-conflicts]
+name = "resolving-merge-conflicts"
+description = "Use when you need to resolve an in-progress git merge/rebase conflict."
+source_url = "https://github.com/mattpocock/skills/tree/main/skills/engineering/resolving-merge-conflicts"
+stars = 218599
+commit_sha = "697d4ce9742da558fd1ba6697c8e9775e2e302dd"
+context_size = 230
+domain = "development"
+last_updated = "2026-08-16"
+tags = [
+    "git-merge",
+    "rebase-conflict",
+    "resolution",
+]
+score = 98.98989868164063
+is_mega_skill = false
+dependencies = []
+
+[skills.resolving-merge-conflicts.install_action]
+type = "copy"
+
+[skills.resolving-merge-conflicts.install_action.value]
+folder = "skills/engineering/resolving-merge-conflicts"
+
+[skills.triage]
+name = "triage"
+description = "Move issues and external PRs through a state machine of triage roles — categorise, verify, grill if needed, and write agent-ready briefs."
+source_url = "https://github.com/mattpocock/skills/tree/main/skills/engineering/triage"
+stars = 218599
+commit_sha = "6a34259e99bc5fed4f8fe5da61c273dad14edf67"
+context_size = 1651
+domain = "planning-and-orchestration"
+last_updated = "2026-08-16"
+tags = [
+    "issue-movement",
+    "state-machine",
+    "categorization",
+]
+score = 98.98989868164063
+is_mega_skill = false
+dependencies = []
+
+[skills.triage.install_action]
+type = "copy"
+
+[skills.triage.install_action.value]
+folder = "skills/engineering/triage"
+
+[skills.mcp-builder]
+name = "mcp-builder"
+description = "Guide for creating high-quality MCP (Model Context Protocol) servers that enable LLMs to interact with external services through well-designed tools. Use when building MCP servers to integrate external APIs or services, whether in Python (FastMCP) or Node/TypeScript (MCP SDK)."
+source_url = "https://github.com/anthropics/skills/tree/main/skills/mcp-builder"
+stars = 169596
+commit_sha = "b9e19e6f44773509fbdd7001d77ff41a49a486c1"
+context_size = 2273
+domain = "development"
+last_updated = "2026-08-16"
+tags = [
+    "api-integration",
+    "tool-development",
+    "protocol-creation",
+]
+score = 86.4000015258789
+is_mega_skill = false
+dependencies = []
+
+[skills.mcp-builder.install_action]
+type = "copy"
+
+[skills.mcp-builder.install_action.value]
+folder = "skills/mcp-builder"
+
+[skills.algorithmic-art]
+name = "algorithmic-art"
+description = "Creating algorithmic art using p5.js with seeded randomness and interactive parameter exploration. Use this when users request creating art using code, generative art, algorithmic art, flow fields, or particle systems. Create original algorithmic art rather than copying existing artists' work to avoid copyright violations."
+source_url = "https://github.com/anthropics/skills/tree/main/skills/algorithmic-art"
+stars = 169596
+commit_sha = "b9e19e6f44773509fbdd7001d77ff41a49a486c1"
+context_size = 4942
+domain = "design"
+last_updated = "2026-08-16"
+tags = [
+    "algorithmic-art",
+    "generative-art",
+    "p5.js",
+]
+score = 86.4000015258789
+is_mega_skill = false
+dependencies = []
+
+[skills.algorithmic-art.install_action]
+type = "copy"
+
+[skills.algorithmic-art.install_action.value]
+folder = "skills/algorithmic-art"
+
+[skills.scaffold-exercises]
+name = "scaffold-exercises"
+description = "Create exercise directory structures with sections, problems, solutions, and explainers that pass linting. Use when user wants to scaffold exercises, create exercise stubs, or set up a new course section."
+source_url = "https://github.com/mattpocock/skills/tree/main/skills/misc/scaffold-exercises"
+stars = 218599
+commit_sha = "697d4ce9742da558fd1ba6697c8e9775e2e302dd"
+context_size = 897
+domain = "development"
+last_updated = "2026-08-16"
+tags = [
+    "exercise-setup",
+    "directory-structure",
+    "problem-solving",
+]
+score = 98.98989868164063
+is_mega_skill = false
+dependencies = []
+
+[skills.scaffold-exercises.install_action]
+type = "copy"
+
+[skills.scaffold-exercises.install_action.value]
+folder = "skills/misc/scaffold-exercises"
+
+[skills.ask-matt]
+name = "ask-matt"
+description = "Ask which skill or flow fits your situation. A router over the skills in this repo."
+source_url = "https://github.com/mattpocock/skills/tree/main/skills/engineering/ask-matt"
+stars = 218599
+commit_sha = "61accb0e66652cfe71da1266d49f1cbd129e3ae1"
+context_size = 2872
+domain = "collaboration"
+last_updated = "2026-08-16"
+tags = [
+    "skill-router",
+    "situation-fit",
+]
+score = 98.98989868164063
+is_mega_skill = false
+dependencies = []
+
+[skills.ask-matt.install_action]
+type = "copy"
+
+[skills.ask-matt.install_action.value]
+folder = "skills/engineering/ask-matt"
+
+[skills.writing-fragments]
+name = "writing-fragments"
+description = "Writing, explore — mine raw fragments, no structure yet."
+source_url = "https://github.com/mattpocock/skills/tree/main/skills/in-progress/writing-fragments"
+stars = 218599
+commit_sha = "697d4ce9742da558fd1ba6697c8e9775e2e302dd"
+context_size = 894
+domain = "documentation"
+last_updated = "2026-08-16"
+tags = [
+    "content-exploration",
+    "raw-material",
+    "writing-process",
+]
+score = 98.98989868164063
+is_mega_skill = false
+dependencies = []
+
+[skills.writing-fragments.install_action]
+type = "copy"
+
+[skills.writing-fragments.install_action.value]
+folder = "skills/in-progress/writing-fragments"
+
+[skills.handoff]
+name = "handoff"
+description = "Compact the current conversation into a handoff document for another agent to pick up."
+source_url = "https://github.com/mattpocock/skills/tree/main/skills/productivity/handoff"
+stars = 218599
+commit_sha = "d28dfdc39beadc3142a33359b5cfa4765dcbd0bc"
+context_size = 223
+domain = "collaboration"
+last_updated = "2026-08-16"
+tags = [
+    "conversation-summary",
+    "handoff-document",
+    "context-transfer",
+]
+score = 98.98989868164063
+is_mega_skill = false
+dependencies = []
+
+[skills.handoff.install_action]
+type = "copy"
+
+[skills.handoff.install_action.value]
+folder = "skills/productivity/handoff"
+
+[skills.to-spec]
+name = "to-spec"
+description = "Turn the current conversation into a spec and publish it to the project issue tracker — no interview, just synthesis of what you've already discussed."
+source_url = "https://github.com/mattpocock/skills/tree/main/skills/engineering/to-spec"
+stars = 218599
+commit_sha = "6a34259e99bc5fed4f8fe5da61c273dad14edf67"
+context_size = 762
+domain = "documentation"
+last_updated = "2026-08-16"
+tags = [
+    "synthesis",
+    "spec-publishing",
+    "project-tracker",
+]
+score = 98.98989868164063
+is_mega_skill = false
+dependencies = []
+
+[skills.to-spec.install_action]
+type = "copy"
+
+[skills.to-spec.install_action.value]
+folder = "skills/engineering/to-spec"
+
 [skills.migrate-to-shoehorn]
 name = "migrate-to-shoehorn"
 description = "Migrate test files from `as` type assertions to @total-typescript/shoehorn. Use when user mentions shoehorn, wants to replace `as` in tests, or needs partial test data."
 source_url = "https://github.com/mattpocock/skills/tree/main/skills/misc/migrate-to-shoehorn"
-stars = 210322
+stars = 218599
 commit_sha = "697d4ce9742da558fd1ba6697c8e9775e2e302dd"
 context_size = 698
 domain = "development"
-last_updated = "2026-08-09"
+last_updated = "2026-08-16"
 tags = [
-    "migration",
-    "testing",
+    "test-migration",
     "typescript",
+    "shoehorn",
 ]
-score = 99.3548355102539
+score = 98.98989868164063
 is_mega_skill = false
 dependencies = []
 
@@ -408,39 +524,107 @@ type = "copy"
 [skills.migrate-to-shoehorn.install_action.value]
 folder = "skills/misc/migrate-to-shoehorn"
 
-[skills.cloudflare-deploy]
-name = "cloudflare-deploy"
-description = "Deploy applications and infrastructure to Cloudflare using Workers, Pages, and related platform services. Use when the user asks to deploy, host, publish, or set up a project on Cloudflare."
-source_url = "https://github.com/openai/skills/tree/main/skills/.curated/cloudflare-deploy"
-stars = 24645
-commit_sha = "bf9e226541ec801750547acfa8cf761b7c878f27"
-context_size = 1844
+[skills.superpowers]
+name = "superpowers"
+description = "Complete software development methodology for coding agents - brainstorming, test-driven development, systematic debugging, writing plans, executing plans, and more. Skills trigger automatically for mandatory workflows."
+source_url = "https://github.com/obra/superpowers/tree/main/"
+stars = 272568
+commit_sha = ""
+context_size = 0
+domain = "development"
+last_updated = "2026-08-16"
+tags = ["mega-skill"]
+score = 112.19999694824219
+is_mega_skill = true
+dependencies = []
+
+[skills.superpowers.install_action]
+type = "mega-skill-copy"
+
+[skills.superpowers.install_action.value]
+source_folder = "skills"
+dest_name = "superpowers"
+
+[skills.wizard]
+name = "wizard"
+description = "Generate an interactive bash wizard that walks a human through steps only they can perform. Use when provisioning infrastructure, setting up credentials or CI secrets, walking an unfamiliar third-party dashboard, or running a one-off migration or cutover. Don't invoke this for steps the agent can perform itself."
+source_url = "https://github.com/mattpocock/skills/tree/main/skills/engineering/wizard"
+stars = 218599
+commit_sha = "cb7db0eeb6270b5534128dafcc1a59e3e7ab0472"
+context_size = 1040
 domain = "deployment"
-last_updated = "2026-08-09"
+last_updated = "2026-08-16"
 tags = [
-    "cloudflare",
-    "infrastructure",
-    "application-hosting",
+    "interactive-bash",
+    "provisioning",
+    "setup-guidance",
 ]
-score = 90.0
+score = 98.98989868164063
 is_mega_skill = false
 dependencies = []
 
-[skills.cloudflare-deploy.install_action]
+[skills.wizard.install_action]
 type = "copy"
 
-[skills.cloudflare-deploy.install_action.value]
-folder = "skills/.curated/cloudflare-deploy"
+[skills.wizard.install_action.value]
+folder = "skills/engineering/wizard"
+
+[skills.loop-me]
+name = "loop-me"
+description = "Grill me about specs for the workflows I want to build, within this workspace."
+source_url = "https://github.com/mattpocock/skills/tree/main/skills/in-progress/loop-me"
+stars = 218599
+commit_sha = "bfdaef8e989a5c81160e74bc5043bd434da49cac"
+context_size = 640
+domain = "planning-and-orchestration"
+last_updated = "2026-08-16"
+tags = [
+    "workflow-specs",
+    "grilling-session",
+]
+score = 98.98989868164063
+is_mega_skill = false
+dependencies = []
+
+[skills.loop-me.install_action]
+type = "copy"
+
+[skills.loop-me.install_action.value]
+folder = "skills/in-progress/loop-me"
+
+[skills.wayfinder]
+name = "wayfinder"
+description = "Plan a huge chunk of work — more than one agent session can hold — as a shared map of decision tickets on your issue tracker, and resolve them one at a time until the way to the destination is clear."
+source_url = "https://github.com/mattpocock/skills/tree/main/skills/engineering/wayfinder"
+stars = 218599
+commit_sha = "6a34259e99bc5fed4f8fe5da61c273dad14edf67"
+context_size = 3014
+domain = "planning-and-orchestration"
+last_updated = "2026-08-16"
+tags = [
+    "work-planning",
+    "decision-map",
+    "issue-tracker",
+]
+score = 98.98989868164063
+is_mega_skill = false
+dependencies = []
+
+[skills.wayfinder.install_action]
+type = "copy"
+
+[skills.wayfinder.install_action.value]
+folder = "skills/engineering/wayfinder"
 
 [skills.gsd]
 name = "gsd"
 description = "Get Shit Done - A comprehensive project management system for solo developers using Claude agents. Spec-driven development with context engineering and meta-prompting."
 source_url = "https://github.com/gsd-build/get-shit-done/tree/main/"
-stars = 64731
+stars = 64690
 commit_sha = ""
 context_size = 0
 domain = "development"
-last_updated = "2026-08-09"
+last_updated = "2026-08-16"
 tags = ["mega-skill"]
 score = 105.0
 is_mega_skill = true
@@ -456,425 +640,165 @@ type = "npx"
 package = "get-shit-done-cc"
 args = ["@latest"]
 
-[skills.figma-create-design-system-rules]
-name = "figma-create-design-system-rules"
-description = """Generates custom design system rules for the user's codebase. Use when user says "create design system rules", "generate rules for my project", "set up design rules", "customize design system guidelines", or wants to establish project-specific conventions for Figma-to-code workflows. Requires Figma MCP server connection."""
-source_url = "https://github.com/openai/skills/tree/main/skills/.curated/figma-create-design-system-rules"
-stars = 24645
-commit_sha = "736f600bf6ecbc000c04f1d2710b990899f28903"
-context_size = 4555
+[skills.frontend-design]
+name = "frontend-design"
+description = "Guidance for distinctive, intentional visual design when building new UI or reshaping an existing one. Helps with aesthetic direction, typography, and making choices that don't read as templated defaults."
+source_url = "https://github.com/anthropics/skills/tree/main/skills/frontend-design"
+stars = 169596
+commit_sha = "2235be7c60b551f5de82ade908fd3816455afcda"
+context_size = 2065
 domain = "design"
-last_updated = "2026-08-09"
+last_updated = "2026-08-16"
 tags = [
-    "design-system",
-    "custom-rules",
-    "figma-integration",
+    "visual-design",
+    "user-interface",
+    "aesthetic-guidance",
 ]
-score = 90.0
+score = 86.4000015258789
 is_mega_skill = false
 dependencies = []
 
-[skills.figma-create-design-system-rules.install_action]
+[skills.frontend-design.install_action]
 type = "copy"
 
-[skills.figma-create-design-system-rules.install_action.value]
-folder = "skills/.curated/figma-create-design-system-rules"
+[skills.frontend-design.install_action.value]
+folder = "skills/frontend-design"
 
-[skills.implement]
-name = "implement"
-description = "Implement a piece of work based on a spec or set of tickets."
-source_url = "https://github.com/mattpocock/skills/tree/main/skills/engineering/implement"
-stars = 210322
-commit_sha = "697d4ce9742da558fd1ba6697c8e9775e2e302dd"
-context_size = 108
-domain = "development"
-last_updated = "2026-08-09"
+[skills.doc-coauthoring]
+name = "doc-coauthoring"
+description = "Guide users through a structured workflow for co-authoring documentation. Use when user wants to write documentation, proposals, technical specs, decision docs, or similar structured content. This workflow helps users efficiently transfer context, refine content through iteration, and verify the doc works for readers. Trigger when user mentions writing docs, creating proposals, drafting specs, or similar documentation tasks."
+source_url = "https://github.com/anthropics/skills/tree/main/skills/doc-coauthoring"
+stars = 169596
+commit_sha = "00756142ab04c82a447693cf373c4e0c554d1005"
+context_size = 3953
+domain = "documentation"
+last_updated = "2026-08-16"
 tags = [
-    "task-implementation",
-    "spec-driven",
-    "ticket-based",
+    "co-authoring",
+    "structured-workflow",
+    "technical-docs",
 ]
-score = 99.3548355102539
+score = 86.4000015258789
 is_mega_skill = false
 dependencies = []
 
-[skills.implement.install_action]
+[skills.doc-coauthoring.install_action]
 type = "copy"
 
-[skills.implement.install_action.value]
-folder = "skills/engineering/implement"
+[skills.doc-coauthoring.install_action.value]
+folder = "skills/doc-coauthoring"
 
-[skills.taste-skill]
-name = "taste-skill"
-description = "Taste-Skill - gives your AI good taste. Stops the AI from generating boring, generic slop. Collection of skills for image generation, minimalism, output quality, and taste-aware prompting."
-source_url = "https://github.com/Leonxlnx/taste-skill/tree/main/"
-stars = 74360
-commit_sha = ""
-context_size = 0
-domain = "development"
-last_updated = "2026-08-09"
-tags = ["mega-skill"]
-score = 106.0
-is_mega_skill = true
-dependencies = []
-
-[skills.taste-skill.install_action]
-type = "mega-skill-copy"
-
-[skills.taste-skill.install_action.value]
-source_folder = "skills"
-dest_name = "taste-skill"
-
-[skills.triage]
-name = "triage"
-description = "Move issues and external PRs through a state machine of triage roles — categorise, verify, grill if needed, and write agent-ready briefs."
-source_url = "https://github.com/mattpocock/skills/tree/main/skills/engineering/triage"
-stars = 210322
-commit_sha = "bfdaef8e989a5c81160e74bc5043bd434da49cac"
-context_size = 1645
-domain = "collaboration"
-last_updated = "2026-08-09"
+[skills.canvas-design]
+name = "canvas-design"
+description = "Create beautiful visual art in .png and .pdf documents using design philosophy. You should use this skill when the user asks to create a poster, piece of art, design, or other static piece. Create original visual designs, never copying existing artists' work to avoid copyright violations."
+source_url = "https://github.com/anthropics/skills/tree/main/skills/canvas-design"
+stars = 169596
+commit_sha = "b9e19e6f44773509fbdd7001d77ff41a49a486c1"
+context_size = 2984
+domain = "design"
+last_updated = "2026-08-16"
 tags = [
-    "issue-movement",
-    "verification",
-    "brief-writing",
+    "visual-art",
+    "static-design",
+    "original-art",
 ]
-score = 99.3548355102539
+score = 86.4000015258789
 is_mega_skill = false
 dependencies = []
 
-[skills.triage.install_action]
+[skills.canvas-design.install_action]
 type = "copy"
 
-[skills.triage.install_action.value]
-folder = "skills/engineering/triage"
+[skills.canvas-design.install_action.value]
+folder = "skills/canvas-design"
 
-[skills.wizard]
-name = "wizard"
-description = "Generate an interactive bash wizard that walks a human through steps only they can perform. Use when provisioning infrastructure, setting up credentials or CI secrets, walking an unfamiliar third-party dashboard, or running a one-off migration or cutover. Don't invoke this for steps the agent can perform itself."
-source_url = "https://github.com/mattpocock/skills/tree/main/skills/engineering/wizard"
-stars = 210322
-commit_sha = "cb7db0eeb6270b5534128dafcc1a59e3e7ab0472"
-context_size = 1040
-domain = "deployment"
-last_updated = "2026-08-09"
-tags = [
-    "interactive-wizard",
-    "infrastructure-provisioning",
-    "step-guidance",
-]
-score = 99.3548355102539
-is_mega_skill = false
-dependencies = []
-
-[skills.wizard.install_action]
-type = "copy"
-
-[skills.wizard.install_action.value]
-folder = "skills/engineering/wizard"
-
-[skills.loop-me]
-name = "loop-me"
-description = "Grill me about specs for the workflows I want to build, within this workspace."
-source_url = "https://github.com/mattpocock/skills/tree/main/skills/in-progress/loop-me"
-stars = 210322
-commit_sha = "bfdaef8e989a5c81160e74bc5043bd434da49cac"
-context_size = 640
-domain = "collaboration"
-last_updated = "2026-08-09"
-tags = [
-    "spec-discussion",
-    "workflow-building",
-    "interactive-feedback",
-]
-score = 99.3548355102539
-is_mega_skill = false
-dependencies = []
-
-[skills.loop-me.install_action]
-type = "copy"
-
-[skills.loop-me.install_action.value]
-folder = "skills/in-progress/loop-me"
-
-[skills.code-review]
-name = "code-review"
-description = """Review the changes since a fixed point (commit, branch, tag, or merge-base) along two axes — Standards (does the code follow this repo's documented coding standards?) and Spec (does the code match what the originating issue/spec asked for?). Runs both reviews in parallel sub-agents and reports them side by side. Use when the user wants to review a branch, a PR, work-in-progress changes, or asks to "review since X"."""
-source_url = "https://github.com/mattpocock/skills/tree/main/skills/engineering/code-review"
-stars = 210322
-commit_sha = "c0d69015e0cc8b66715beb3f93f9e53256e20f30"
-context_size = 1658
-domain = "development"
-last_updated = "2026-08-09"
-tags = [
-    "code-quality",
-    "standards-review",
-    "spec-compliance",
-]
-score = 99.3548355102539
-is_mega_skill = false
-dependencies = []
-
-[skills.code-review.install_action]
-type = "copy"
-
-[skills.code-review.install_action.value]
-folder = "skills/engineering/code-review"
-
-[skills.scaffold-exercises]
-name = "scaffold-exercises"
-description = "Create exercise directory structures with sections, problems, solutions, and explainers that pass linting. Use when user wants to scaffold exercises, create exercise stubs, or set up a new course section."
-source_url = "https://github.com/mattpocock/skills/tree/main/skills/misc/scaffold-exercises"
-stars = 210322
-commit_sha = "697d4ce9742da558fd1ba6697c8e9775e2e302dd"
-context_size = 897
-domain = "development"
-last_updated = "2026-08-09"
-tags = [
-    "education",
-    "exercise-creation",
-    "course-setup",
-]
-score = 99.3548355102539
-is_mega_skill = false
-dependencies = []
-
-[skills.scaffold-exercises.install_action]
-type = "copy"
-
-[skills.scaffold-exercises.install_action.value]
-folder = "skills/misc/scaffold-exercises"
-
-[skills.setup-pre-commit]
-name = "setup-pre-commit"
-description = "Set up Husky pre-commit hooks with lint-staged (Prettier), type checking, and tests in the current repo. Use when user wants to add pre-commit hooks, set up Husky, configure lint-staged, or add commit-time formatting/typechecking/testing."
-source_url = "https://github.com/mattpocock/skills/tree/main/skills/misc/setup-pre-commit"
-stars = 210322
-commit_sha = "697d4ce9742da558fd1ba6697c8e9775e2e302dd"
-context_size = 565
-domain = "development"
-last_updated = "2026-08-09"
-tags = [
-    "pre-commit",
-    "hooks",
-    "code-quality",
-]
-score = 99.3548355102539
-is_mega_skill = false
-dependencies = []
-
-[skills.setup-pre-commit.install_action]
-type = "copy"
-
-[skills.setup-pre-commit.install_action.value]
-folder = "skills/misc/setup-pre-commit"
-
-[skills.grill-me]
-name = "grill-me"
-description = "A relentless interview to sharpen a plan or design."
-source_url = "https://github.com/mattpocock/skills/tree/main/skills/productivity/grill-me"
-stars = 210322
-commit_sha = "697d4ce9742da558fd1ba6697c8e9775e2e302dd"
-context_size = 36
-domain = "planning-and-orchestration"
-last_updated = "2026-08-09"
+[skills.grill-with-docs]
+name = "grill-with-docs"
+description = "A relentless interview to sharpen a plan or design, which also creates docs (ADR's and glossary) as we go."
+source_url = "https://github.com/mattpocock/skills/tree/main/skills/engineering/grill-with-docs"
+stars = 218599
+commit_sha = "447ca70872026d5b79d6073a546dac082117fed7"
+context_size = 61
+domain = "documentation"
+last_updated = "2026-08-16"
 tags = [
     "interview",
-    "design-validation",
-    "stress-test",
+    "plan-sharpening",
+    "documentation-creation",
 ]
-score = 99.3548355102539
+score = 98.98989868164063
 is_mega_skill = false
 dependencies = []
 
-[skills.grill-me.install_action]
+[skills.grill-with-docs.install_action]
 type = "copy"
 
-[skills.grill-me.install_action.value]
-folder = "skills/productivity/grill-me"
+[skills.grill-with-docs.install_action.value]
+folder = "skills/engineering/grill-with-docs"
 
-[skills.claude-handoff]
-name = "claude-handoff"
-description = "Hand the current conversation off to a fresh background agent that picks up the work immediately."
-source_url = "https://github.com/mattpocock/skills/tree/main/skills/in-progress/claude-handoff"
-stars = 210322
-commit_sha = "a2f9333669ff53db762c87ecda5a15442060a3be"
-context_size = 321
-domain = "collaboration"
-last_updated = "2026-08-09"
-tags = [
-    "conversation-hand-off",
-    "background-agent",
-]
-score = 99.3548355102539
-is_mega_skill = false
-dependencies = []
-
-[skills.claude-handoff.install_action]
-type = "copy"
-
-[skills.claude-handoff.install_action.value]
-folder = "skills/in-progress/claude-handoff"
-
-[skills.figma-code-connect-components]
-name = "figma-code-connect-components"
-description = 'Connects Figma design components to code components using Code Connect mapping tools. Use when user says "code connect", "connect this component to code", "map this component", "link component to code", "create code connect mapping", or wants to establish mappings between Figma designs and code implementations. For canvas writes via `use_figma`, use `figma-use`.'
-source_url = "https://github.com/openai/skills/tree/main/skills/.curated/figma-code-connect-components"
-stars = 24645
-commit_sha = "736f600bf6ecbc000c04f1d2710b990899f28903"
-context_size = 4190
-domain = "design"
-last_updated = "2026-08-09"
-tags = [
-    "design-code-mapping",
-    "component-linking",
-    "figma-integration",
-]
-score = 90.0
-is_mega_skill = false
-dependencies = []
-
-[skills.figma-code-connect-components.install_action]
-type = "copy"
-
-[skills.figma-code-connect-components.install_action.value]
-folder = "skills/.curated/figma-code-connect-components"
-
-[skills.git-guardrails-claude-code]
-name = "git-guardrails-claude-code"
-description = "Set up Claude Code hooks to block dangerous git commands (push, reset --hard, clean, branch -D, etc.) before they execute. Use when user wants to prevent destructive git operations, add git safety hooks, or block git push/reset in Claude Code."
-source_url = "https://github.com/mattpocock/skills/tree/main/skills/misc/git-guardrails-claude-code"
-stars = 210322
-commit_sha = "697d4ce9742da558fd1ba6697c8e9775e2e302dd"
-context_size = 578
-domain = "collaboration"
-last_updated = "2026-08-09"
-tags = [
-    "git",
-    "safety",
-    "version-control",
-]
-score = 99.3548355102539
-is_mega_skill = false
-dependencies = []
-
-[skills.git-guardrails-claude-code.install_action]
-type = "copy"
-
-[skills.git-guardrails-claude-code.install_action.value]
-folder = "skills/misc/git-guardrails-claude-code"
-
-[skills.writing-fragments]
-name = "writing-fragments"
-description = "Writing, explore — mine raw fragments, no structure yet."
-source_url = "https://github.com/mattpocock/skills/tree/main/skills/in-progress/writing-fragments"
-stars = 210322
-commit_sha = "697d4ce9742da558fd1ba6697c8e9775e2e302dd"
-context_size = 894
+[skills.skill-creator]
+name = "skill-creator"
+description = "Create new skills, modify and improve existing skills, and measure skill performance. Use when users want to create a skill from scratch, edit, or optimize an existing skill, run evals to test a skill, benchmark skill performance with variance analysis, or optimize a skill's description for better triggering accuracy."
+source_url = "https://github.com/anthropics/skills/tree/main/skills/skill-creator"
+stars = 169596
+commit_sha = "b9e19e6f44773509fbdd7001d77ff41a49a486c1"
+context_size = 8292
 domain = "development"
-last_updated = "2026-08-09"
+last_updated = "2026-08-16"
 tags = [
-    "creative-writing",
-    "idea-exploration",
-    "drafting",
-]
-score = 99.3548355102539
-is_mega_skill = false
-dependencies = []
-
-[skills.writing-fragments.install_action]
-type = "copy"
-
-[skills.writing-fragments.install_action.value]
-folder = "skills/in-progress/writing-fragments"
-
-[skills.to-spec]
-name = "to-spec"
-description = "Turn the current conversation into a spec and publish it to the project issue tracker — no interview, just synthesis of what you've already discussed."
-source_url = "https://github.com/mattpocock/skills/tree/main/skills/engineering/to-spec"
-stars = 210322
-commit_sha = "a2f9333669ff53db762c87ecda5a15442060a3be"
-context_size = 758
-domain = "documentation"
-last_updated = "2026-08-09"
-tags = [
-    "spec-synthesis",
-    "project-tracking",
-    "conversation-to-spec",
-]
-score = 99.3548355102539
-is_mega_skill = false
-dependencies = []
-
-[skills.to-spec.install_action]
-type = "copy"
-
-[skills.to-spec.install_action.value]
-folder = "skills/engineering/to-spec"
-
-[skills.writing-for-agents]
-name = "writing-for-agents"
-description = "Writing documents for agents. Use when creating or editing skills, or modifying AGENTS.md or CLAUDE.md."
-source_url = "https://github.com/mattpocock/skills/tree/main/skills/productivity/writing-for-agents"
-stars = 210322
-commit_sha = "4aaccb58d40559d7e3c59a029b2290ae5ba538de"
-context_size = 2741
-domain = "documentation"
-last_updated = "2026-08-09"
-tags = [
-    "writing",
-    "agent-integration",
     "skill-development",
+    "performance-evaluation",
+    "optimization",
 ]
-score = 99.3548355102539
+score = 86.4000015258789
 is_mega_skill = false
 dependencies = []
 
-[skills.writing-for-agents.install_action]
+[skills.skill-creator.install_action]
 type = "copy"
 
-[skills.writing-for-agents.install_action.value]
-folder = "skills/productivity/writing-for-agents"
+[skills.skill-creator.install_action.value]
+folder = "skills/skill-creator"
 
-[skills.tdd]
-name = "tdd"
-description = 'Test-driven development. Use when the user wants to build features or fix bugs test-first, mentions "red-green-refactor", or wants integration tests.'
-source_url = "https://github.com/mattpocock/skills/tree/main/skills/engineering/tdd"
-stars = 210322
-commit_sha = "8a475c438d90a2f1d7d3710c12658b60dc701a13"
-context_size = 892
-domain = "testing"
-last_updated = "2026-08-09"
+[skills.pptx]
+name = "pptx"
+description = 'Use this skill any time a .pptx or .potx file is involved in any way — as input, output, or both. This includes: creating slide decks, pitch decks, or presentations; reading, parsing, or extracting text from any .pptx or .potx file (even if the extracted content will be used elsewhere, like in an email or summary); editing, modifying, or updating existing presentations; combining or splitting slide files; working with templates (.potx), layouts, speaker notes, or comments. Trigger whenever the user mentions "deck," "slides," "presentation," or references a .pptx or .potx filename, regardless of what they plan to do with the content afterward. If a .pptx or .potx file needs to be opened, created, or touched, use this skill.'
+source_url = "https://github.com/anthropics/skills/tree/main/skills/pptx"
+stars = 169596
+commit_sha = "fa0fa64bdc967915dc8399e803be67759e1e62b8"
+context_size = 5199
+domain = "documentation"
+last_updated = "2026-08-16"
 tags = [
-    "test-driven-development",
-    "integration-tests",
-    "red-green-refactor",
+    "presentation-management",
+    "slide-creation",
+    "content-editing",
 ]
-score = 99.3548355102539
+score = 86.4000015258789
 is_mega_skill = false
 dependencies = []
 
-[skills.tdd.install_action]
+[skills.pptx.install_action]
 type = "copy"
 
-[skills.tdd.install_action.value]
-folder = "skills/engineering/tdd"
+[skills.pptx.install_action.value]
+folder = "skills/pptx"
 
 [skills.setup-matt-pocock-skills]
 name = "setup-matt-pocock-skills"
 description = "Configure this repo for the engineering skills — set up its issue tracker, triage label vocabulary, and domain doc layout. Run once before first use of the other engineering skills."
 source_url = "https://github.com/mattpocock/skills/tree/main/skills/engineering/setup-matt-pocock-skills"
-stars = 210322
+stars = 218599
 commit_sha = "c66bdeeee002d81e3f8b21403c07f9a0d7bea6da"
 context_size = 1730
-domain = "planning-and-orchestration"
-last_updated = "2026-08-09"
+domain = "development"
+last_updated = "2026-08-16"
 tags = [
-    "repo-setup",
-    "issue-tracker",
-    "domain-doc-layout",
+    "repo-configuration",
+    "issue-tracker-setup",
+    "triage-labels",
 ]
-score = 99.3548355102539
+score = 98.98989868164063
 is_mega_skill = false
 dependencies = []
 
@@ -884,21 +808,45 @@ type = "copy"
 [skills.setup-matt-pocock-skills.install_action.value]
 folder = "skills/engineering/setup-matt-pocock-skills"
 
+[skills.grill-me]
+name = "grill-me"
+description = "A relentless interview to sharpen a plan or design."
+source_url = "https://github.com/mattpocock/skills/tree/main/skills/productivity/grill-me"
+stars = 218599
+commit_sha = "fcf0071560d32913c9d4f820e0d7ca467c881619"
+context_size = 39
+domain = "planning-and-orchestration"
+last_updated = "2026-08-16"
+tags = [
+    "critical-thinking",
+    "interview",
+    "design-review",
+]
+score = 98.98989868164063
+is_mega_skill = false
+dependencies = []
+
+[skills.grill-me.install_action]
+type = "copy"
+
+[skills.grill-me.install_action.value]
+folder = "skills/productivity/grill-me"
+
 [skills.to-tickets]
 name = "to-tickets"
 description = "Break a plan, spec, or the current conversation into a set of tracer-bullet tickets, each declaring its blocking edges, published to the configured tracker — edges as text in one file per ticket locally, or native blocking links on a real tracker."
 source_url = "https://github.com/mattpocock/skills/tree/main/skills/engineering/to-tickets"
-stars = 210322
-commit_sha = "ed37663cc5fbef691ddfecd080dff42f7e7e350d"
-context_size = 1426
+stars = 218599
+commit_sha = "6a34259e99bc5fed4f8fe5da61c273dad14edf67"
+context_size = 1430
 domain = "planning-and-orchestration"
-last_updated = "2026-08-09"
+last_updated = "2026-08-16"
 tags = [
+    "breaking-plans",
     "tracer-bullet",
-    "ticket-creation",
-    "blocking-edges",
+    "issue-tracker",
 ]
-score = 99.3548355102539
+score = 98.98989868164063
 is_mega_skill = false
 dependencies = []
 
@@ -908,21 +856,45 @@ type = "copy"
 [skills.to-tickets.install_action.value]
 folder = "skills/engineering/to-tickets"
 
+[skills.to-questionnaire]
+name = "to-questionnaire"
+description = "Turn a decision you can't fully answer into a questionnaire for someone else to fill in."
+source_url = "https://github.com/mattpocock/skills/tree/main/skills/productivity/to-questionnaire"
+stars = 218599
+commit_sha = "0f2bdbdb06220d2df3718b8f0483157c6c8a8600"
+context_size = 730
+domain = "planning-and-orchestration"
+last_updated = "2026-08-16"
+tags = [
+    "decision-making",
+    "questionnaire",
+    "structured-input",
+]
+score = 98.98989868164063
+is_mega_skill = false
+dependencies = []
+
+[skills.to-questionnaire.install_action]
+type = "copy"
+
+[skills.to-questionnaire.install_action.value]
+folder = "skills/productivity/to-questionnaire"
+
 [skills.teach]
 name = "teach"
 description = "Teach the user a new skill or concept, within this workspace."
 source_url = "https://github.com/mattpocock/skills/tree/main/skills/productivity/teach"
-stars = 210322
+stars = 218599
 commit_sha = "697d4ce9742da558fd1ba6697c8e9775e2e302dd"
 context_size = 2376
-domain = "documentation"
-last_updated = "2026-08-09"
+domain = "collaboration"
+last_updated = "2026-08-16"
 tags = [
-    "education",
     "skill-development",
-    "knowledge-sharing",
+    "concept-teaching",
+    "learning",
 ]
-score = 99.3548355102539
+score = 98.98989868164063
 is_mega_skill = false
 dependencies = []
 
@@ -932,93 +904,45 @@ type = "copy"
 [skills.teach.install_action.value]
 folder = "skills/productivity/teach"
 
-[skills.resolving-merge-conflicts]
-name = "resolving-merge-conflicts"
-description = "Use when you need to resolve an in-progress git merge/rebase conflict."
-source_url = "https://github.com/mattpocock/skills/tree/main/skills/engineering/resolving-merge-conflicts"
-stars = 210322
-commit_sha = "697d4ce9742da558fd1ba6697c8e9775e2e302dd"
-context_size = 230
-domain = "development"
-last_updated = "2026-08-09"
+[skills.pdf]
+name = "pdf"
+description = "Use this skill whenever the user wants to do anything with PDF files. This includes reading or extracting text/tables from PDFs, combining or merging multiple PDFs into one, splitting PDFs apart, rotating pages, adding watermarks, creating new PDFs, filling PDF forms, encrypting/decrypting PDFs, extracting images, and OCR on scanned PDFs to make them searchable. If the user mentions a .pdf file or asks to produce one, use this skill."
+source_url = "https://github.com/anthropics/skills/tree/main/skills/pdf"
+stars = 169596
+commit_sha = "1ed29a03dc852d30fa6ef2ca53a67dc2c2c2c563"
+context_size = 2018
+domain = "documentation"
+last_updated = "2026-08-16"
 tags = [
-    "git-merge",
-    "conflict-resolution",
-    "rebase-issues",
+    "pdf-management",
+    "file-manipulation",
+    "text-extraction",
 ]
-score = 99.3548355102539
+score = 86.4000015258789
 is_mega_skill = false
 dependencies = []
 
-[skills.resolving-merge-conflicts.install_action]
+[skills.pdf.install_action]
 type = "copy"
 
-[skills.resolving-merge-conflicts.install_action.value]
-folder = "skills/engineering/resolving-merge-conflicts"
-
-[skills.cli-creator]
-name = "cli-creator"
-description = "Build a composable CLI for Codex from API docs, an OpenAPI spec, existing curl examples, an SDK, a web app, an admin tool, or a local script. Use when the user wants Codex to create a command-line tool that can run from any repo, expose composable read/write commands, return stable JSON, manage auth, and pair with a companion skill."
-source_url = "https://github.com/openai/skills/tree/main/skills/.curated/cli-creator"
-stars = 24645
-commit_sha = "0ed2046f287a92b5f4bcace213dcb3cc5f094cb9"
-context_size = 2625
-domain = "development"
-last_updated = "2026-08-09"
-tags = [
-    "cli",
-    "command-line",
-    "tool-creation",
-]
-score = 90.0
-is_mega_skill = false
-dependencies = []
-
-[skills.cli-creator.install_action]
-type = "copy"
-
-[skills.cli-creator.install_action.value]
-folder = "skills/.curated/cli-creator"
-
-[skills.codebase-design]
-name = "codebase-design"
-description = "Shared vocabulary for designing deep modules. Use when the user wants to design or improve a module's interface, find deepening opportunities, decide where a seam goes, make code more testable or AI-navigable, or when another skill needs the deep-module vocabulary."
-source_url = "https://github.com/mattpocock/skills/tree/main/skills/engineering/codebase-design"
-stars = 210322
-commit_sha = "c0d69015e0cc8b66715beb3f93f9e53256e20f30"
-context_size = 1622
-domain = "design"
-last_updated = "2026-08-09"
-tags = [
-    "module-interface",
-    "deep-design",
-    "architecture-improvement",
-]
-score = 99.3548355102539
-is_mega_skill = false
-dependencies = []
-
-[skills.codebase-design.install_action]
-type = "copy"
-
-[skills.codebase-design.install_action.value]
-folder = "skills/engineering/codebase-design"
+[skills.pdf.install_action.value]
+folder = "skills/pdf"
 
 [skills.setup-ts-deep-modules]
 name = "setup-ts-deep-modules"
 description = "Wire dependency-cruiser into a TypeScript repo so each package is a deep module — implementation hidden in subfolders, reachable only through its entry-point files. User-invoked."
 source_url = "https://github.com/mattpocock/skills/tree/main/skills/in-progress/setup-ts-deep-modules"
-stars = 210322
-commit_sha = "697d4ce9742da558fd1ba6697c8e9775e2e302dd"
-context_size = 1900
+stars = 218599
+commit_sha = "fcf0071560d32913c9d4f820e0d7ca467c881619"
+context_size = 1903
 domain = "development"
-last_updated = "2026-08-09"
+last_updated = "2026-08-16"
 tags = [
     "typescript",
-    "dependency-management",
-    "module-setup",
+    "dependency-structure",
+    "module-management",
 ]
-score = 99.3548355102539
+score = 98.98989868164063
 is_mega_skill = false
 dependencies = []
 
@@ -1028,114 +952,140 @@ type = "copy"
 [skills.setup-ts-deep-modules.install_action.value]
 folder = "skills/in-progress/setup-ts-deep-modules"
 
-[skills.aspnet-core]
-name = "aspnet-core"
-description = "Build, review, refactor, or architect ASP.NET Core web applications using current official guidance for .NET web development. Use when working on Blazor Web Apps, Razor Pages, MVC, Minimal APIs, controller-based Web APIs, SignalR, gRPC, middleware, dependency injection, configuration, authentication, authorization, testing, performance, deployment, or ASP.NET Core upgrades."
-source_url = "https://github.com/openai/skills/tree/main/skills/.curated/aspnet-core"
-stars = 24645
-commit_sha = "c207989386b30063bcecaf6b1977d761b244732e"
-context_size = 1386
-domain = "development"
-last_updated = "2026-08-09"
+[skills.claude-handoff]
+name = "claude-handoff"
+description = "Hand the current conversation off to a fresh background agent that picks up the work immediately."
+source_url = "https://github.com/mattpocock/skills/tree/main/skills/in-progress/claude-handoff"
+stars = 218599
+commit_sha = "d28dfdc39beadc3142a33359b5cfa4765dcbd0bc"
+context_size = 325
+domain = "collaboration"
+last_updated = "2026-08-16"
 tags = [
-    "web-development",
-    "dotnet",
-    "application-architecture",
+    "conversation-transfer",
+    "background-agent",
 ]
-score = 90.0
+score = 98.98989868164063
 is_mega_skill = false
 dependencies = []
 
-[skills.aspnet-core.install_action]
+[skills.claude-handoff.install_action]
 type = "copy"
 
-[skills.aspnet-core.install_action.value]
-folder = "skills/.curated/aspnet-core"
+[skills.claude-handoff.install_action.value]
+folder = "skills/in-progress/claude-handoff"
 
-[skills.chatgpt-apps]
-name = "chatgpt-apps"
-description = "Build, scaffold, refactor, and troubleshoot ChatGPT Apps SDK applications that combine an MCP server and widget UI. Use when Codex needs to design tools, register UI resources, wire the MCP Apps bridge or ChatGPT compatibility APIs, apply Apps SDK metadata or CSP or domain settings, or produce a docs-aligned project scaffold. Prefer a docs-first workflow by invoking the openai-docs skill or OpenAI developer docs MCP tools before generating code."
-source_url = "https://github.com/openai/skills/tree/main/skills/.curated/chatgpt-apps"
-stars = 24645
-commit_sha = "14f4eb1410aca89371166bc7e7a567435f3ace05"
-context_size = 4906
-domain = "development"
-last_updated = "2026-08-09"
+[skills.prototype]
+name = "prototype"
+description = "Build a throwaway prototype to answer a design question. Use when the user wants to sanity-check whether a state model or logic feels right, or explore what a UI should look like."
+source_url = "https://github.com/mattpocock/skills/tree/main/skills/engineering/prototype"
+stars = 218599
+commit_sha = "6bcbcb09e2f1ed5fa20b4e890c732ecbb58c6b64"
+context_size = 738
+domain = "design"
+last_updated = "2026-08-16"
 tags = [
-    "sdk",
-    "app-development",
-    "project-scaffolding",
+    "throwaway-prototype",
+    "design-exploration",
+    "ui-sanity-check",
 ]
-score = 90.0
+score = 98.98989868164063
 is_mega_skill = false
 dependencies = []
 
-[skills.chatgpt-apps.install_action]
+[skills.prototype.install_action]
 type = "copy"
 
-[skills.chatgpt-apps.install_action.value]
-folder = "skills/.curated/chatgpt-apps"
+[skills.prototype.install_action.value]
+folder = "skills/engineering/prototype"
 
-[skills.writing-beats]
-name = "writing-beats"
-description = "Writing, exploit — assemble raw material into a journey of beats, grounding each term before a beat leans on it."
-source_url = "https://github.com/mattpocock/skills/tree/main/skills/in-progress/writing-beats"
-stars = 210322
+[skills.setup-pre-commit]
+name = "setup-pre-commit"
+description = "Set up Husky pre-commit hooks with lint-staged (Prettier), type checking, and tests in the current repo. Use when user wants to add pre-commit hooks, set up Husky, configure lint-staged, or add commit-time formatting/typechecking/testing."
+source_url = "https://github.com/mattpocock/skills/tree/main/skills/misc/setup-pre-commit"
+stars = 218599
 commit_sha = "697d4ce9742da558fd1ba6697c8e9775e2e302dd"
-context_size = 1226
+context_size = 565
 domain = "development"
-last_updated = "2026-08-09"
+last_updated = "2026-08-16"
 tags = [
-    "creative-writing",
-    "storytelling",
-    "narrative-structure",
+    "pre-commit-hooks",
+    "husky",
+    "linting",
 ]
-score = 99.3548355102539
+score = 98.98989868164063
 is_mega_skill = false
 dependencies = []
 
-[skills.writing-beats.install_action]
+[skills.setup-pre-commit.install_action]
 type = "copy"
 
-[skills.writing-beats.install_action.value]
-folder = "skills/in-progress/writing-beats"
+[skills.setup-pre-commit.install_action.value]
+folder = "skills/misc/setup-pre-commit"
 
-[skills.superpowers]
-name = "superpowers"
-description = "Complete software development methodology for coding agents - brainstorming, test-driven development, systematic debugging, writing plans, executing plans, and more. Skills trigger automatically for mandatory workflows."
-source_url = "https://github.com/obra/superpowers/tree/main/"
-stars = 269433
-commit_sha = ""
-context_size = 0
-domain = "development"
-last_updated = "2026-08-09"
-tags = ["mega-skill"]
-score = 112.0
-is_mega_skill = true
+[skills.brand-guidelines]
+name = "brand-guidelines"
+description = "Applies Anthropic's official brand colors and typography to any sort of artifact that may benefit from having Anthropic's look-and-feel. Use it when brand colors or style guidelines, visual formatting, or company design standards apply."
+source_url = "https://github.com/anthropics/skills/tree/main/skills/brand-guidelines"
+stars = 169596
+commit_sha = "b9e19e6f44773509fbdd7001d77ff41a49a486c1"
+context_size = 558
+domain = "design"
+last_updated = "2026-08-16"
+tags = [
+    "brand-identity",
+    "visual-design",
+    "guidelines",
+]
+score = 86.4000015258789
+is_mega_skill = false
 dependencies = []
 
-[skills.superpowers.install_action]
-type = "mega-skill-copy"
+[skills.brand-guidelines.install_action]
+type = "copy"
 
-[skills.superpowers.install_action.value]
-source_folder = "skills"
-dest_name = "superpowers"
+[skills.brand-guidelines.install_action.value]
+folder = "skills/brand-guidelines"
+
+[skills.code-review]
+name = "code-review"
+description = """Review the changes since a fixed point (commit, branch, tag, or merge-base) along two axes — Standards (does the code follow this repo's documented coding standards?) and Spec (does the code match what the originating issue/spec asked for?). Runs both reviews in parallel sub-agents and reports them side by side. Use when the user wants to review a branch, a PR, work-in-progress changes, or asks to "review since X"."""
+source_url = "https://github.com/mattpocock/skills/tree/main/skills/engineering/code-review"
+stars = 218599
+commit_sha = "6a34259e99bc5fed4f8fe5da61c273dad14edf67"
+context_size = 1662
+domain = "testing"
+last_updated = "2026-08-16"
+tags = [
+    "standards-check",
+    "spec-validation",
+    "parallel-reviews",
+]
+score = 98.98989868164063
+is_mega_skill = false
+dependencies = []
+
+[skills.code-review.install_action]
+type = "copy"
+
+[skills.code-review.install_action.value]
+folder = "skills/engineering/code-review"
 
 [skills.writing-shape]
 name = "writing-shape"
 description = "Writing, exploit — shape raw material into an article, paragraph by paragraph."
 source_url = "https://github.com/mattpocock/skills/tree/main/skills/in-progress/writing-shape"
-stars = 210322
+stars = 218599
 commit_sha = "697d4ce9742da558fd1ba6697c8e9775e2e302dd"
 context_size = 1492
-domain = "development"
-last_updated = "2026-08-09"
+domain = "documentation"
+last_updated = "2026-08-16"
 tags = [
-    "writing",
-    "content-formation",
+    "content-organization",
+    "writing-structure",
     "article-development",
 ]
-score = 99.3548355102539
+score = 98.98989868164063
 is_mega_skill = false
 dependencies = []
 
@@ -1145,53 +1095,104 @@ type = "copy"
 [skills.writing-shape.install_action.value]
 folder = "skills/in-progress/writing-shape"
 
-[skills.define-goal]
-name = "define-goal"
-description = "Help the user define a concrete, measurable goal before starting work, especially when they ask to use the goal tool, create a goal, set an objective, clarify success criteria, or turn a fuzzy intention into a quantitative outcome. Use this skill for goal creation and goal refinement only; it does not manage durable snapshots, decision logs, or long-running execution artifacts."
-source_url = "https://github.com/openai/skills/tree/main/skills/.curated/define-goal"
-stars = 24645
-commit_sha = "b0401f07213a66414d84a65cb50c1d226f99485a"
-context_size = 1411
+[skills.tdd]
+name = "tdd"
+description = 'Test-driven development. Use when the user wants to build features or fix bugs test-first, mentions "red-green-refactor", or wants integration tests.'
+source_url = "https://github.com/mattpocock/skills/tree/main/skills/engineering/tdd"
+stars = 218599
+commit_sha = "fcf0071560d32913c9d4f820e0d7ca467c881619"
+context_size = 894
+domain = "testing"
+last_updated = "2026-08-16"
+tags = [
+    "test-driven-development",
+    "feature-building",
+    "red-green-refactor",
+]
+score = 98.98989868164063
+is_mega_skill = false
+dependencies = []
+
+[skills.tdd.install_action]
+type = "copy"
+
+[skills.tdd.install_action.value]
+folder = "skills/engineering/tdd"
+
+[skills.claude-api]
+name = "claude-api"
+description = """
+Reference for the Claude API / Anthropic SDK — model ids, pricing, params, streaming, tool use, MCP, agents, caching, token counting, model migration.
+TRIGGER — read BEFORE opening the target file; don't skip because it "looks like a one-liner" — whenever: the prompt names Claude/Anthropic in any form (Claude, Anthropic, Fable, Opus, Sonnet, Haiku, `anthropic`, `@anthropic-ai`, `claude-*`, `us.anthropic.*`, `[1m]`); the user asks about an LLM (pricing/model choice/limits/caching) — never answer from memory; OR the task is LLM-shaped with provider unstated (agent/MCP/tool-definition/multi-agent/RAG/LLM-judge/computer-use; generate/summarize/extract/classify/rewrite/converse over NL; debugging refusals/cutoffs/streaming/tool-calls/tokens).
+SKIP only when another provider is being worked on (overrides all triggers): OpenAI/GPT/Gemini/Llama/Mistral/Cohere/Ollama named in the query; OR `grep -rE 'openai|langchain_openai|google.generativeai|genai|mistralai|cohere|ollama'` over the project hits (run this grep FIRST if no provider named — don't Read the file)."""
+source_url = "https://github.com/anthropics/skills/tree/main/skills/claude-api"
+stars = 169596
+commit_sha = "f6656c1256d5a8adfa37db9110046ef20bac644c"
+context_size = 18581
+domain = "documentation"
+last_updated = "2026-08-16"
+tags = [
+    "api-reference",
+    "model-specs",
+    "developer-tools",
+]
+score = 86.4000015258789
+is_mega_skill = false
+dependencies = []
+
+[skills.claude-api.install_action]
+type = "copy"
+
+[skills.claude-api.install_action.value]
+folder = "skills/claude-api"
+
+[skills.writing-beats]
+name = "writing-beats"
+description = "Writing, exploit — assemble raw material into a journey of beats, grounding each term before a beat leans on it."
+source_url = "https://github.com/mattpocock/skills/tree/main/skills/in-progress/writing-beats"
+stars = 218599
+commit_sha = "697d4ce9742da558fd1ba6697c8e9775e2e302dd"
+context_size = 1226
+domain = "documentation"
+last_updated = "2026-08-16"
+tags = [
+    "content-creation",
+    "narrative-structure",
+    "writing-process",
+]
+score = 98.98989868164063
+is_mega_skill = false
+dependencies = []
+
+[skills.writing-beats.install_action]
+type = "copy"
+
+[skills.writing-beats.install_action.value]
+folder = "skills/in-progress/writing-beats"
+
+[skills.grilling]
+name = "grilling"
+description = "Grill the user relentlessly about a plan, decision, or idea. Use when the user wants to stress-test their thinking, or uses any 'grill' trigger phrases."
+source_url = "https://github.com/mattpocock/skills/tree/main/skills/productivity/grilling"
+stars = 218599
+commit_sha = "86cba45f4244b2545112d13e77ba82eb2bfad325"
+context_size = 464
 domain = "planning-and-orchestration"
-last_updated = "2026-08-09"
+last_updated = "2026-08-16"
 tags = [
-    "goal-setting",
-    "objective-definition",
-    "planning",
+    "stress-test",
+    "critical-dialogue",
+    "idea-evaluation",
 ]
-score = 90.0
+score = 98.98989868164063
 is_mega_skill = false
 dependencies = []
 
-[skills.define-goal.install_action]
+[skills.grilling.install_action]
 type = "copy"
 
-[skills.define-goal.install_action.value]
-folder = "skills/.curated/define-goal"
-
-[skills.figma-implement-design]
-name = "figma-implement-design"
-description = 'Translates Figma designs into production-ready application code with 1:1 visual fidelity. Use when implementing UI code from Figma files, when user mentions "implement design", "generate code", "implement component", provides Figma URLs, or asks to build components matching Figma specs. For Figma canvas writes via `use_figma`, use `figma-use`.'
-source_url = "https://github.com/openai/skills/tree/main/skills/.curated/figma-implement-design"
-stars = 24645
-commit_sha = "736f600bf6ecbc000c04f1d2710b990899f28903"
-context_size = 2905
-domain = "development"
-last_updated = "2026-08-09"
-tags = [
-    "design-implementation",
-    "code-generation",
-    "figma-integration",
-]
-score = 90.0
-is_mega_skill = false
-dependencies = []
-
-[skills.figma-implement-design.install_action]
-type = "copy"
-
-[skills.figma-implement-design.install_action.value]
-folder = "skills/.curated/figma-implement-design"
+[skills.grilling.install_action.value]
+folder = "skills/productivity/grilling"
 
 [skills.ai-flavor-remover]
 name = "ai-flavor-remover"
@@ -1222,6 +1223,32 @@ folder = "."
 
 
 
+
+[skills.aspnet-core]
+name = "aspnet-core"
+description = "Build, review, refactor, or architect ASP.NET Core web applications using current official guidance for .NET web development. Use when working on Blazor Web Apps, Razor Pages, MVC, Minimal APIs, controller-based Web APIs, SignalR, gRPC, middleware, dependency injection, configuration, authentication, authorization, testing, performance, deployment, or ASP.NET Core upgrades."
+source_url = "https://github.com/openai/skills/tree/main/skills/.curated/aspnet-core"
+stars = 24645
+commit_sha = "c207989386b30063bcecaf6b1977d761b244732e"
+context_size = 1386
+domain = "development"
+last_updated = "2026-08-09"
+tags = [
+    "web-development",
+    "dotnet",
+    "application-architecture",
+]
+score = 90.0
+is_mega_skill = false
+dependencies = []
+
+[skills.aspnet-core.install_action]
+type = "copy"
+
+[skills.aspnet-core.install_action.value]
+folder = "skills/.curated/aspnet-core"
+
+
 [skills.batch-grill-me]
 name = "batch-grill-me"
 description = "A relentless interview that asks every frontier question at once, round by round."
@@ -1244,6 +1271,7 @@ type = "copy"
 
 [skills.batch-grill-me.install_action.value]
 folder = "skills/in-progress/batch-grill-me"
+
 
 
 [skills.caveman]
@@ -1274,6 +1302,82 @@ folder = "skills/productivity/caveman"
 
 
 
+
+[skills.chatgpt-apps]
+name = "chatgpt-apps"
+description = "Build, scaffold, refactor, and troubleshoot ChatGPT Apps SDK applications that combine an MCP server and widget UI. Use when Codex needs to design tools, register UI resources, wire the MCP Apps bridge or ChatGPT compatibility APIs, apply Apps SDK metadata or CSP or domain settings, or produce a docs-aligned project scaffold. Prefer a docs-first workflow by invoking the openai-docs skill or OpenAI developer docs MCP tools before generating code."
+source_url = "https://github.com/openai/skills/tree/main/skills/.curated/chatgpt-apps"
+stars = 24645
+commit_sha = "14f4eb1410aca89371166bc7e7a567435f3ace05"
+context_size = 4906
+domain = "development"
+last_updated = "2026-08-09"
+tags = [
+    "sdk",
+    "app-development",
+    "project-scaffolding",
+]
+score = 90.0
+is_mega_skill = false
+dependencies = []
+
+[skills.chatgpt-apps.install_action]
+type = "copy"
+
+[skills.chatgpt-apps.install_action.value]
+folder = "skills/.curated/chatgpt-apps"
+
+
+[skills.cli-creator]
+name = "cli-creator"
+description = "Build a composable CLI for Codex from API docs, an OpenAPI spec, existing curl examples, an SDK, a web app, an admin tool, or a local script. Use when the user wants Codex to create a command-line tool that can run from any repo, expose composable read/write commands, return stable JSON, manage auth, and pair with a companion skill."
+source_url = "https://github.com/openai/skills/tree/main/skills/.curated/cli-creator"
+stars = 24645
+commit_sha = "0ed2046f287a92b5f4bcace213dcb3cc5f094cb9"
+context_size = 2625
+domain = "development"
+last_updated = "2026-08-09"
+tags = [
+    "cli",
+    "command-line",
+    "tool-creation",
+]
+score = 90.0
+is_mega_skill = false
+dependencies = []
+
+[skills.cli-creator.install_action]
+type = "copy"
+
+[skills.cli-creator.install_action.value]
+folder = "skills/.curated/cli-creator"
+
+
+[skills.cloudflare-deploy]
+name = "cloudflare-deploy"
+description = "Deploy applications and infrastructure to Cloudflare using Workers, Pages, and related platform services. Use when the user asks to deploy, host, publish, or set up a project on Cloudflare."
+source_url = "https://github.com/openai/skills/tree/main/skills/.curated/cloudflare-deploy"
+stars = 24645
+commit_sha = "bf9e226541ec801750547acfa8cf761b7c878f27"
+context_size = 1844
+domain = "deployment"
+last_updated = "2026-08-09"
+tags = [
+    "cloudflare",
+    "infrastructure",
+    "application-hosting",
+]
+score = 90.0
+is_mega_skill = false
+dependencies = []
+
+[skills.cloudflare-deploy.install_action]
+type = "copy"
+
+[skills.cloudflare-deploy.install_action.value]
+folder = "skills/.curated/cloudflare-deploy"
+
+
 [skills.consult-advisor]
 name = "consult-advisor"
 description = 'Launch a separate Codex or Claude session for independent, read-only advice on planning, review, implementation, debugging, architecture, research, or testing, with configurable model and reasoning effort. Use only when the user explicitly invokes `$consult-advisor`, including explicit setup or configuration requests; never invoke it implicitly.'
@@ -1301,6 +1405,32 @@ type = "copy"
 folder = "skills/consult-advisor"
 
 
+
+[skills.define-goal]
+name = "define-goal"
+description = "Help the user define a concrete, measurable goal before starting work, especially when they ask to use the goal tool, create a goal, set an objective, clarify success criteria, or turn a fuzzy intention into a quantitative outcome. Use this skill for goal creation and goal refinement only; it does not manage durable snapshots, decision logs, or long-running execution artifacts."
+source_url = "https://github.com/openai/skills/tree/main/skills/.curated/define-goal"
+stars = 24645
+commit_sha = "b0401f07213a66414d84a65cb50c1d226f99485a"
+context_size = 1411
+domain = "planning-and-orchestration"
+last_updated = "2026-08-09"
+tags = [
+    "goal-setting",
+    "objective-definition",
+    "planning",
+]
+score = 90.0
+is_mega_skill = false
+dependencies = []
+
+[skills.define-goal.install_action]
+type = "copy"
+
+[skills.define-goal.install_action.value]
+folder = "skills/.curated/define-goal"
+
+
 [skills.design-an-interface]
 name = "design-an-interface"
 description = 'Generate multiple radically different interface designs for a module using parallel sub-agents. Use when user wants to design an API, explore interface options, compare module shapes, or mentions "design it twice".'
@@ -1323,6 +1453,7 @@ type = "copy"
 
 [skills.design-an-interface.install_action.value]
 folder = "skills/deprecated/design-an-interface"
+
 
 
 
@@ -1355,6 +1486,7 @@ folder = "skills/engineering/diagnose"
 
 
 
+
 [skills.edit-article]
 name = "edit-article"
 description = "Edit and improve articles by restructuring sections, improving clarity, and tightening prose. Use when user wants to edit, revise, or improve an article draft."
@@ -1378,6 +1510,7 @@ type = "copy"
 
 [skills.edit-article.install_action.value]
 folder = "skills/personal/edit-article"
+
 
 
 [skills.figma]
@@ -1408,6 +1541,182 @@ folder = "skills/.curated/figma"
 
 
 
+
+[skills.figma-code-connect-components]
+name = "figma-code-connect-components"
+description = 'Connects Figma design components to code components using Code Connect mapping tools. Use when user says "code connect", "connect this component to code", "map this component", "link component to code", "create code connect mapping", or wants to establish mappings between Figma designs and code implementations. For canvas writes via `use_figma`, use `figma-use`.'
+source_url = "https://github.com/openai/skills/tree/main/skills/.curated/figma-code-connect-components"
+stars = 24645
+commit_sha = "736f600bf6ecbc000c04f1d2710b990899f28903"
+context_size = 4190
+domain = "design"
+last_updated = "2026-08-09"
+tags = [
+    "design-code-mapping",
+    "component-linking",
+    "figma-integration",
+]
+score = 90.0
+is_mega_skill = false
+dependencies = []
+
+[skills.figma-code-connect-components.install_action]
+type = "copy"
+
+[skills.figma-code-connect-components.install_action.value]
+folder = "skills/.curated/figma-code-connect-components"
+
+
+[skills.figma-create-design-system-rules]
+name = "figma-create-design-system-rules"
+description = """Generates custom design system rules for the user's codebase. Use when user says "create design system rules", "generate rules for my project", "set up design rules", "customize design system guidelines", or wants to establish project-specific conventions for Figma-to-code workflows. Requires Figma MCP server connection."""
+source_url = "https://github.com/openai/skills/tree/main/skills/.curated/figma-create-design-system-rules"
+stars = 24645
+commit_sha = "736f600bf6ecbc000c04f1d2710b990899f28903"
+context_size = 4555
+domain = "design"
+last_updated = "2026-08-09"
+tags = [
+    "design-system",
+    "custom-rules",
+    "figma-integration",
+]
+score = 90.0
+is_mega_skill = false
+dependencies = []
+
+[skills.figma-create-design-system-rules.install_action]
+type = "copy"
+
+[skills.figma-create-design-system-rules.install_action.value]
+folder = "skills/.curated/figma-create-design-system-rules"
+
+
+[skills.figma-create-new-file]
+name = "figma-create-new-file"
+description = "Create a new blank Figma file. Use when the user wants to create a new Figma design or FigJam file, or when you need a new file before calling use_figma. Handles plan resolution via whoami if needed. Usage — /figma-create-new-file [editorType] [fileName] (e.g. /figma-create-new-file figjam My Whiteboard)"
+source_url = "https://github.com/openai/skills/tree/main/skills/.curated/figma-create-new-file"
+stars = 24645
+commit_sha = "736f600bf6ecbc000c04f1d2710b990899f28903"
+context_size = 682
+domain = "design"
+last_updated = "2026-08-09"
+tags = [
+    "file-creation",
+    "figma-setup",
+    "editor-management",
+]
+score = 90.0
+is_mega_skill = false
+dependencies = []
+
+[skills.figma-create-new-file.install_action]
+type = "copy"
+
+[skills.figma-create-new-file.install_action.value]
+folder = "skills/.curated/figma-create-new-file"
+
+
+[skills.figma-generate-design]
+name = "figma-generate-design"
+description = "Use this skill alongside figma-use when the task involves translating an application page, view, or multi-section layout into Figma. Triggers: 'write to Figma', 'create in Figma from code', 'push page to Figma', 'take this app/page and build it in Figma', 'create a screen', 'build a landing page in Figma', 'update the Figma screen to match code'. This is the preferred workflow skill whenever the user wants to build or update a full page, screen, or view in Figma from code or a description. Discovers design system components, variables, and styles via search_design_system, imports them, and assembles screens incrementally section-by-section using design system tokens instead of hardcoded values."
+source_url = "https://github.com/openai/skills/tree/main/skills/.curated/figma-generate-design"
+stars = 24645
+commit_sha = "736f600bf6ecbc000c04f1d2710b990899f28903"
+context_size = 5041
+domain = "design"
+last_updated = "2026-08-09"
+tags = [
+    "design-generation",
+    "figma-code-integration",
+    "screen-building",
+]
+score = 90.0
+is_mega_skill = false
+dependencies = []
+
+[skills.figma-generate-design.install_action]
+type = "copy"
+
+[skills.figma-generate-design.install_action.value]
+folder = "skills/.curated/figma-generate-design"
+
+
+[skills.figma-generate-library]
+name = "figma-generate-library"
+description = "Build or update a professional-grade design system in Figma from a codebase. Use when the user wants to create variables/tokens, build component libraries, set up theming (light/dark modes), document foundations, or reconcile gaps between code and Figma. This skill teaches WHAT to build and in WHAT ORDER — it complements the `figma-use` skill which teaches HOW to call the Plugin API. Both skills should be loaded together."
+source_url = "https://github.com/openai/skills/tree/main/skills/.curated/figma-generate-library"
+stars = 24645
+commit_sha = "736f600bf6ecbc000c04f1d2710b990899f28903"
+context_size = 4463
+domain = "design"
+last_updated = "2026-08-09"
+tags = [
+    "design-library",
+    "system-building",
+    "figma-integration",
+]
+score = 90.0
+is_mega_skill = false
+dependencies = []
+
+[skills.figma-generate-library.install_action]
+type = "copy"
+
+[skills.figma-generate-library.install_action.value]
+folder = "skills/.curated/figma-generate-library"
+
+
+[skills.figma-implement-design]
+name = "figma-implement-design"
+description = 'Translates Figma designs into production-ready application code with 1:1 visual fidelity. Use when implementing UI code from Figma files, when user mentions "implement design", "generate code", "implement component", provides Figma URLs, or asks to build components matching Figma specs. For Figma canvas writes via `use_figma`, use `figma-use`.'
+source_url = "https://github.com/openai/skills/tree/main/skills/.curated/figma-implement-design"
+stars = 24645
+commit_sha = "736f600bf6ecbc000c04f1d2710b990899f28903"
+context_size = 2905
+domain = "development"
+last_updated = "2026-08-09"
+tags = [
+    "design-implementation",
+    "code-generation",
+    "figma-integration",
+]
+score = 90.0
+is_mega_skill = false
+dependencies = []
+
+[skills.figma-implement-design.install_action]
+type = "copy"
+
+[skills.figma-implement-design.install_action.value]
+folder = "skills/.curated/figma-implement-design"
+
+
+[skills.figma-use]
+name = "figma-use"
+description = "**MANDATORY prerequisite** — you MUST invoke this skill BEFORE every `use_figma` tool call. NEVER call `use_figma` directly without loading this skill first. Skipping it causes common, hard-to-debug failures. Trigger whenever the user wants to perform a write action or a unique read action that requires JavaScript execution in the Figma file context — e.g. create/edit/delete nodes, set up variables or tokens, build components and variants, modify auto-layout or fills, bind variables to properties, or inspect file structure programmatically."
+source_url = "https://github.com/openai/skills/tree/main/skills/.curated/figma-use"
+stars = 24645
+commit_sha = "736f600bf6ecbc000c04f1d2710b990899f28903"
+context_size = 4449
+domain = "design"
+last_updated = "2026-08-09"
+tags = [
+    "figma-context",
+    "write-action",
+    "node-management",
+]
+score = 90.0
+is_mega_skill = false
+dependencies = []
+
+[skills.figma-use.install_action]
+type = "copy"
+
+[skills.figma-use.install_action.value]
+folder = "skills/.curated/figma-use"
+
+
 [skills.gh-address-comments]
 name = "gh-address-comments"
 description = "Help address review/issue comments on the open GitHub PR for the current branch using gh CLI; verify gh auth first and prompt the user to authenticate if not logged in."
@@ -1436,6 +1745,7 @@ folder = "skills/.curated/gh-address-comments"
 
 
 
+
 [skills.gh-fix-ci]
 name = "gh-fix-ci"
 description = "Use when a user asks to debug or fix failing GitHub PR checks that run in GitHub Actions; use `gh` to inspect checks and logs, summarize failure context, draft a fix plan, and implement only after explicit approval. Treat external providers (for example Buildkite) as out of scope and report only the details URL."
@@ -1459,6 +1769,7 @@ type = "copy"
 
 [skills.gh-fix-ci.install_action.value]
 folder = "skills/.curated/gh-fix-ci"
+
 
 
 
@@ -1501,6 +1812,7 @@ folder = "."
 
 
 
+
 [skills.hatch-pet]
 name = "hatch-pet"
 description = "Create, repair, validate, visually QA, and package Codex-compatible animated pets and pet spritesheets from character art, generated images, company or prospect brand cues, or visual references. Use when a user wants a lightweight-worker Codex pet workflow, a non-pixel custom pet style, a prospect or company mascot pet, or a full 8x9 animated pet atlas with transparent unused cells, QA contact sheets, and pet.json packaging. This skill composes the installed $imagegen system skill for visual generation and uses bundled scripts for deterministic spritesheet assembly."
@@ -1529,6 +1841,7 @@ folder = "skills/.curated/hatch-pet"
 
 
 
+
 [skills.hermes-tweet]
 name = "hermes-tweet"
 description = "Use Hermes Tweet from Hermes Agent for X/Twitter search, authenticated reads, approved actions, monitors, media workflows, and social automation through Xquik."
@@ -1552,6 +1865,7 @@ type = "copy"
 
 [skills.hermes-tweet.install_action.value]
 folder = "skills/hermes-tweet"
+
 
 
 
@@ -1586,6 +1900,7 @@ folder = "."
 
 
 
+
 [skills.jupyter-notebook]
 name = "jupyter-notebook"
 description = "Use when the user asks to create, scaffold, or edit Jupyter notebooks (`.ipynb`) for experiments, explorations, or tutorials; prefer the bundled templates and run the helper script `new_notebook.py` to generate a clean starting notebook."
@@ -1614,6 +1929,7 @@ folder = "skills/.curated/jupyter-notebook"
 
 
 
+
 [skills.linear]
 name = "linear"
 description = "Manage issues, projects & team workflows in Linear. Use when the user wants to read, create or updates tickets in Linear."
@@ -1637,6 +1953,7 @@ type = "copy"
 
 [skills.linear.install_action.value]
 folder = "skills/.curated/linear"
+
 
 
 
@@ -1671,6 +1988,7 @@ folder = "."
 
 
 
+
 [skills.obsidian-vault]
 name = "obsidian-vault"
 description = "Search, create, and manage notes in the Obsidian vault with wikilinks and index notes. Use when user wants to find, create, or organize notes in Obsidian."
@@ -1696,6 +2014,7 @@ type = "copy"
 folder = "skills/personal/obsidian-vault"
 
 
+
 [skills.qa]
 name = "qa"
 description = 'Interactive QA session where user reports bugs or issues conversationally, and the agent files GitHub issues. Explores the codebase in the background for context and domain language. Use when user wants to report bugs, do QA, file issues conversationally, or mentions "QA session".'
@@ -1718,6 +2037,7 @@ type = "copy"
 
 [skills.qa.install_action.value]
 folder = "skills/deprecated/qa"
+
 
 
 
@@ -1748,6 +2068,7 @@ folder = "skills/deprecated/request-refactor-plan"
 
 
 
+
 [skills.review]
 name = "review"
 description = """Review the changes since a fixed point (commit, branch, tag, or merge-base) along two axes — Standards (does the code follow this repo's documented coding standards?) and Spec (does the code match what the originating issue/PRD asked for?). Runs both reviews in parallel sub-agents and reports them side by side. Use when the user wants to review a branch, a PR, work-in-progress changes, or asks to "review since X"."""
@@ -1771,6 +2092,7 @@ type = "copy"
 
 [skills.review.install_action.value]
 folder = "skills/in-progress/review"
+
 
 
 
@@ -1805,6 +2127,7 @@ folder = "."
 
 
 
+
 [skills.stop-slop]
 name = "stop-slop"
 description = "A skill file for removing AI tells from prose. Removes AI writing patterns from prose."
@@ -1829,6 +2152,7 @@ type = "copy"
 
 [skills.stop-slop.install_action.value]
 folder = "."
+
 
 
 
@@ -1862,6 +2186,7 @@ folder = "skills/engineering/to-issues"
 
 
 
+
 [skills.to-prd]
 name = "to-prd"
 description = "Turn the current conversation context into a PRD and publish it to the project issue tracker. Use when user wants to create a PRD from the current context."
@@ -1885,6 +2210,7 @@ type = "copy"
 
 [skills.to-prd.install_action.value]
 folder = "skills/engineering/to-prd"
+
 
 
 
@@ -1916,6 +2242,7 @@ folder = "skills/deprecated/ubiquitous-language"
 
 
 
+
 [skills.write-a-skill]
 name = "write-a-skill"
 description = "Create new agent skills with proper structure, progressive disclosure, and bundled resources. Use when user wants to create, write, or build a new skill."
@@ -1939,6 +2266,7 @@ type = "copy"
 
 [skills.write-a-skill.install_action.value]
 folder = "skills/productivity/write-a-skill"
+
 
 
 
@@ -1973,6 +2301,7 @@ folder = "."
 
 
 
+
 [skills.writing-great-skills]
 name = "writing-great-skills"
 description = "Reference for writing and editing skills well — the vocabulary and principles that make a skill predictable."
@@ -1998,6 +2327,7 @@ type = "copy"
 folder = "skills/productivity/writing-great-skills"
 
 
+
 [skills.zoom-out]
 name = "zoom-out"
 description = "Tell the agent to zoom out and give broader context or a higher-level perspective. Use when you're unfamiliar with a section of code or need to understand how it fits into the bigger picture."
@@ -2021,4 +2351,5 @@ type = "copy"
 
 [skills.zoom-out.install_action.value]
 folder = "skills/engineering/zoom-out"
+
 
