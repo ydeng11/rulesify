@@ -133,3 +133,7 @@ impl OpenRouterClient {
         Err(anyhow::anyhow!("Max retries exceeded"))
     }
 }
+
+#[cfg(test)]
+#[path = "client_tests.rs"]
+mod tests;

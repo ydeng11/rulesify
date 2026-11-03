@@ -59,8 +59,14 @@ impl Classifier {
         let mut results = ClassificationResult::new();
 
         for batch in skills.chunks(BATCH_SIZE) {
-            let batch_results = self.classify_batch(batch).await?;
-            results.extend(batch_results);
+            match self.classify_batch(batch).await {
+                Ok(batch_results) => results.extend(batch_results),
+                Err(error) => log::warn!(
+                    "Failed to classify {} skills, leaving them for registry fallback: {}",
+                    batch.len(),
+                    error
+                ),
+            }
         }
 
         Ok(results)

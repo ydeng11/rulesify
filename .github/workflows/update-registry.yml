@@ -26,7 +26,7 @@ jobs:
       - name: Save original registry before auto-generation
         run: cp registry.toml /tmp/registry-original.toml
 
-      - run: cargo run --bin update-registry -- --force --verbose
+      - run: cargo run --bin update-registry -- --verbose
 
       - name: Restore manually-added skills removed by auto-generator
         run: python3 .github/scripts/restore_skills.py /tmp/registry-original.toml registry.toml
