@@ -11,6 +11,7 @@ permissions:
 
 jobs:
   update:
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     environment: Prod
     env:
@@ -39,9 +40,26 @@ jobs:
           git diff --quiet registry.toml && echo "has_changes=false" >> $GITHUB_OUTPUT
           git diff --quiet registry.toml || echo "has_changes=true" >> $GITHUB_OUTPUT
 
-      - if: steps.changes.outputs.has_changes == 'true'
+      - name: Test generated registry
+        if: steps.changes.outputs.has_changes == 'true'
+        run: cargo test --all-features -- --test-threads=1
+
+      - id: registry-pr
+        if: steps.changes.outputs.has_changes == 'true'
         uses: peter-evans/create-pull-request@v6
         with:
           title: "Weekly registry update"
           branch: "auto/registry-update"
+          base: "main"
+          add-paths: registry.toml
           commit-message: "chore: update registry"
+
+      - name: Merge verified registry update
+        if: steps.registry-pr.outputs.pull-request-number != '' && steps.registry-pr.outputs.pull-request-operation != 'closed'
+        env:
+          PR_NUMBER: ${{ steps.registry-pr.outputs.pull-request-number }}
+          PR_HEAD_SHA: ${{ steps.registry-pr.outputs.pull-request-head-sha }}
+        run: |
+          test -n "$PR_HEAD_SHA"
+          test "$(gh pr view "$PR_NUMBER" --json headRefName,baseRefName,files --jq '.headRefName == "auto/registry-update" and .baseRefName == "main" and ([.files[].path] == ["registry.toml"])')" = "true"
+          gh pr merge "$PR_NUMBER" --squash --match-head-commit "$PR_HEAD_SHA"
