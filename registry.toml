@@ -1,5 +1,5 @@
 version = 1
-updated = "2026-11-15"
+updated = "2026-11-20"
 
 [skills.taste-skill]
 name = "taste-skill"
@@ -2634,8 +2634,94 @@ type = "copy"
 [skills.zoom-out.install_action.value]
 folder = "skills/engineering/zoom-out"
 
+[skills.diagram-design]
+name = "diagram-design"
+description = "Create branded architecture diagrams, flowcharts, sequence diagrams, and other technical visuals as self-contained HTML and SVG."
+source_url = "https://github.com/cathrynlavery/diagram-design/tree/main/skills/diagram-design"
+stars = 69221
+commit_sha = "d74d8c2d0c78a9e1efd43137f6a9a51182a8b5f0"
+context_size = 8220
+domain = "design"
+last_updated = "2026-11-19"
+tags = [
+    "diagrams",
+    "architecture",
+    "svg",
+]
+is_mega_skill = false
+dependencies = []
 
+[skills.diagram-design.install_action]
+type = "copy"
 
+[skills.diagram-design.install_action.value]
+folder = "skills/diagram-design"
 
+[skills.vercel-react-best-practices]
+name = "vercel-react-best-practices"
+description = "Review and improve React and Next.js performance with Vercel's guidance on data fetching, bundle size, and rendering."
+source_url = "https://github.com/vercel-labs/agent-skills/tree/main/skills/react-best-practices"
+stars = 34609
+commit_sha = "5a37a6329fbad3666c3207392a6a7c0110e92efb"
+context_size = 1812
+domain = "development"
+last_updated = "2026-11-20"
+tags = [
+    "react",
+    "nextjs",
+    "performance",
+]
+is_mega_skill = false
+dependencies = []
 
+[skills.vercel-react-best-practices.install_action]
+type = "copy"
 
+[skills.vercel-react-best-practices.install_action.value]
+folder = "skills/react-best-practices"
+
+[skills.xlsx]
+name = "xlsx"
+description = "Create, edit, and analyze spreadsheets with formulas and formatting. Formula recalculation uses LibreOffice."
+source_url = "https://github.com/anthropics/skills/tree/main/skills/xlsx"
+stars = 198027
+commit_sha = "e4bb5d960d87126ff3b3a8af1a104b7db67560ba"
+context_size = 2442
+domain = "data"
+last_updated = "2026-11-16"
+tags = [
+    "spreadsheets",
+    "excel",
+    "formulas",
+]
+is_mega_skill = false
+dependencies = []
+
+[skills.xlsx.install_action]
+type = "copy"
+
+[skills.xlsx.install_action.value]
+folder = "skills/xlsx"
+
+[skills.agent-browser]
+name = "agent-browser"
+description = "Use the Agent Browser CLI with Chromium to navigate sites, test web apps, inspect pages, and capture screenshots."
+source_url = "https://github.com/vercel-labs/agent-browser/tree/main/skills/agent-browser"
+stars = 53060
+commit_sha = "343602553a26a44a9eb9393f99f1dd009d39ae8f"
+context_size = 826
+domain = "testing"
+last_updated = "2026-11-20"
+tags = [
+    "browser-automation",
+    "web-testing",
+    "chromium",
+]
+is_mega_skill = false
+dependencies = []
+
+[skills.agent-browser.install_action]
+type = "copy"
+
+[skills.agent-browser.install_action.value]
+folder = "skills/agent-browser"
